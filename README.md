@@ -1,6 +1,6 @@
 # XamlIslandsCpp
 
-![MainWindow.png](.\img\MainWindow.png)
+![MainWindow.png](img/MainWindow.png)
 
 本项目实现了一个最小的 XAML Islands 应用。目标是：
 
