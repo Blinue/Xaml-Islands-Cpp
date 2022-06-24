@@ -45,8 +45,7 @@ bool XamlApp::Initialize(HINSTANCE hInstance) {
 	// https://stackoverflow.com/questions/69715610/how-to-initialize-the-background-color-of-win32-app-to-something-other-than-whit
 	SetWindowPos(_hwndXamlHost, NULL, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
 
-	if (isWin11) {
-	} else {
+	if (!isWin11) {
 		// Win10 中任务栏可能出现空的 DesktopWindowXamlSource 窗口
 		// 见 https://github.com/microsoft/microsoft-ui-xaml/issues/6490
 		// 如果不将 ShowWindow 提前，任务栏会短暂出现两个图标
@@ -90,9 +89,7 @@ bool XamlApp::Initialize(HINSTANCE hInstance) {
 		}
 	});
 
-	if (isWin11) {
-		
-	} else {
+	if (!isWin11) {
 		// Win10 中因为 ShowWindow 提前，需要显式设置 XAML Islands 位置
 		_OnResize();
 	}
