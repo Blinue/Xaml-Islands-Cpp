@@ -9,6 +9,10 @@
 
 ## 编译要求
 
+1. Windows SDK 22000
+2. Visual Studio 需安装 C++ 和 UWP 负载
+
+## 运行要求
+
 1. Windows 10 v1903 以上或 Windows 11
-2. Windows SDK 22000
-3. Visual Studio 需安装 C++ 和 UWP 负载
+2. 需安装最新的 MSVC 运行时
