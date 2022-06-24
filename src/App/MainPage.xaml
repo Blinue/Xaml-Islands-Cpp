@@ -23,7 +23,7 @@
                        Text="Hello from XAML Islands" FontSize="30" />
 			<TextBlock HorizontalAlignment="Center" Margin="15" TextWrapping="Wrap"
                        Text="😍❤💋🌹🎉😎🐱‍👤" FontSize="16" />
-			<Button HorizontalAlignment="Center" x:Name="Button">Click Me</Button>
+			<Button HorizontalAlignment="Center" x:Name="Button" Click="ClickHandler">Click Me</Button>
 		</StackPanel>
 	</muxc:NavigationView>
 </Page>

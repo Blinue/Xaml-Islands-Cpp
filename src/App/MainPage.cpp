@@ -11,8 +11,8 @@ MainPage::MainPage() {
 	InitializeComponent();
 }
 
-MainPage::~MainPage() {
-	
+void MainPage::ClickHandler(IInspectable const&, RoutedEventArgs const&) {
+	Button().Content(box_value(L"BOOM!"));
 }
 
 }
