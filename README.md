@@ -2,10 +2,10 @@
 
 ![MainWindow.png](img/MainWindow.png)
 
-本项目实现了一个最小的 [XAML Islands](https://docs.microsoft.com/en-us/windows/apps/desktop/modernize/xaml-islands) 应用。目标是：
+本项目实现了一个最小的 [XAML Islands](https://docs.microsoft.com/en-us/windows/apps/desktop/modernize/xaml-islands) (C++/WinRT) 应用。目标是：
 
 1. 作为创建 XAML Islands 应用的起点。
-2. 作为一个实验/调试的最小环境。
+2. 作为一个用于实验/调试的最小环境。
 
 ## 编译要求
 
