@@ -147,21 +147,16 @@ LRESULT XamlApp::_WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	}
 	case WM_SIZE:
 	{
-		if (wParam == SIZE_MINIMIZED) {
-			if (_mainPage) {
-				Utils::CloseXamlPopups(_mainPage.XamlRoot());
-			}			
-		} else {
-			_OnResize();
-			if (_mainPage) {
-				[](XamlApp* app)->winrt::fire_and_forget {
-					co_await app->_mainPage.Dispatcher().RunAsync(winrt::CoreDispatcherPriority::Normal, [app]() {
-						Utils::ResizeXamlDialog(app->_mainPage.XamlRoot());
-						Utils::RepositionXamlPopups(app->_mainPage.XamlRoot());
+		_OnResize();
+		if (_mainPage) {
+			[](XamlApp* app)->winrt::fire_and_forget {
+				co_await app->_mainPage.Dispatcher().RunAsync(winrt::CoreDispatcherPriority::Normal, [app]() {
+					Utils::ResizeXamlDialog(app->_mainPage.XamlRoot());
+					Utils::RepositionXamlPopups(app->_mainPage.XamlRoot());
 					});
-				}(this);
-			}
+			}(this);
 		}
+
 		return 0;
 	}
 	case WM_GETMINMAXINFO:
@@ -170,6 +165,16 @@ LRESULT XamlApp::_WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		MINMAXINFO* mmi = (MINMAXINFO*)lParam;
 		mmi->ptMinTrackSize = { 500,300 };
 		return 0;
+	}
+	case WM_SYSCOMMAND:
+	{
+		if (wParam == SC_MINIMIZE && _mainPage) {
+			// 最小化时关闭 ComboBox
+			// 不能在 WM_SIZE 中处理，该消息发送于最小化之后，会导致 ComboBox 无法交互
+			Utils::CloseXamlPopups(_mainPage.XamlRoot());
+		}
+		
+		break;
 	}
 	case WM_ACTIVATE:
 	{
