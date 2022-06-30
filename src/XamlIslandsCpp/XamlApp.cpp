@@ -147,14 +147,16 @@ LRESULT XamlApp::_WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	}
 	case WM_SIZE:
 	{
-		_OnResize();
-		if (_mainPage) {
-			[](XamlApp* app)->winrt::fire_and_forget {
-				co_await app->_mainPage.Dispatcher().RunAsync(winrt::CoreDispatcherPriority::Normal, [app]() {
-					Utils::ResizeXamlDialog(app->_mainPage.XamlRoot());
-					Utils::RepositionXamlPopups(app->_mainPage.XamlRoot());
-					});
-			}(this);
+		if (wParam != SIZE_MINIMIZED) {
+			_OnResize();
+			if (_mainPage) {
+				[](XamlApp* app)->winrt::fire_and_forget {
+					co_await app->_mainPage.Dispatcher().RunAsync(winrt::CoreDispatcherPriority::Normal, [app]() {
+						Utils::ResizeXamlDialog(app->_mainPage.XamlRoot());
+						Utils::RepositionXamlPopups(app->_mainPage.XamlRoot());
+						});
+				}(this);
+			}
 		}
 
 		return 0;
@@ -168,9 +170,14 @@ LRESULT XamlApp::_WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	}
 	case WM_SYSCOMMAND:
 	{
+		// Alt 键默认会打开菜单，导致界面不响应鼠标移动。这里禁用这个行为
+		if ((wParam & 0xfff0) == SC_KEYMENU) {
+			return 0;
+		}
+
+		// 最小化时关闭 ComboBox
+		// 不能在 WM_SIZE 中处理，该消息发送于最小化之后，会导致 ComboBox 无法交互
 		if (wParam == SC_MINIMIZE && _mainPage) {
-			// 最小化时关闭 ComboBox
-			// 不能在 WM_SIZE 中处理，该消息发送于最小化之后，会导致 ComboBox 无法交互
 			Utils::CloseXamlPopups(_mainPage.XamlRoot());
 		}
 		
