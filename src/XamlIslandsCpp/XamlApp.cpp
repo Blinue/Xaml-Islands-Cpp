@@ -39,40 +39,21 @@ bool XamlApp::Initialize(HINSTANCE hInstance) {
 		return false;
 	}
 
-	bool isWin11 = Utils::GetOSBuild() >= 22000;
-
-	// 防止窗口显示时背景闪烁
-	// https://stackoverflow.com/questions/69715610/how-to-initialize-the-background-color-of-win32-app-to-something-other-than-whit
-	SetWindowPos(_hwndXamlHost, NULL, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
-
-	if (!isWin11) {
-		// Win10 中任务栏可能出现空的 DesktopWindowXamlSource 窗口
-		// 见 https://github.com/microsoft/microsoft-ui-xaml/issues/6490
-		// 如果不将 ShowWindow 提前，任务栏会短暂出现两个图标
-		ShowWindow(_hwndXamlHost, SW_SHOW);
-	}
-
-	// 初始化 UWP 应用和 XAML Islands
+	// 初始化 UWP 应用
 	_uwpApp = winrt::XamlIslandsCpp::App::App();
-	if (!isWin11) {
-		// 隐藏 DesktopWindowXamlSource 窗口
-		winrt::CoreWindow coreWindow = winrt::CoreWindow::GetForCurrentThread();
-		if (coreWindow) {
-			HWND hwndDWXS;
-			coreWindow.as<ICoreWindowInterop>()->get_WindowHandle(&hwndDWXS);
-			ShowWindow(hwndDWXS, SW_HIDE);
-		}
-	}
 
 	_mainPage = winrt::XamlIslandsCpp::App::MainPage();
-	if (isWin11) {
-		// Win11 中在 MainPage 加载完成后再显示主窗口
-		_mainPage.Loaded([this](winrt::IInspectable const&, winrt::RoutedEventArgs const&) {
-			ShowWindow(_hwndXamlHost, SW_SHOW);
-			SetFocus(_hwndXamlHost);
+	// MainPage 加载完成后显示主窗口
+	_mainPage.Loaded([this](winrt::IInspectable const&, winrt::RoutedEventArgs const&) -> winrt::IAsyncAction {
+		co_await _mainPage.Dispatcher().RunAsync(winrt::CoreDispatcherPriority::Normal, [hwndXamlHost(_hwndXamlHost)]() {
+			// 防止窗口显示时背景闪烁
+			// https://stackoverflow.com/questions/69715610/how-to-initialize-the-background-color-of-win32-app-to-something-other-than-whit
+			SetWindowPos(hwndXamlHost, NULL, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+			ShowWindow(hwndXamlHost, SW_SHOWNORMAL);
 		});
-	}
+	});
 
+	// 初始化 XAML Islands
 	_xamlSource = winrt::DesktopWindowXamlSource();
 	_xamlSourceNative2 = _xamlSource.as<IDesktopWindowXamlSourceNative2>();
 
@@ -88,11 +69,6 @@ bool XamlApp::Initialize(HINSTANCE hInstance) {
 			sender.NavigateFocus(args.Request());
 		}
 	});
-
-	if (!isWin11) {
-		// Win10 中因为 ShowWindow 提前，需要显式设置 XAML Islands 位置
-		_OnResize();
-	}
 
 	return true;
 }
@@ -129,6 +105,14 @@ void XamlApp::_OnResize() {
 
 LRESULT XamlApp::_WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
 	switch (message) {
+	case WM_SHOWWINDOW:
+	{
+		if (wParam == TRUE) {
+			SetFocus(_hwndXamlHost);
+		}
+
+		break;
+	}
 	case WM_KEYDOWN:
 	{
 		if (wParam == VK_TAB) {
@@ -151,7 +135,7 @@ LRESULT XamlApp::_WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 					co_await app->_mainPage.Dispatcher().RunAsync(winrt::CoreDispatcherPriority::Normal, [app]() {
 						Utils::ResizeXamlDialog(app->_mainPage.XamlRoot());
 						Utils::RepositionXamlPopups(app->_mainPage.XamlRoot());
-						});
+					});
 				}(this);
 			}
 		}
