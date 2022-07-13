@@ -184,6 +184,20 @@ LRESULT XamlApp::_WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 		return 0;
 	}
+	case WM_DPICHANGED:
+	{
+		RECT* newRect = (RECT*)lParam;
+		SetWindowPos(hWnd,
+			NULL,
+			newRect->left,
+			newRect->top,
+			newRect->right - newRect->left,
+			newRect->bottom - newRect->top,
+			SWP_NOZORDER | SWP_NOACTIVATE
+		);
+
+		break;
+	}
 	case WM_DESTROY:
 		PostQuitMessage(0);
 		return 0;

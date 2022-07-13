@@ -15,6 +15,8 @@
 
 :heavy_check_mark: WinUI 集成
 
+:heavy_check_mark: 响应 DPI 更改
+
 **不会实现的功能**（这些功能超出了本项目的目标，你可在 [Magpie](https://github.com/Blinue/Magpie) 中找到它们的实现）
 
 :x: 明暗主题切换
