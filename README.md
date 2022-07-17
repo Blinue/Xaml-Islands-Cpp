@@ -1,4 +1,4 @@
-# XamlIslandsCpp
+# Xaml-Islands-Cpp
 
 ![MainWindow.png](img/MainWindow.png)
 
