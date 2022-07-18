@@ -2,6 +2,9 @@
 #include "Utils.h"
 
 
+using namespace winrt;
+
+
 UINT Utils::GetOSBuild() {
 	static UINT build = 0;
 
@@ -26,24 +29,32 @@ UINT Utils::GetOSBuild() {
 	return build;
 }
 
-void Utils::CloseXamlPopups(winrt::XamlRoot const& root) {
+void Utils::CloseXamlPopups(XamlRoot const& root) {
 	if (!root) {
 		return;
 	}
 
-	for (const auto& popup : winrt::VisualTreeHelper::GetOpenPopupsForXamlRoot(root)) {
-		if (!popup.IsConstrainedToRootBounds()) {
-			popup.IsOpen(false);
+	for (const auto& popup : VisualTreeHelper::GetOpenPopupsForXamlRoot(root)) {
+		hstring className = get_class_name(popup.Child());
+		if (className == name_of<Controls::ContentDialog>() || className == name_of<Shapes::Rectangle>()) {
+			continue;
 		}
+
+		popup.IsOpen(false);
 	}
 }
 
-void Utils::RepositionXamlPopups(winrt::XamlRoot const& root) {
+void Utils::RepositionXamlPopups(XamlRoot const& root, bool closeFlyoutPresenter) {
 	if (!root) {
 		return;
 	}
 
-	for (const auto& popup : winrt::VisualTreeHelper::GetOpenPopupsForXamlRoot(root)) {
+	for (const auto& popup : VisualTreeHelper::GetOpenPopupsForXamlRoot(root)) {
+		if (closeFlyoutPresenter && get_class_name(popup.Child()) == name_of<Controls::FlyoutPresenter>()) {
+			popup.IsOpen(false);
+			continue;
+		}
+
 		// 取自 https://github.com/CommunityToolkit/Microsoft.Toolkit.Win32/blob/229fa3cd245ff002906b2a594196b88aded25774/Microsoft.Toolkit.Forms.UI.XamlHost/WindowsXamlHostBase.cs#L180
 
 		// Toggle the CompositeMode property, which will force all windowed Popups
@@ -51,10 +62,10 @@ void Utils::RepositionXamlPopups(winrt::XamlRoot const& root) {
 		auto compositeMode = popup.CompositeMode();
 
 		// Set CompositeMode to some value it currently isn't set to.
-		if (compositeMode == winrt::ElementCompositeMode::SourceOver) {
-			popup.CompositeMode(winrt::ElementCompositeMode::MinBlend);
+		if (compositeMode == ElementCompositeMode::SourceOver) {
+			popup.CompositeMode(ElementCompositeMode::MinBlend);
 		} else {
-			popup.CompositeMode(winrt::ElementCompositeMode::SourceOver);
+			popup.CompositeMode(ElementCompositeMode::SourceOver);
 		}
 
 		// Restore CompositeMode to whatever it was originally set to.
@@ -63,20 +74,20 @@ void Utils::RepositionXamlPopups(winrt::XamlRoot const& root) {
 }
 
 // 使 ContentDialog 跟随窗口尺寸调整
-void Utils::ResizeXamlDialog(winrt::XamlRoot const& root) {
+void Utils::ResizeXamlDialog(XamlRoot const& root) {
 	if (!root) {
 		return;
 	}
 
-	winrt::Size rootSize = root.Size();
+	Size rootSize = root.Size();
 
-	for (const auto& popup : winrt::VisualTreeHelper::GetOpenPopupsForXamlRoot(root)) {
-		if (!popup.IsConstrainedToRootBounds()) {
-			continue;
+	for (const auto& popup : VisualTreeHelper::GetOpenPopupsForXamlRoot(root)) {
+		UIElement child = popup.Child();
+		hstring className = get_class_name(child);
+		if (className == name_of<Controls::ContentDialog>() || className == name_of<Shapes::Rectangle>()) {
+			FrameworkElement fe = child.as<FrameworkElement>();
+			fe.Width(rootSize.Width);
+			fe.Height(rootSize.Height);
 		}
-
-		winrt::FrameworkElement child = popup.Child().as<winrt::FrameworkElement>();
-		child.Width(rootSize.Width);
-		child.Height(rootSize.Height);
 	}
 }

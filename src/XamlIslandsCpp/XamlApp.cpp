@@ -134,7 +134,7 @@ LRESULT XamlApp::_WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				[](XamlApp* app)->winrt::fire_and_forget {
 					co_await app->_mainPage.Dispatcher().RunAsync(winrt::CoreDispatcherPriority::Normal, [app]() {
 						Utils::ResizeXamlDialog(app->_mainPage.XamlRoot());
-						Utils::RepositionXamlPopups(app->_mainPage.XamlRoot());
+						Utils::RepositionXamlPopups(app->_mainPage.XamlRoot(), true);
 					});
 				}(this);
 			}
@@ -179,7 +179,7 @@ LRESULT XamlApp::_WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	case WM_MOVING:
 	{
 		if (_mainPage) {
-			Utils::RepositionXamlPopups(_mainPage.XamlRoot());
+			Utils::RepositionXamlPopups(_mainPage.XamlRoot(), false);
 		}
 
 		return 0;
