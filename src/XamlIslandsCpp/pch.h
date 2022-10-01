@@ -23,6 +23,9 @@
 #include <string_view>
 #include <vector>
 
+// 修复 C++/WinRT 头文件的警告
+#undef GetCurrentTime
+
 // C++/WinRT 头文件
 #include <unknwn.h>
 #include <restrictederrorinfo.h>
