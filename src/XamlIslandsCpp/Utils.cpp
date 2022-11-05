@@ -79,7 +79,7 @@ void Utils::RepositionXamlPopups(XamlRoot const& root, bool closeFlyoutPresenter
 }
 
 // 使 ContentDialog 跟随窗口尺寸调整
-void Utils::ResizeXamlDialog(XamlRoot const& root) {
+void Utils::ResizeContentDialog(XamlRoot const& root) {
 	if (!root) {
 		return;
 	}
@@ -93,6 +93,19 @@ void Utils::ResizeXamlDialog(XamlRoot const& root) {
 			FrameworkElement fe = child.as<FrameworkElement>();
 			fe.Width(rootSize.Width);
 			fe.Height(rootSize.Height);
+		}
+	}
+}
+
+void Utils::CloseContentDialog(const winrt::Windows::UI::Xaml::XamlRoot& root) {
+	if (!root) {
+		return;
+	}
+
+	for (const auto& popup : VisualTreeHelper::GetOpenPopupsForXamlRoot(root)) {
+		if (Controls::ContentDialog dialog = popup.Child().try_as<Controls::ContentDialog>()) {
+			dialog.Hide();
+			return;
 		}
 	}
 }

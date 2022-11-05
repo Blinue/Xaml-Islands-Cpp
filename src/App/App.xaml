@@ -1,10 +1,9 @@
-<Toolkit:XamlApplication
-	x:Class="XamlIslandsCpp.App.App"
-	xmlns:Toolkit="using:Microsoft.Toolkit.Win32.UI.XamlHost"
-	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-	xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
-	xmlns:local="using:XamlIslandsCpp.App">
+<Toolkit:XamlApplication x:Class="XamlIslandsCpp.App.App"
+						 xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+						 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+						 xmlns:Toolkit="using:Microsoft.Toolkit.Win32.UI.XamlHost"
+						 xmlns:local="using:XamlIslandsCpp.App"
+						 xmlns:muxc="using:Microsoft.UI.Xaml.Controls">
 	<Application.Resources>
 		<ResourceDictionary>
 			<ResourceDictionary.MergedDictionaries>
