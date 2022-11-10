@@ -96,16 +96,3 @@ void Utils::ResizeContentDialog(XamlRoot const& root) {
 		}
 	}
 }
-
-void Utils::CloseContentDialog(const winrt::Windows::UI::Xaml::XamlRoot& root) {
-	if (!root) {
-		return;
-	}
-
-	for (const auto& popup : VisualTreeHelper::GetOpenPopupsForXamlRoot(root)) {
-		if (Controls::ContentDialog dialog = popup.Child().try_as<Controls::ContentDialog>()) {
-			dialog.Hide();
-			return;
-		}
-	}
-}

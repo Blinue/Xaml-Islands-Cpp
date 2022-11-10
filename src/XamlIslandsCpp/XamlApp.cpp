@@ -199,7 +199,6 @@ LRESULT XamlApp::_WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		break;
 	}
 	case WM_DESTROY:
-		Utils::CloseContentDialog(_mainPage.XamlRoot());
 		PostQuitMessage(0);
 		return 0;
 	}
