@@ -100,6 +100,7 @@
     <ClCompile Include="XamlApp.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <Import Project="XamlIslands.targets" />
   <ImportGroup Label="ExtensionTargets">
     <Import Project="..\..\packages\Microsoft.UI.Xaml.2.8.2-prerelease.220830001\build\native\Microsoft.UI.Xaml.targets" Condition="Exists('..\..\packages\Microsoft.UI.Xaml.2.8.2-prerelease.220830001\build\native\Microsoft.UI.Xaml.targets')" />
     <Import Project="..\..\packages\Microsoft.Web.WebView2.1.0.1466-prerelease\build\native\Microsoft.Web.WebView2.targets" Condition="Exists('..\..\packages\Microsoft.Web.WebView2.1.0.1466-prerelease\build\native\Microsoft.Web.WebView2.targets')" />
@@ -114,34 +115,5 @@
     <Error Condition="!Exists('..\..\packages\Microsoft.Web.WebView2.1.0.1466-prerelease\build\native\Microsoft.Web.WebView2.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.Web.WebView2.1.0.1466-prerelease\build\native\Microsoft.Web.WebView2.targets'))" />
     <Error Condition="!Exists('..\..\packages\Microsoft.Windows.CppWinRT.2.0.221121.5\build\native\Microsoft.Windows.CppWinRT.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.Windows.CppWinRT.2.0.221121.5\build\native\Microsoft.Windows.CppWinRT.props'))" />
     <Error Condition="!Exists('..\..\packages\Microsoft.Windows.CppWinRT.2.0.221121.5\build\native\Microsoft.Windows.CppWinRT.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.Windows.CppWinRT.2.0.221121.5\build\native\Microsoft.Windows.CppWinRT.targets'))" />
-  </Target>
-  <!-- 将 App 项目的输出复制到输出文件夹（主要是 resources.pri）-->
-  <!-- 来自 https://github.com/CommunityToolkit/Microsoft.Toolkit.Win32/blob/master/Microsoft.WinRT.Win32.targets -->
-  <Target Name="_GetAppPayload">
-    <MSBuild Projects="..\App\App.vcxproj"
-    		 Properties="Configuration=$(Configuration);Platform=$(Platform)"
-    		 Targets="Build;GetPackagingOutputs">
-      <Output TaskParameter="TargetOutputs" ItemName="_AppxBuildOutputPaths" />
-    </MSBuild>
-    <CreateItem Include="%(_AppxBuildOutputPaths.Identity)"
-				Condition="'%(_AppxBuildOutputPaths.TargetPath)'!=''"
-    			AdditionalMetadata="FinalTargetPath=$(OutDir)%(_AppxBuildOutputPaths.TargetPath);TargetPath=%(_AppxBuildOutputPaths.TargetPath)">
-      <Output ItemName="_AppBuildOutputs" TaskParameter="Include"/>
-    </CreateItem>
-  </Target>
-  <Target Name="CopyAllProjectReferencesOutputs"
-          AfterTargets="ResolveReferences"
-          DependsOnTargets="_GetAppPayload"
-          Inputs="@(_AppBuildOutputs)"
-          Outputs="@(_AppBuildOutputs->'%(FinalTargetPath)')"
-          Condition="'$(_DisableAppxCopy)'==''">
-  	<CreateItem Include="@(_AppxBuildOutputPaths)"
-  				Condition="'%(_AppxBuildOutputPaths.TargetPath)'!=''"
-  				AdditionalMetadata="Link=%(_AppxBuildOutputPaths.TargetPath)">
-  	  <Output ItemName="_AppxBuildOutputs" TaskParameter="Include"/>
-  	</CreateItem>
-  	<CreateItem Include="@(_AppxBuildOutputs)" AdditionalMetadata="CopyToOutputDirectory=PreserveNewest">
-  	  <Output ItemName="Content" TaskParameter="Include"/>
-  	</CreateItem>
   </Target>
 </Project>
