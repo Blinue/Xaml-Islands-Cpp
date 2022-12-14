@@ -6,7 +6,6 @@
 // 但是，如果此处列出的文件中的任何一个在生成之间有更新，它们全部都将被重新编译。
 // 请勿在此处添加要频繁更新的文件，这将使得性能优势无效。
 
-
 #include <SDKDDKVer.h>
 
 #define WIN32_LEAN_AND_MEAN
@@ -40,7 +39,6 @@
 #include <winrt/Windows.UI.Xaml.Media.h>
 #include <winrt/Windows.UI.Xaml.Shapes.h>
 
-
 namespace winrt {
 using namespace Windows::Foundation;
 using namespace Windows::UI::Core;
@@ -48,4 +46,3 @@ using namespace Windows::UI::Xaml;
 using namespace Windows::UI::Xaml::Hosting;
 using namespace Windows::UI::Xaml::Media;
 }
-

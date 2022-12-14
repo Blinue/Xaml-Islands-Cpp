@@ -1,9 +1,5 @@
-// main.cpp : 定义应用程序的入口点。
-//
-
 #include "pch.h"
 #include "XamlApp.h"
-
 
 int APIENTRY wWinMain(
 	_In_ HINSTANCE hInstance,

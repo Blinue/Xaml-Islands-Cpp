@@ -1,13 +1,11 @@
 #pragma once
 #include "pch.h"
-#include <windows.ui.xaml.hosting.desktopwindowxamlsource.h>
 #include <winrt/XamlIslandsCpp.App.h>
 
+struct IDesktopWindowXamlSourceNative2;
 
 class XamlApp {
 public:
-	XamlApp() = default;
-
 	XamlApp(const XamlApp&) = delete;
 	XamlApp(XamlApp&&) = delete;
 
@@ -21,7 +19,8 @@ public:
 	int Run();
 
 private:
-	ATOM _RegisterWndClass(HINSTANCE hInstance, const wchar_t* className);
+	XamlApp();
+	~XamlApp();
 
 	void _OnResize();
 

@@ -1,9 +1,7 @@
 #include "pch.h"
 #include "Utils.h"
 
-
 using namespace winrt;
-
 
 UINT Utils::GetOSBuild() {
 	static UINT build = 0;

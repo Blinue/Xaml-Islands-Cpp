@@ -4,7 +4,6 @@
 #include "MainPage.g.cpp"
 #endif
 
-
 namespace winrt::XamlIslandsCpp::App::implementation {
 
 MainPage::MainPage() {

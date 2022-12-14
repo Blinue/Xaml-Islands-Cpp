@@ -2,7 +2,6 @@
 #include "pch.h"
 #include "MainPage.g.h"
 
-
 namespace winrt::XamlIslandsCpp::App::implementation {
 
 struct MainPage : MainPageT<MainPage> {

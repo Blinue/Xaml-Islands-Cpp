@@ -8,14 +8,24 @@
 namespace winrt::XamlIslandsCpp::App::implementation {
 
 App::App() {
-	__super::Initialize();
-	
-	AddRef();
-	m_inner.as<::IUnknown>()->Release();
+	// 初始化 XAML 框架
+	_windowsXamlManager = Hosting::WindowsXamlManager::InitializeForCurrentThread();
 }
 
 App::~App() {
 	Close();
+}
+
+void App::Close() {
+	if (_isClosed) {
+		return;
+	}
+	_isClosed = true;
+
+	_windowsXamlManager.Close();
+	_windowsXamlManager = nullptr;
+
+	Exit();
 }
 
 }

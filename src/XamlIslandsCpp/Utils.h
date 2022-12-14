@@ -1,6 +1,5 @@
 #pragma once
 
-
 struct Utils {
 	static UINT GetOSBuild();
 	static void CloseXamlPopups(winrt::XamlRoot const& root);

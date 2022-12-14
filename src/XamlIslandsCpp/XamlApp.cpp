@@ -1,8 +1,7 @@
 #include "pch.h"
 #include "XamlApp.h"
 #include "Utils.h"
-#include <CoreWindow.h>
-
+#include <windows.ui.xaml.hosting.desktopwindowxamlsource.h>
 
 bool XamlApp::Initialize(HINSTANCE hInstance) {
 	// 注册窗口类
@@ -96,6 +95,10 @@ int XamlApp::Run() {
 
 	return (int)msg.wParam;
 }
+
+XamlApp::XamlApp() {}
+
+XamlApp::~XamlApp() {}
 
 void XamlApp::_OnResize() {
 	RECT clientRect;
