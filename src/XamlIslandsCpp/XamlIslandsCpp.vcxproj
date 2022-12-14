@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\..\packages\Microsoft.Toolkit.Win32.UI.SDK.6.1.2\build\Microsoft.Toolkit.Win32.UI.SDK.props" Condition="Exists('..\..\packages\Microsoft.Toolkit.Win32.UI.SDK.6.1.2\build\Microsoft.Toolkit.Win32.UI.SDK.props')" />
   <Import Project="..\..\packages\Microsoft.Windows.CppWinRT.2.0.221121.5\build\native\Microsoft.Windows.CppWinRT.props" Condition="Exists('..\..\packages\Microsoft.Windows.CppWinRT.2.0.221121.5\build\native\Microsoft.Windows.CppWinRT.props')" />
   <Import Project="..\..\packages\Microsoft.UI.Xaml.2.8.2-prerelease.220830001\build\native\Microsoft.UI.Xaml.props" Condition="Exists('..\..\packages\Microsoft.UI.Xaml.2.8.2-prerelease.220830001\build\native\Microsoft.UI.Xaml.props')" />
   <ItemGroup Label="ProjectConfigurations">
@@ -105,7 +104,6 @@
     <Import Project="..\..\packages\Microsoft.UI.Xaml.2.8.2-prerelease.220830001\build\native\Microsoft.UI.Xaml.targets" Condition="Exists('..\..\packages\Microsoft.UI.Xaml.2.8.2-prerelease.220830001\build\native\Microsoft.UI.Xaml.targets')" />
     <Import Project="..\..\packages\Microsoft.Web.WebView2.1.0.1466-prerelease\build\native\Microsoft.Web.WebView2.targets" Condition="Exists('..\..\packages\Microsoft.Web.WebView2.1.0.1466-prerelease\build\native\Microsoft.Web.WebView2.targets')" />
     <Import Project="..\..\packages\Microsoft.Windows.CppWinRT.2.0.221121.5\build\native\Microsoft.Windows.CppWinRT.targets" Condition="Exists('..\..\packages\Microsoft.Windows.CppWinRT.2.0.221121.5\build\native\Microsoft.Windows.CppWinRT.targets')" />
-    <Import Project="..\..\packages\Microsoft.Toolkit.Win32.UI.SDK.6.1.2\build\Microsoft.Toolkit.Win32.UI.SDK.targets" Condition="Exists('..\..\packages\Microsoft.Toolkit.Win32.UI.SDK.6.1.2\build\Microsoft.Toolkit.Win32.UI.SDK.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
@@ -116,18 +114,34 @@
     <Error Condition="!Exists('..\..\packages\Microsoft.Web.WebView2.1.0.1466-prerelease\build\native\Microsoft.Web.WebView2.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.Web.WebView2.1.0.1466-prerelease\build\native\Microsoft.Web.WebView2.targets'))" />
     <Error Condition="!Exists('..\..\packages\Microsoft.Windows.CppWinRT.2.0.221121.5\build\native\Microsoft.Windows.CppWinRT.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.Windows.CppWinRT.2.0.221121.5\build\native\Microsoft.Windows.CppWinRT.props'))" />
     <Error Condition="!Exists('..\..\packages\Microsoft.Windows.CppWinRT.2.0.221121.5\build\native\Microsoft.Windows.CppWinRT.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.Windows.CppWinRT.2.0.221121.5\build\native\Microsoft.Windows.CppWinRT.targets'))" />
-    <Error Condition="!Exists('..\..\packages\Microsoft.Toolkit.Win32.UI.SDK.6.1.2\build\Microsoft.Toolkit.Win32.UI.SDK.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.Toolkit.Win32.UI.SDK.6.1.2\build\Microsoft.Toolkit.Win32.UI.SDK.props'))" />
-    <Error Condition="!Exists('..\..\packages\Microsoft.Toolkit.Win32.UI.SDK.6.1.2\build\Microsoft.Toolkit.Win32.UI.SDK.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.Toolkit.Win32.UI.SDK.6.1.2\build\Microsoft.Toolkit.Win32.UI.SDK.targets'))" />
   </Target>
-  <!-- 解决 vcrt-forwarders 编译问题 https://github.com/microsoft/vcrt-forwarders/issues/37 -->
-  <Target Name="_FixUpProjectConfigurations" BeforeTargets="ResolveVCRTForwarderReferences" Condition="'@(ProjectReferenceWithConfiguration)' != '' And '$(VCRTForwarders-IncludeDebugCRT)' == ''">
-    <ItemGroup>
-      <_SavedProjectReferenceWithConfiguration Include="@(ProjectReferenceWithConfiguration)">
-        <Configuration>$(Configuration)</Configuration>
-        <Platform>$(Platform)</Platform>
-      </_SavedProjectReferenceWithConfiguration>
-      <ProjectReferenceWithConfiguration Remove="@(ProjectReferenceWithConfiguration)" />
-      <ProjectReferenceWithConfiguration Include="@(_SavedProjectReferenceWithConfiguration)" />
-    </ItemGroup>
+  <!-- 将 App 项目的输出复制到输出文件夹（主要是 resources.pri）-->
+  <!-- 来自 https://github.com/CommunityToolkit/Microsoft.Toolkit.Win32/blob/master/Microsoft.WinRT.Win32.targets -->
+  <Target Name="_GetAppPayload">
+    <MSBuild Projects="..\App\App.vcxproj"
+    		 Properties="Configuration=$(Configuration);Platform=$(Platform)"
+    		 Targets="Build;GetPackagingOutputs">
+      <Output TaskParameter="TargetOutputs" ItemName="_AppxBuildOutputPaths" />
+    </MSBuild>
+    <CreateItem Include="%(_AppxBuildOutputPaths.Identity)"
+				Condition="'%(_AppxBuildOutputPaths.TargetPath)'!=''"
+    			AdditionalMetadata="FinalTargetPath=$(OutDir)%(_AppxBuildOutputPaths.TargetPath);TargetPath=%(_AppxBuildOutputPaths.TargetPath)">
+      <Output ItemName="_AppBuildOutputs" TaskParameter="Include"/>
+    </CreateItem>
+  </Target>
+  <Target Name="CopyAllProjectReferencesOutputs"
+          AfterTargets="ResolveReferences"
+          DependsOnTargets="_GetAppPayload"
+          Inputs="@(_AppBuildOutputs)"
+          Outputs="@(_AppBuildOutputs->'%(FinalTargetPath)')"
+          Condition="'$(_DisableAppxCopy)'==''">
+  	<CreateItem Include="@(_AppxBuildOutputPaths)"
+  				Condition="'%(_AppxBuildOutputPaths.TargetPath)'!=''"
+  				AdditionalMetadata="Link=%(_AppxBuildOutputPaths.TargetPath)">
+  	  <Output ItemName="_AppxBuildOutputs" TaskParameter="Include"/>
+  	</CreateItem>
+  	<CreateItem Include="@(_AppxBuildOutputs)" AdditionalMetadata="CopyToOutputDirectory=PreserveNewest">
+  	  <Output ItemName="Content" TaskParameter="Include"/>
+  	</CreateItem>
   </Target>
 </Project>
