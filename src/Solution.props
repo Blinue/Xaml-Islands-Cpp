@@ -19,9 +19,8 @@
 			<ConformanceMode>true</ConformanceMode>
 			<LanguageStandard>stdcpp17</LanguageStandard>
 			<LanguageStandard_C>stdc17</LanguageStandard_C>
-			<FloatingPointModel>Fast</FloatingPointModel>
 			<MultiProcessorCompilation>true</MultiProcessorCompilation>
-			<AdditionalOptions>/bigobj /utf-8 /Zc:__cplusplus /volatile:iso %(AdditionalOptions)</AdditionalOptions>
+			<AdditionalOptions>/bigobj /utf-8 /fp:contract /Zc:__cplusplus /volatile:iso %(AdditionalOptions)</AdditionalOptions>
 		</ClCompile>
 	</ItemDefinitionGroup>
 </Project>

@@ -59,6 +59,9 @@
     <ProjectReference Include="..\$(AppProjectName)\$(AppProjectName).vcxproj" />
   </ItemGroup>
   <ItemDefinitionGroup>
+    <ClCompile>
+      <FloatingPointModel>Fast</FloatingPointModel>
+    </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
