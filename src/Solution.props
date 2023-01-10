@@ -1,26 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-	<PropertyGroup>
-		<DefaultLanguage>en-US</DefaultLanguage>
-		<CppWinRTOptimized>true</CppWinRTOptimized>
-		<CppWinRTRootNamespaceAutoMerge>true</CppWinRTRootNamespaceAutoMerge>
-		<CppWinRTVerbosity>low</CppWinRTVerbosity>
-		<IntDir>$(SolutionDir)\obj\$(Platform)\$(Configuration)\$(MSBuildProjectName)\</IntDir>
-		<GeneratedFilesDir>$(IntDir)Generated Files\</GeneratedFilesDir>
-	</PropertyGroup>
-
-	<ItemDefinitionGroup>
-		<ClCompile>
-			<PrecompiledHeader>Use</PrecompiledHeader>
-			<PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-			<PrecompiledHeaderOutputFile>$(IntDir)pch.pch</PrecompiledHeaderOutputFile>
-			<WarningLevel>Level4</WarningLevel>
-			<SDLCheck>true</SDLCheck>
-			<ConformanceMode>true</ConformanceMode>
-			<LanguageStandard>stdcpp17</LanguageStandard>
-			<LanguageStandard_C>stdc17</LanguageStandard_C>
-			<MultiProcessorCompilation>true</MultiProcessorCompilation>
-			<AdditionalOptions>/bigobj /utf-8 /fp:contract /Zc:__cplusplus /volatile:iso %(AdditionalOptions)</AdditionalOptions>
-		</ClCompile>
-	</ItemDefinitionGroup>
+  <PropertyGroup>
+    <DefaultLanguage>en-US</DefaultLanguage>
+    <CppWinRTOptimized>true</CppWinRTOptimized>
+    <CppWinRTRootNamespaceAutoMerge>true</CppWinRTRootNamespaceAutoMerge>
+    <CppWinRTVerbosity>low</CppWinRTVerbosity>
+    <IntDir>$(SolutionDir)\obj\$(Platform)\$(Configuration)\$(MSBuildProjectName)\</IntDir>
+    <GeneratedFilesDir>$(IntDir)Generated Files\</GeneratedFilesDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderOutputFile>$(IntDir)pch.pch</PrecompiledHeaderOutputFile>
+      <WarningLevel>Level4</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalOptions>/bigobj /utf-8 /fp:contract /Zc:__cplusplus /volatile:iso %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+  </ItemDefinitionGroup>
 </Project>

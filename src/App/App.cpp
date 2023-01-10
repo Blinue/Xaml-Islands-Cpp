@@ -4,7 +4,6 @@
 #include "App.g.cpp"
 #endif
 
-
 namespace winrt::XamlIslandsCpp::App::implementation {
 
 App::App() {
