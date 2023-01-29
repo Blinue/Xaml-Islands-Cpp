@@ -75,22 +75,3 @@ void Utils::RepositionXamlPopups(XamlRoot const& root, bool closeFlyoutPresenter
 		popup.CompositeMode(compositeMode);
 	}
 }
-
-// 使 ContentDialog 跟随窗口尺寸调整
-void Utils::ResizeContentDialog(XamlRoot const& root) {
-	if (!root) {
-		return;
-	}
-
-	Size rootSize = root.Size();
-
-	for (const auto& popup : VisualTreeHelper::GetOpenPopupsForXamlRoot(root)) {
-		UIElement child = popup.Child();
-		hstring className = get_class_name(child);
-		if (className == name_of<Controls::ContentDialog>() || className == name_of<Shapes::Rectangle>()) {
-			FrameworkElement fe = child.as<FrameworkElement>();
-			fe.Width(rootSize.Width);
-			fe.Height(rootSize.Height);
-		}
-	}
-}

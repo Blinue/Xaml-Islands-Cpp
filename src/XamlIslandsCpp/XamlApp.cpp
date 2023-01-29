@@ -2,6 +2,7 @@
 #include "XamlApp.h"
 #include "Utils.h"
 #include <windows.ui.xaml.hosting.desktopwindowxamlsource.h>
+#include <CoreWindow.h>
 
 bool XamlApp::Initialize(HINSTANCE hInstance) {
 	// 注册窗口类
@@ -60,6 +61,9 @@ bool XamlApp::Initialize(HINSTANCE hInstance) {
 	interop->AttachToWindow(_hwndXamlHost);
 	interop->get_WindowHandle(&_hwndXamlIsland);
 	_xamlSource.Content(_mainPage);
+
+	// 防止第一次收到 WM_SIZE 消息时 MainPage 尺寸为 0
+	_OnResize();
 
 	// 焦点始终位于 _hwndXamlIsland 中
 	_xamlSource.TakeFocusRequested([](winrt::DesktopWindowXamlSource const& sender, winrt::DesktopWindowXamlSourceTakeFocusRequestedEventArgs const& args) {
@@ -134,9 +138,18 @@ LRESULT XamlApp::_WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		if (wParam != SIZE_MINIMIZED) {
 			_OnResize();
 			if (_mainPage) {
+				// 使 ContentDialog 跟随窗口尺寸调整
+				// 来自 https://github.com/microsoft/microsoft-ui-xaml/issues/3577#issuecomment-1399250405
+				if (winrt::CoreWindow coreWindow = winrt::CoreWindow::GetForCurrentThread()) {
+					HWND hwndDWXS;
+					coreWindow.as<ICoreWindowInterop>()->get_WindowHandle(&hwndDWXS);
+					int width = LOWORD(lParam);
+					int height = HIWORD(lParam);
+					PostMessage(hwndDWXS, WM_SIZE, wParam, lParam);
+				}
+
 				[](XamlApp* app)->winrt::fire_and_forget {
 					co_await app->_mainPage.Dispatcher().RunAsync(winrt::CoreDispatcherPriority::Normal, [app]() {
-						Utils::ResizeContentDialog(app->_mainPage.XamlRoot());
 						Utils::RepositionXamlPopups(app->_mainPage.XamlRoot(), true);
 					});
 				}(this);
