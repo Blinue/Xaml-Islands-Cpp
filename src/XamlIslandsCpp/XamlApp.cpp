@@ -151,8 +151,6 @@ LRESULT XamlApp::_WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				if (winrt::CoreWindow coreWindow = winrt::CoreWindow::GetForCurrentThread()) {
 					HWND hwndDWXS;
 					coreWindow.as<ICoreWindowInterop>()->get_WindowHandle(&hwndDWXS);
-					int width = LOWORD(lParam);
-					int height = HIWORD(lParam);
 					PostMessage(hwndDWXS, WM_SIZE, wParam, lParam);
 				}
 

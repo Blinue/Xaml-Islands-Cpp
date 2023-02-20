@@ -1,40 +1,39 @@
 <Page x:Class="XamlIslandsCpp.App.MainPage"
-	  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-	  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-	  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-	  xmlns:local="using:XamlIslandsCpp.App"
-	  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-	  xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
-	  mc:Ignorable="d">
-
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:local="using:XamlIslandsCpp.App"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
+      mc:Ignorable="d">
 	<muxc:NavigationView IsBackButtonVisible="Collapsed">
 		<muxc:NavigationView.MenuItems>
 			<muxc:NavigationViewItem Content="主页"
-									 IsSelected="True"
-									 Tag="Home">
+			                         IsSelected="True"
+			                         Tag="Home">
 				<muxc:NavigationViewItem.Icon>
 					<FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}"
-							  Glyph="&#xE80F;" />
+					          Glyph="&#xE80F;" />
 				</muxc:NavigationViewItem.Icon>
 			</muxc:NavigationViewItem>
 		</muxc:NavigationView.MenuItems>
 
 		<StackPanel Padding="20"
-					HorizontalAlignment="Center"
-					VerticalAlignment="Center"
-					Spacing="10">
+		            HorizontalAlignment="Center"
+		            VerticalAlignment="Center"
+		            Spacing="10">
 			<TextBlock HorizontalAlignment="Center"
-					   FontSize="30"
-					   Text="Hello from XAML Islands"
-					   TextWrapping="Wrap" />
+			           FontSize="30"
+			           Text="Hello from XAML Islands"
+			           TextWrapping="Wrap" />
 			<TextBlock Margin="15"
-					   HorizontalAlignment="Center"
-					   FontSize="16"
-					   Text="😍❤💋🌹🎉😎🐱‍👤"
-					   TextWrapping="Wrap" />
+			           HorizontalAlignment="Center"
+			           FontSize="16"
+			           Text="😍❤💋🌹🎉😎🐱‍👤"
+			           TextWrapping="Wrap" />
 			<Button x:Name="Button"
-					HorizontalAlignment="Center"
-					Click="ClickHandler">
+			        HorizontalAlignment="Center"
+			        Click="ClickHandler">
 				Click Me
 			</Button>
 		</StackPanel>

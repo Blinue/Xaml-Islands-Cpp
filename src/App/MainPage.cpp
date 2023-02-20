@@ -6,10 +6,6 @@
 
 namespace winrt::XamlIslandsCpp::App::implementation {
 
-MainPage::MainPage() {
-	InitializeComponent();
-}
-
 void MainPage::ClickHandler(IInspectable const&, RoutedEventArgs const&) {
 	Button().Content(box_value(L"BOOM!"));
 }
