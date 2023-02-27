@@ -5,8 +5,10 @@
       xmlns:local="using:XamlIslandsCpp.App"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
+      Loaded="Loaded"
       mc:Ignorable="d">
-	<muxc:NavigationView IsBackButtonVisible="Collapsed">
+	<muxc:NavigationView Name="RootNavigationView"
+	                     IsBackButtonVisible="Collapsed">
 		<muxc:NavigationView.MenuItems>
 			<muxc:NavigationViewItem Content="主页"
 			                         IsSelected="True"

@@ -5,6 +5,8 @@
 namespace winrt::XamlIslandsCpp::App::implementation {
 
 struct MainPage : MainPageT<MainPage> {
+	void Loaded(IInspectable const&, RoutedEventArgs const&);
+
 	void ClickHandler(IInspectable const&, RoutedEventArgs const&);
 };
 
