@@ -31,5 +31,4 @@
 
 ## 运行要求
 
-1. Windows 10 v1903+ 或 Windows 11
-2. 需安装最新的 MSVC 运行时
+Windows 10 v1903+ 或 Windows 11
