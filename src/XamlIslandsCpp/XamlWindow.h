@@ -13,6 +13,13 @@ public:
 	int MessageLoop() {
 		MSG msg{};
 		while (GetMessage(&msg, nullptr, 0, 0)) {
+			// XAML Islands 会吞掉 Alt+F4，需要特殊处理
+			// https://github.com/microsoft/microsoft-ui-xaml/issues/2408
+			if (msg.message == WM_SYSKEYDOWN && msg.wParam == VK_F4) [[unlikely]] {
+				SendMessage(GetAncestor(msg.hwnd, GA_ROOT), msg.message, msg.wParam, msg.lParam);
+				continue;
+			}
+
 			BOOL processed = FALSE;
 			HRESULT hr = _xamlSourceNative2->PreTranslateMessage(&msg, &processed);
 			if (SUCCEEDED(hr) && processed) {
@@ -50,11 +57,13 @@ protected:
 		_content = content;
 		// Xaml 控件加载完成后显示主窗口
 		_content.Loaded([this](winrt::IInspectable const&, winrt::RoutedEventArgs const&) -> winrt::IAsyncAction {
-			co_await _content.Dispatcher().RunAsync(winrt::CoreDispatcherPriority::Normal, [hWnd(_hWnd)]() {
+			co_await _content.Dispatcher().RunAsync(winrt::CoreDispatcherPriority::Normal, [this]() {
 				// 防止窗口显示时背景闪烁
 				// https://stackoverflow.com/questions/69715610/how-to-initialize-the-background-color-of-win32-app-to-something-other-than-whit
-				SetWindowPos(hWnd, NULL, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
-				ShowWindow(hWnd, SW_SHOWNORMAL);
+				SetWindowPos(_hWnd, NULL, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+				ShowWindow(_hWnd, SW_SHOWNORMAL);
+				// 将焦点置于 XAML Islands 窗口可以修复按 Alt 键会导致 UI 无法交互的问题
+				SetFocus(_hwndXamlIsland);
 			});
 		});
 
@@ -127,13 +136,13 @@ protected:
 
 			return 0;
 		}
+		case WM_MENUCHAR:
+		{
+			// 防止按 Alt+Key 时发出铃声
+			return MAKELRESULT(0, MNC_CLOSE);
+		}
 		case WM_SYSCOMMAND:
 		{
-			// Alt 键默认会打开菜单，导致界面不响应鼠标移动。这里禁用这个行为
-			if ((wParam & 0xfff0) == SC_KEYMENU) {
-				return 0;
-			}
-
 			// 最小化时关闭 ComboBox
 			// 不能在 WM_SIZE 中处理，该消息发送于最小化之后，会导致 ComboBox 无法交互
 			if (wParam == SC_MINIMIZE && _content) {
@@ -171,7 +180,7 @@ protected:
 					[](C const& content)->winrt::fire_and_forget {
 						co_await content.Dispatcher().RunAsync(winrt::CoreDispatcherPriority::Normal, [xamlRoot(content.XamlRoot())]() {
 							Utils::RepositionXamlPopups(xamlRoot, true);
-							});
+						});
 					}(_content);
 				}
 			}

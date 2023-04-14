@@ -7,15 +7,9 @@ bool MainWindow::Initialize(HINSTANCE hInstance) noexcept {
 	WNDCLASSEXW wcex{};
 	wcex.cbSize = sizeof(WNDCLASSEX);
 	wcex.lpfnWndProc = _WndProc;
-	wcex.cbClsExtra = 0;
-	wcex.cbWndExtra = 0;
 	wcex.hInstance = hInstance;
-	wcex.hIcon = NULL;
 	wcex.hCursor = LoadCursor(nullptr, IDC_ARROW);
-	wcex.hbrBackground = NULL;
-	wcex.lpszMenuName = NULL;
 	wcex.lpszClassName = L"XamlIslandsCpp";
-	wcex.hIconSm = NULL;
 
 	RegisterClassEx(&wcex);
 
