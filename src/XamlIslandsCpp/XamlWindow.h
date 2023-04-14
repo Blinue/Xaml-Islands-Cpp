@@ -57,13 +57,11 @@ protected:
 		_content = content;
 		// Xaml 控件加载完成后显示主窗口
 		_content.Loaded([this](winrt::IInspectable const&, winrt::RoutedEventArgs const&) -> winrt::IAsyncAction {
-			co_await _content.Dispatcher().RunAsync(winrt::CoreDispatcherPriority::Normal, [this]() {
+			co_await _content.Dispatcher().RunAsync(winrt::CoreDispatcherPriority::Normal, [hWnd(_hWnd)]() {
 				// 防止窗口显示时背景闪烁
 				// https://stackoverflow.com/questions/69715610/how-to-initialize-the-background-color-of-win32-app-to-something-other-than-whit
-				SetWindowPos(_hWnd, NULL, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
-				ShowWindow(_hWnd, SW_SHOWNORMAL);
-				// 将焦点置于 XAML Islands 窗口可以修复按 Alt 键会导致 UI 无法交互的问题
-				SetFocus(_hwndXamlIsland);
+				SetWindowPos(hWnd, NULL, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+				ShowWindow(hWnd, SW_SHOWNORMAL);
 			});
 		});
 
@@ -96,7 +94,8 @@ protected:
 		case WM_SHOWWINDOW:
 		{
 			if (wParam == TRUE) {
-				SetFocus(_hWnd);
+				// 将焦点置于 XAML Islands 窗口可以修复按 Alt 键会导致 UI 无法交互的问题
+				SetFocus(_hwndXamlIsland);
 			}
 
 			break;
@@ -155,6 +154,7 @@ protected:
 		{
 			if (_hwndXamlIsland) {
 				if (LOWORD(wParam) != WA_INACTIVE) {
+					// 将焦点置于 XAML Islands 窗口可以修复按 Alt 键会导致 UI 无法交互的问题
 					SetFocus(_hwndXamlIsland);
 				} else {
 					Utils::CloseXamlPopups(_content.XamlRoot());
