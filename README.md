@@ -11,9 +11,9 @@
 
 :heavy_check_mark: XAML Islands 集成
 
-:heavy_check_mark: 焦点处理
-
 :heavy_check_mark: WinUI 集成
+
+:heavy_check_mark: 焦点处理
 
 :heavy_check_mark: 响应 DPI 更改
 
