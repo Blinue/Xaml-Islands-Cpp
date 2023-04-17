@@ -17,12 +17,13 @@
 
 :heavy_check_mark: 响应 DPI 更改
 
+:heavy_check_mark: 集成 [HybridCRT](https://github.com/microsoft/WindowsAppSDK/blob/main/docs/Coding-Guidelines/HybridCRT.md)，不依赖 Visual C++ 运行时
+
 **不会实现的功能**（这些功能超出了本项目的目标，你可在 [Magpie](https://github.com/Blinue/Magpie) 中找到它们的实现）
 
 :x: 明暗主题切换
 
 :x: Mica 背景
-
 
 ## 编译要求
 
