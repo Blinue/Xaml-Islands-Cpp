@@ -19,6 +19,8 @@
 
 :heavy_check_mark: 集成 [HybridCRT](https://github.com/microsoft/WindowsAppSDK/blob/main/docs/Coding-Guidelines/HybridCRT.md)，不依赖 Visual C++ 运行时
 
+:heavy_check_mark: [修剪 resources.pri](https://github.com/microsoft/microsoft-ui-xaml/pull/4400)
+
 **不会实现的功能**（这些功能超出了本项目的目标，你可在 [Magpie](https://github.com/Blinue/Magpie) 中找到它们的实现）
 
 :x: 明暗主题切换
@@ -35,3 +37,7 @@
 ## 运行要求
 
 Windows 10 v1903+ 或 Windows 11
+
+## 发布
+
+执行 publish.py 将编译程序、清理文件以及修剪 resources.pri，可用于发布的程序体积约 8.83MB。
