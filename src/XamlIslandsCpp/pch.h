@@ -8,10 +8,6 @@
 
 #include <SDKDDKVer.h>
 
-#define WIN32_LEAN_AND_MEAN
-#define WINRT_LEAN_AND_MEAN
-#define WINRT_NO_MODULE_LOCK
-
 // Windows 头文件
 #define NOMINMAX	// 使用 std::min 和 std::max 而不是宏
 #include <windows.h>

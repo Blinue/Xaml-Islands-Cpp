@@ -13,6 +13,9 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderOutputFile>$(IntDir)pch.pch</PrecompiledHeaderOutputFile>
+      <!-- WINRT_NO_SOURCE_LOCATION: MSVC 17.6 中 <source_location> 返回完全限定函数名，使大量的模板函数无法 COMDAT 折叠，从而大幅增加了二进制文件的体积。 -->
+      <!-- 定义 WINRT_NO_SOURCE_LOCATION 以禁止 cppwinrt 使用 <source_location>。 -->
+      <PreprocessorDefinitions>_WINDOWS;WIN32_LEAN_AND_MEAN;WINRT_LEAN_AND_MEAN;WINRT_NO_MODULE_LOCK;WINRT_NO_SOURCE_LOCATION;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <WarningLevel>Level4</WarningLevel>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
@@ -22,4 +25,7 @@
       <AdditionalOptions>/bigobj /utf-8 /fp:contract /Zc:__cplusplus /volatile:iso %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
   </ItemDefinitionGroup>
+
+  <!-- HybridCRT -->
+  <Import Project="$(MSBuildThisFileDirectory)HybridCRT.props" />
 </Project>

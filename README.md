@@ -40,4 +40,4 @@ Windows 10 v1903+ 或 Windows 11
 
 ## 发布
 
-执行 publish.py 将编译程序、清理文件以及修剪 resources.pri，可用于发布的程序体积约 8.83MB。
+执行 publish.py 将编译程序、清理文件以及修剪 resources.pri，可用于发布的程序体积约 8.66MB。
