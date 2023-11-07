@@ -4,6 +4,15 @@ import shutil
 import glob
 from xml.etree import ElementTree
 
+try:
+    # https://docs.github.com/en/actions/learn-github-actions/variables
+    if os.environ["GITHUB_ACTIONS"].lower() == "true":
+        # 不知为何在 Github Actions 中运行时默认编码为 ANSI，并且 print 需刷新流才能正常显示
+        for stream in [sys.stdout, sys.stderr]:
+            stream.reconfigure(encoding="utf-8")
+except:
+    pass
+
 #####################################################################
 #
 # 使用 vswhere 查找 msbuild
