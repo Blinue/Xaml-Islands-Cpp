@@ -17,9 +17,9 @@
 
 :heavy_check_mark: 响应 DPI 更改
 
-:heavy_check_mark: 集成 [HybridCRT](https://github.com/microsoft/WindowsAppSDK/blob/main/docs/Coding-Guidelines/HybridCRT.md)，不依赖 Visual C++ 运行时
-
 :heavy_check_mark: [修剪 resources.pri](https://github.com/microsoft/microsoft-ui-xaml/pull/4400)
+
+:heavy_check_mark: 自包含，无外部依赖，无需打包
 
 **不会实现的功能**（这些功能超出了本项目的目标，你可在 [Magpie](https://github.com/Blinue/Magpie) 中找到它们的实现）
 
