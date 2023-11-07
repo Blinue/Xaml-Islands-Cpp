@@ -30,6 +30,7 @@ except:
 
 if needExtract:
     with zipfile.ZipFile(
+        # 取最新的包
         max(
             glob.glob(
                 f"{packagesFolder}\\{winuiPkg}\\tools\\AppX\\{platform}\\Release\\Microsoft.UI.Xaml*.appx"
@@ -38,8 +39,9 @@ if needExtract:
     ) as appx:
         # 收集要解压的文件
         members = ["Microsoft.UI.Xaml.dll", "resources.pri"]
+        # 编译需要 Assets 文件夹，编译完成后会删除它
         for file in appx.namelist():
-            if file.startswith("Microsoft.UI.Xaml"):
+            if file.startswith("Microsoft.UI.Xaml/Assets"):
                 members.append(file)
 
         appx.extractall(members=members)

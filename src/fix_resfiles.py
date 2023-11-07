@@ -1,7 +1,3 @@
-"""
-避免使用 WinUI NuGet 包的 pri，否则编译会失败。
-"""
-
 import sys
 import os
 
