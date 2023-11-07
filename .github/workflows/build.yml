@@ -1,0 +1,28 @@
+name: build
+
+on:
+  push:
+    paths: [ '.github/workflows/build.yml', 'XamlIslandsCpp.sln', 'publish.py', 'src/**' ]
+  pull_request:
+    paths: [ '.github/workflows/build.yml', 'XamlIslandsCpp.sln', 'publish.py', 'src/**' ]
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Build
+      run: python publish.py
+
+    - name: Store build
+      uses: actions/upload-artifact@v3
+      with: 
+          name: XamlIslandsCpp
+          path: ./publish
+          
