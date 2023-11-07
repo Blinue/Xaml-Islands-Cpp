@@ -19,7 +19,7 @@
 
 :heavy_check_mark: [修剪 resources.pri](https://github.com/microsoft/microsoft-ui-xaml/pull/4400)
 
-:heavy_check_mark: 自包含，无外部依赖，无需打包
+:heavy_check_mark: 无外部依赖，无需打包
 
 **不会实现的功能**（这些功能超出了本项目的目标，你可在 [Magpie](https://github.com/Blinue/Magpie) 中找到它们的实现）
 
