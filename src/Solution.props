@@ -5,7 +5,7 @@
     <CppWinRTOptimized>true</CppWinRTOptimized>
     <CppWinRTRootNamespaceAutoMerge>true</CppWinRTRootNamespaceAutoMerge>
     <CppWinRTVerbosity>low</CppWinRTVerbosity>
-    <IntDir>$(SolutionDir)\obj\$(Platform)\$(Configuration)\$(MSBuildProjectName)\</IntDir>
+    <IntDir>$(SolutionDir)obj\$(Platform)\$(Configuration)\$(MSBuildProjectName)\</IntDir>
     <GeneratedFilesDir>$(IntDir)Generated Files\</GeneratedFilesDir>
   </PropertyGroup>
   <ItemDefinitionGroup>
@@ -28,4 +28,7 @@
 
   <!-- HybridCRT -->
   <Import Project="$(MSBuildThisFileDirectory)HybridCRT.props" />
+
+  <!-- 如果使用正式版 WinUI 需要一些 hack 才能正确编译，预发行版则不需要 -->
+  <Import Project="$(MSBuildThisFileDirectory)WinUI.props" />
 </Project>

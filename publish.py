@@ -86,9 +86,7 @@ print("清理完毕", flush=True)
 #####################################################################
 
 # 取最新的 Windows SDK
-windowsSdkDir = sorted(
-    glob.glob(programFilesX86Path + "\\Windows Kits\\10\\bin\\10.*")
-)[-1]
+windowsSdkDir = max(glob.glob(programFilesX86Path + "\\Windows Kits\\10\\bin\\10.*"))
 makepriPath = windowsSdkDir + "\\x64\\makepri.exe"
 if not os.access(makepriPath, os.X_OK):
     raise Exception("未找到 makepri")
