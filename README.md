@@ -11,7 +11,7 @@
 
 :heavy_check_mark: XAML Islands 集成
 
-:heavy_check_mark: WinUI 集成（支持正式版而不是预发行版）
+:heavy_check_mark: WinUI 集成（支持正式版而不是仅限预发行版）
 
 :heavy_check_mark: 焦点处理
 
