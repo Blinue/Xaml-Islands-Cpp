@@ -33,6 +33,7 @@
 
 1. Windows SDK 22621
 2. Visual Studio 2022，需安装 C++ 和 UWP 负载
+3. Python 3.11+
 
 ## 运行要求
 
