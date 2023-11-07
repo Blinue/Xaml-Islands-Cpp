@@ -38,7 +38,7 @@ if needExtract:
         )
     ) as appx:
         # 收集要解压的文件
-        members = ["Microsoft.UI.Xaml.dll", "resources.pri"]
+        members = ["Microsoft.UI.Xaml.dll", "Microsoft.UI.Xaml.winmd", "resources.pri"]
         # 编译需要 Assets 文件夹，编译完成后会删除它
         for file in appx.namelist():
             if file.startswith("Microsoft.UI.Xaml/Assets"):
