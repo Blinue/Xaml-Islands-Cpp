@@ -73,7 +73,8 @@ def remove_folder(folder):
         pass
 
 
-remove_file("Microsoft.Web.WebView2.Core.dll")
+for folder in ["Microsoft.UI.Xaml", "App"]:
+    remove_folder(folder)
 
 for pattern in ["*.pdb", "*.lib", "*.exp", "*.winmd", "*.xml", "*.xbf", "dummy.*"]:
     for file in glob.glob(pattern):
@@ -83,8 +84,7 @@ for file in glob.glob("*.pri"):
     if file != "resources.pri":
         remove_file(file)
 
-for folder in ["Microsoft.UI.Xaml", "App"]:
-    remove_folder(folder)
+remove_file("Microsoft.Web.WebView2.Core.dll")
 
 print("清理完毕", flush=True)
 
