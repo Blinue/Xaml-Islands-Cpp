@@ -7,7 +7,7 @@ if len(sys.argv) != 2:
 with open(sys.argv[1], "r+") as f:
     lines = []
     for line in f.readlines():
-        if line.find("\\packages\\Microsoft.UI.Xaml") == -1:
+        if not "\\packages\\Microsoft.UI.Xaml" in line or "prerelease" in line:
             lines.append(line)
 
     f.seek(os.SEEK_SET)

@@ -65,16 +65,8 @@ def remove_file(file):
         pass
 
 
-# 删除文件夹，忽略错误
-def remove_folder(folder):
-    try:
-        shutil.rmtree(folder)
-    except:
-        pass
-
-
 for folder in ["Microsoft.UI.Xaml", "App"]:
-    remove_folder(folder)
+    shutil.rmtree(folder, ignore_errors=True)
 
 for pattern in ["*.pdb", "*.lib", "*.exp", "*.winmd", "*.xml", "*.xbf", "dummy.*"]:
     for file in glob.glob(pattern):
@@ -118,6 +110,7 @@ for resourceNode in xmlTree.getroot().findall(
         continue
 
     # 我们仅需 19h1 和 21h1 的资源，分别用于 Win10 和 Win11
+    # 小写 compact 仅存在于预发行版 WinUI 的资源中
     for key in ["compact", "Compact", "v1", "rs2", "rs3", "rs4", "rs5"]:
         if key in name:
             # 将文件内容替换为一个空格（Base64 为 "IA=="）
