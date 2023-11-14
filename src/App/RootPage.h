@@ -1,10 +1,10 @@
 #pragma once
 #include "pch.h"
-#include "MainPage.g.h"
+#include "RootPage.g.h"
 
 namespace winrt::XamlIslandsCpp::App::implementation {
 
-struct MainPage : MainPageT<MainPage> {
+struct RootPage : RootPageT<RootPage> {
 	void Loaded(IInspectable const&, RoutedEventArgs const&);
 
 	void ClickHandler(IInspectable const&, RoutedEventArgs const&);
@@ -14,7 +14,7 @@ struct MainPage : MainPageT<MainPage> {
 
 namespace winrt::XamlIslandsCpp::App::factory_implementation {
 
-struct MainPage : MainPageT<MainPage, implementation::MainPage> {
+struct RootPage : RootPageT<RootPage, implementation::RootPage> {
 };
 
 }

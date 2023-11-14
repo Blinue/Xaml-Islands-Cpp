@@ -85,7 +85,7 @@ protected:
 			}
 		});
 
-		// 防止第一次收到 WM_SIZE 消息时 MainPage 尺寸为 0
+		// 防止第一次收到 WM_SIZE 消息时 RootPage 尺寸为 0
 		_OnResize();
 	}
 

@@ -1,0 +1,6 @@
+namespace XamlIslandsCpp.App {
+	[default_interface]
+	runtimeclass RootPage : Windows.UI.Xaml.Controls.Page {
+		RootPage();
+	}
+}

@@ -5,7 +5,7 @@
   <asmv3:file name="XamlIslandsCpp.App.dll" xmlns="urn:schemas-microsoft-com:winrt.v1">
     <activatableClass name="XamlIslandsCpp.App.App"
                       threadingModel="both" />
-    <activatableClass name="XamlIslandsCpp.App.MainPage"
+    <activatableClass name="XamlIslandsCpp.App.RootPage"
                       threadingModel="both" />
   </asmv3:file>
   

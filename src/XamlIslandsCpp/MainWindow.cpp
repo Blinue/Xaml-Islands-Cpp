@@ -28,7 +28,7 @@ bool MainWindow::Initialize(HINSTANCE hInstance) noexcept {
 		return false;
 	}
 
-	_SetContent(winrt::XamlIslandsCpp::App::MainPage());
+	_SetContent(winrt::XamlIslandsCpp::App::RootPage());
 
 	return true;
 }
