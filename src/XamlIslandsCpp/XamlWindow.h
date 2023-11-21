@@ -142,26 +142,12 @@ protected:
 		}
 		case WM_SYSCOMMAND:
 		{
-			// 最小化时关闭 ComboBox
-			// 不能在 WM_SIZE 中处理，该消息发送于最小化之后，会导致 ComboBox 无法交互
-			if (wParam == SC_MINIMIZE && _content) {
-				Utils::CloseXamlPopups(_content.XamlRoot());
+			// 禁用按 Alt 键会激活菜单的行为，它使用户界面无法交互
+			if ((wParam & 0xFFF0) == SC_KEYMENU && lParam == 0) {
+				return 0;
 			}
 
 			break;
-		}
-		case WM_ACTIVATE:
-		{
-			if (_hwndXamlIsland) {
-				if (LOWORD(wParam) != WA_INACTIVE) {
-					// 将焦点置于 XAML Islands 窗口可以修复按 Alt 键会导致 UI 无法交互的问题
-					SetFocus(_hwndXamlIsland);
-				} else {
-					Utils::CloseXamlPopups(_content.XamlRoot());
-				}
-			}
-
-			return 0;
 		}
 		case WM_SIZE:
 		{

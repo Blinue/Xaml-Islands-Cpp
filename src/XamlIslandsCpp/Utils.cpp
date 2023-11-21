@@ -27,21 +27,6 @@ UINT Utils::GetOSBuild() {
 	return build;
 }
 
-void Utils::CloseXamlPopups(XamlRoot const& root) {
-	if (!root) {
-		return;
-	}
-
-	for (const auto& popup : VisualTreeHelper::GetOpenPopupsForXamlRoot(root)) {
-		hstring className = get_class_name(popup.Child());
-		if (className == name_of<Controls::ContentDialog>() || className == name_of<Shapes::Rectangle>()) {
-			continue;
-		}
-
-		popup.IsOpen(false);
-	}
-}
-
 void Utils::RepositionXamlPopups(XamlRoot const& root, bool closeFlyoutPresenter) {
 	if (!root) {
 		return;
