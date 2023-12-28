@@ -14,6 +14,12 @@ try:
 except:
     pass
 
+platform = "x64"
+if len(sys.argv) == 2:
+    platform = sys.argv[1]
+    if not platform in ["x64", "ARM64"]:
+        raise Exception("非法参数")
+
 #####################################################################
 #
 # 使用 vswhere 查找 msbuild
@@ -43,7 +49,7 @@ if not os.access(msbuildPath, os.X_OK):
 os.chdir(os.path.dirname(__file__))
 
 p = subprocess.run(
-    f'"{msbuildPath}" -restore -p:RestorePackagesConfig=true;Configuration=Release;Platform=x64;OutDir={os.getcwd()}\\publish\\ XamlIslandsCpp.sln'
+    f'"{msbuildPath}" -restore -p:RestorePackagesConfig=true;Configuration=Release;Platform={platform};OutDir={os.getcwd()}\\publish\\{platform}\\ XamlIslandsCpp.sln'
 )
 if p.returncode != 0:
     raise Exception("编译失败")
@@ -54,7 +60,7 @@ if p.returncode != 0:
 #
 #####################################################################
 
-os.chdir("publish")
+os.chdir("publish\\" + platform)
 
 
 # 删除文件，忽略错误
