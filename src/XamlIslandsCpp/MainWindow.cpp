@@ -1,7 +1,6 @@
 #include "pch.h"
 #include "MainWindow.h"
 #include <CoreWindow.h>
-#include "Utils.h"
 
 bool MainWindow::Initialize(HINSTANCE hInstance) noexcept {
 	WNDCLASSEXW wcex{};

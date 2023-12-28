@@ -7,7 +7,7 @@
 
 namespace winrt::XamlIslandsCpp::App::implementation {
 
-static UINT GetOSBuild() {
+static UINT GetOSBuild() noexcept {
 	static UINT build = 0;
 
 	if (build == 0) {

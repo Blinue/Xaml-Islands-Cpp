@@ -21,6 +21,8 @@
 
 :heavy_check_mark: 无外部依赖，无需打包
 
+:heavy_check_mark: 支持 x64 和 ARM64 架构
+
 **不会实现的功能**（这些功能超出了本项目的目标，你可在 [Magpie](https://github.com/Blinue/Magpie) 中找到它们的实现）
 
 :x: 明暗主题切换
@@ -41,4 +43,4 @@ Windows 10 v1903+ 或 Windows 11
 
 ## 发布
 
-执行 publish.py 将编译程序、清理文件以及修剪 resources.pri，可用于发布的程序体积约 8.38 MB。
+执行 publish.py 将编译程序、清理文件以及修剪 resources.pri，可用于发布的程序体积约 8.38 MB (x64)。

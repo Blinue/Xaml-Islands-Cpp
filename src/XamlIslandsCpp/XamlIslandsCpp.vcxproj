@@ -73,7 +73,6 @@
   <ItemGroup>
     <ClInclude Include="MainWindow.h" />
     <ClInclude Include="pch.h" />
-    <ClInclude Include="Utils.h" />
     <ClInclude Include="XamlApp.h" />
     <ClInclude Include="XamlWindow.h" />
   </ItemGroup>
@@ -90,7 +89,6 @@
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="Utils.cpp" />
     <ClCompile Include="XamlApp.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

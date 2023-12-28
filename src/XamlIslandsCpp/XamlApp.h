@@ -1,9 +1,6 @@
 #pragma once
 #include "pch.h"
-
 #include "MainWindow.h"
-
-struct IDesktopWindowXamlSourceNative2;
 
 class XamlApp {
 public:

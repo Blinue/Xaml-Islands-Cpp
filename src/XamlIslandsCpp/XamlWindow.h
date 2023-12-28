@@ -1,7 +1,6 @@
 #pragma once
 #include <windows.ui.xaml.hosting.desktopwindowxamlsource.h>
 #include <CoreWindow.h>
-#include "Utils.h"
 
 template <typename T, typename C>
 class XamlWindowT {
@@ -130,7 +129,7 @@ protected:
 		case WM_MOVING:
 		{
 			if (_hwndXamlIsland) {
-				Utils::RepositionXamlPopups(_content.XamlRoot(), false);
+				_RepositionXamlPopups(_content.XamlRoot(), false);
 			}
 
 			return 0;
@@ -165,7 +164,7 @@ protected:
 
 					[](C const& content)->winrt::fire_and_forget {
 						co_await content.Dispatcher().RunAsync(winrt::CoreDispatcherPriority::Normal, [xamlRoot(content.XamlRoot())]() {
-							Utils::RepositionXamlPopups(xamlRoot, true);
+							_RepositionXamlPopups(xamlRoot, true);
 						});
 					}(_content);
 				}
@@ -178,16 +177,51 @@ protected:
 		return DefWindowProc(_hWnd, msg, wParam, lParam);
 	}
 
+	HWND _hWnd = NULL;
+	C _content{ nullptr };
+	
+private:
 	void _OnResize() noexcept {
 		RECT clientRect;
 		GetClientRect(_hWnd, &clientRect);
 		SetWindowPos(_hwndXamlIsland, NULL, 0, 0, clientRect.right - clientRect.left, clientRect.bottom - clientRect.top, SWP_SHOWWINDOW | SWP_NOACTIVATE);
 	}
 
-	HWND _hWnd = NULL;
-	HWND _hwndXamlIsland = NULL;
+	static void _RepositionXamlPopups(winrt::XamlRoot const& root, bool closeFlyoutPresenter) {
+		if (!root) {
+			return;
+		}
 
-	C _content{ nullptr };
+		for (const auto& popup : winrt::VisualTreeHelper::GetOpenPopupsForXamlRoot(root)) {
+			if (closeFlyoutPresenter) {
+				auto className = winrt::get_class_name(popup.Child());
+				if (className == winrt::name_of<winrt::Controls::FlyoutPresenter>() ||
+					className == winrt::name_of<winrt::Controls::MenuFlyoutPresenter>()
+					) {
+					popup.IsOpen(false);
+					continue;
+				}
+			}
+
+			// 取自 https://github.com/CommunityToolkit/Microsoft.Toolkit.Win32/blob/229fa3cd245ff002906b2a594196b88aded25774/Microsoft.Toolkit.Forms.UI.XamlHost/WindowsXamlHostBase.cs#L180
+
+			// Toggle the CompositeMode property, which will force all windowed Popups
+			// to reposition themselves relative to the new position of the host window.
+			auto compositeMode = popup.CompositeMode();
+
+			// Set CompositeMode to some value it currently isn't set to.
+			if (compositeMode == winrt::ElementCompositeMode::SourceOver) {
+				popup.CompositeMode(winrt::ElementCompositeMode::MinBlend);
+			} else {
+				popup.CompositeMode(winrt::ElementCompositeMode::SourceOver);
+			}
+
+			// Restore CompositeMode to whatever it was originally set to.
+			popup.CompositeMode(compositeMode);
+		}
+	}
+
+	HWND _hwndXamlIsland = NULL;
 	winrt::DesktopWindowXamlSource _xamlSource{ nullptr };
 	winrt::com_ptr<IDesktopWindowXamlSourceNative2> _xamlSourceNative2;
 };
