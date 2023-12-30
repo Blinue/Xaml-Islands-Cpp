@@ -22,25 +22,26 @@ private:
 	/////////////////////////////////////////////////////
 public:
 	Markup::IXamlType GetXamlType(Interop::TypeName const& type) {
-		return AppProvider()->GetXamlType(type);
+		return _AppProvider()->GetXamlType(type);
 	}
 
 	Markup::IXamlType GetXamlType(hstring const& fullName) {
-		return AppProvider()->GetXamlType(fullName);
+		return _AppProvider()->GetXamlType(fullName);
 	}
 
 	com_array<Markup::XmlnsDefinition> GetXmlnsDefinitions() {
-		return AppProvider()->GetXmlnsDefinitions();
+		return _AppProvider()->GetXmlnsDefinitions();
 	}
 
 private:
-	com_ptr<XamlMetaDataProvider> _appProvider;
-	com_ptr<XamlMetaDataProvider> AppProvider() {
+	com_ptr<XamlMetaDataProvider> _AppProvider() {
 		if (!_appProvider) {
 			_appProvider = make_self<XamlMetaDataProvider>();
 		}
 		return _appProvider;
 	}
+
+	com_ptr<XamlMetaDataProvider> _appProvider;
 };
 
 }
