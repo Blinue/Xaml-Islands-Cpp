@@ -78,15 +78,14 @@
   <PropertyGroup Label="UserMacros" />
   <ItemDefinitionGroup>
     <ClCompile>
-      <!-- Temporarily disable cppwinrt heap enforcement to work around xaml compiler generated std::shared_ptr use -->
-      <AdditionalOptions Condition="'$(CppWinRTHeapEnforcement)'==''">/DWINRT_NO_MAKE_DETECTION %(AdditionalOptions)</AdditionalOptions>
+      <!-- 为了支持 ARM64，删除用于 XAML 设计器的几个导出函数，然后自己导出 DllGetActivationFactory -->
+      <PreprocessorDefinitions>_VSDESIGNER_DONT_LOAD_AS_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateWindowsMetadata>false</GenerateWindowsMetadata>
       <SubSystem>Console</SubSystem>
       <AdditionalDependencies>kernel32.lib;ole32.lib;oleaut32.lib;user32.lib;gdi32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <!-- 不知为何 ARM64 配置下不会自动导出 DllGetActivationFactory -->
-      <AdditionalOptions Condition="'$(Platform)'=='ARM64'">/EXPORT:DllGetActivationFactory=WINRT_GetActivationFactory,PRIVATE %(AdditionalOptions)</AdditionalOptions>
+      <ModuleDefinitionFile>App.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -132,6 +131,7 @@
     </Midl>
   </ItemGroup>
   <ItemGroup>
+    <None Include="App.def" />
     <None Include="dummy.exe">
       <DeploymentContent>true</DeploymentContent>
     </None>

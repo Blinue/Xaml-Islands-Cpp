@@ -9,7 +9,6 @@
 #include <SDKDDKVer.h>
 
 // Windows 头文件
-#define NOMINMAX	// 使用 std::min 和 std::max 而不是宏
 #include <windows.h>
 
 // C++ 运行时头文件
