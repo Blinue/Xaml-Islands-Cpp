@@ -79,7 +79,7 @@
   <ItemDefinitionGroup>
     <ClCompile>
       <!-- 为了支持 ARM64，删除用于 XAML 设计器的几个导出函数，然后自己导出 DllGetActivationFactory -->
-      <PreprocessorDefinitions>_WINRT_DLL;_VSDESIGNER_DONT_LOAD_AS_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_WINRT_DLL;_VSDESIGNER_DONT_LOAD_AS_DLL;DISABLE_XAML_GENERATED_MAIN;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateWindowsMetadata>false</GenerateWindowsMetadata>
