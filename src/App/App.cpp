@@ -43,6 +43,15 @@ App::App() {
 			ShowWindow(hwndDWXS, SW_HIDE);
 		}
 	}
+
+#ifdef _DEBUG
+	UnhandledException([this](IInspectable const&, UnhandledExceptionEventArgs const& e) {
+		if (IsDebuggerPresent()) {
+			hstring errorMessage = e.Message();
+			__debugbreak();
+		}
+	});
+#endif
 }
 
 App::~App() {
