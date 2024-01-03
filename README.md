@@ -13,10 +13,6 @@
 
 :heavy_check_mark: WinUI 集成（支持正式版而不是仅限预发行版）
 
-:heavy_check_mark: 焦点处理
-
-:heavy_check_mark: 响应 DPI 更改
-
 :heavy_check_mark: [修剪 resources.pri](https://github.com/microsoft/microsoft-ui-xaml/pull/4400)
 
 :heavy_check_mark: 无外部依赖，无需打包
