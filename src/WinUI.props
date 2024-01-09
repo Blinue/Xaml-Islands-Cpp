@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- 根据文档，未打包的 XAML Islands 应用只能使用预发布版本的 WinUI，此文件用于解除这个限制。 -->
-<!-- 正式版 WinUI 打包为 AppX，我们将其解压提取出 winmd、dll 和 pri，然后引用它们。预发行版不会做任何操作。 -->
-<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-	<!-- 解压 AppX 并添加引用 -->
-	<Target Name="ExtractAndReferenceWinUIRuntime" BeforeTargets="PrepareForBuild">
-		<Exec Command="python $(MSBuildThisFileDirectory)extract_winui_runtime.py $(Platform)" />
-	</Target>
-</Project>

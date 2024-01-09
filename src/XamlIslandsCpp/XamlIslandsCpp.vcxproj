@@ -98,6 +98,11 @@
         <WinMDPath>%(ReferencePath.FullPath)</WinMDPath>
         <Implementation>$([System.IO.Path]::GetFileName('%(ReferencePath.Implementation)'))</Implementation>
       </_UnpackagedWin32WinmdManifest>
+      <!-- 为引用的项目生成的 winmd 生成清单文件 -->
+      <_UnpackagedWin32WinmdProjectReference Condition="'%(_ResolvedNativeProjectReferencePaths.ProjectType)' != 'StaticLibrary' And '%(_ResolvedNativeProjectReferencePaths.DeploymentContent)' != 'false'" Include="@(_ResolvedNativeProjectReferencePaths-&gt;WithMetadataValue('FileType','winmd')-&gt;'%(RootDir)%(Directory)%(TargetPath)')" />
+      <_UnpackagedWin32WinmdManifest Include="@(_UnpackagedWin32WinmdProjectReference->'$(IntDir)%(FileName).manifest')">
+      	<WinMDPath>%(Identity)</WinMDPath>
+      </_UnpackagedWin32WinmdManifest>
     </ItemGroup>
   </Target>
   <Target Name="_UnpackagedWin32GenerateAdditionalWinmdManifests" Inputs="@(_UnpackagedWin32WinmdManifest.WinMDPath)" Outputs="@(_UnpackagedWin32WinmdManifest)" BeforeTargets="Link" DependsOnTargets="_UnpackagedWin32MapWinmdsToManifestFiles">

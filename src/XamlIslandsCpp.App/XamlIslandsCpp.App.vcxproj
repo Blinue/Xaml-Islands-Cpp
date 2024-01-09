@@ -155,6 +155,7 @@
     <ItemGroup>
       <_PrisToMerge Include="@(PackagingOutputs)" Condition="'%(Extension)' == '.pri'" KeepMetadata="DoesntExist" />
     </ItemGroup>
+    <Message Text="Generating resources.pri" Importance="high" />
     <Exec Command="python $(MSBuildThisFileDirectory)make_resources_pri.py &quot;$(OutDir)\&quot; &quot;@(_PrisToMerge)&quot;" />
     <ItemGroup>
       <!-- 删除 resources.pri 后应触发重新编译 -->

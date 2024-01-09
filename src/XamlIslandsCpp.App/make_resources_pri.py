@@ -42,6 +42,7 @@ with open("priconfig.xml", "w") as priConfig:
     priConfig.write("\n</resources>")
 
 subprocess.run(
-    f'"{makepriPath}" New /pr . /cf priconfig.xml /of resources.pri -o'
+    f'"{makepriPath}" New /pr . /cf priconfig.xml /of resources.pri -o',
+    capture_output=True,
 )
 os.remove("priconfig.xml")
