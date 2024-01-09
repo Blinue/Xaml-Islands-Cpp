@@ -16,8 +16,6 @@
     <WindowsTargetPlatformMinVersion>10.0.18362.0</WindowsTargetPlatformMinVersion>
     <OutDir>$(SolutionDir)bin\$(Platform)\$(Configuration)\</OutDir>
     <AppxBundlePlatforms>x64|arm64</AppxBundlePlatforms>
-    <!-- 使 xbf 和字符串资源位于根 ResourceMap 下，否则无法使用 ResourceLoader -->
-    <AppxPrependPriInitialPath>false</AppxPrependPriInitialPath>
     <!-- 将 xbf 文件打包进 pri -->
     <!-- https://github.com/microsoft/terminal/blob/9eb191d5453fed890bad63952e425e1240aa8df5/src/cascadia/TerminalApp/TerminalAppLib.vcxproj#L17-L18 -->
     <DisableEmbeddedXbf>false</DisableEmbeddedXbf>
@@ -145,11 +143,17 @@
     <PRIResource Include="Resources.language-zh-CN.resw" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
-  <PropertyGroup>
-    <!-- 覆盖 Microsoft.Cpp.targets 指定的值，使自动生成的 InitializeComponent 能正确加载 xbf。 -->
-    <!-- 由于设置了 AppxPrependPriInitialPath=false，xbf 位于根 ResourceMap 下。 -->
-    <PriIndexName></PriIndexName>
-  </PropertyGroup>
+  <!-- resources.pri 中 App.xbf 必须是 Files 的根节点，否则程序将无法运行 -->
+  <!-- 来自 https://github.com/TranslucentTB/TranslucentTB/blob/f84233b10c7b5ac60c8bed68080d93a056d3f712/Xaml/Xaml.vcxproj#L433 -->
+  <Target Name="PlaceAppXbfAtRootOfResourceTree" AfterTargets="GetPackagingOutputs">
+    <ItemGroup>
+      <_RelocatedAppXamlData Include="@(PackagingOutputs)" Condition="'%(Filename)' == 'App' and ('%(Extension)' == '.xaml' or '%(Extension)' == '.xbf')" />
+      <PackagingOutputs Remove="@(_RelocatedAppXamlData)" />
+      <PackagingOutputs Include="@(_RelocatedAppXamlData)">
+        <TargetPath>%(Filename)%(Extension)</TargetPath>
+      </PackagingOutputs>
+    </ItemGroup>
+  </Target>
   <!-- 打包为 AppX (即设置 AppxPackage 属性) 会自动生成 resources.pri，但会让 XAML 热重载不起作用，最好避免。 -->
   <!-- 我们自己生成 resources.pri，它由 PackagingOutputs 包含的 pri 合并而成。 -->
   <Target Name="MakeResourcesPri" AfterTargets="_GenerateProjectPriFileCore">

@@ -14,7 +14,8 @@ void RootPage::Loaded(IInspectable const&, RoutedEventArgs const&) {
 }
 
 void RootPage::ClickHandler(IInspectable const&, RoutedEventArgs const&) {
-	Button().Content(box_value(ResourceLoader::GetForCurrentView().GetString(L"TestText")));
+	ResourceLoader resourceLoader = ResourceLoader::GetForCurrentView(L"XamlIslandsCpp.App/Resources");
+	Button().Content(box_value(resourceLoader.GetString(L"TestText")));
 }
 
 }
