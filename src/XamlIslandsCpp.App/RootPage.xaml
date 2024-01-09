@@ -7,37 +7,22 @@
       xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
       Loaded="Loaded"
       mc:Ignorable="d">
-	<muxc:NavigationView Name="RootNavigationView"
-	                     IsBackButtonVisible="Collapsed">
-		<muxc:NavigationView.MenuItems>
-			<muxc:NavigationViewItem Content="主页"
-			                         IsSelected="True"
-			                         Tag="Home">
-				<muxc:NavigationViewItem.Icon>
-					<FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}"
-					          Glyph="&#xE80F;" />
-				</muxc:NavigationViewItem.Icon>
-			</muxc:NavigationViewItem>
-		</muxc:NavigationView.MenuItems>
-
-		<StackPanel Padding="20"
-		            HorizontalAlignment="Center"
-		            VerticalAlignment="Center"
-		            Spacing="10">
-			<TextBlock HorizontalAlignment="Center"
-			           FontSize="30"
-			           Text="Hello from XAML Islands"
-			           TextWrapping="Wrap" />
-			<TextBlock Margin="15"
-			           HorizontalAlignment="Center"
-			           FontSize="16"
-			           Text="😍❤💋🌹🎉😎🐱‍👤"
-			           TextWrapping="Wrap" />
-			<Button x:Name="Button"
-			        HorizontalAlignment="Center"
-			        Click="ClickHandler">
-				Click Me
-			</Button>
-		</StackPanel>
-	</muxc:NavigationView>
+	<StackPanel Padding="20"
+	            HorizontalAlignment="Center"
+	            VerticalAlignment="Center"
+	            Spacing="10">
+		<TextBlock x:Uid="GreetingTextBlock"
+		           HorizontalAlignment="Center"
+		           FontSize="30"
+		           TextWrapping="Wrap" />
+		<TextBlock Margin="15"
+		           HorizontalAlignment="Center"
+		           FontSize="16"
+		           Text="😍❤💋🌹🎉😎🐱‍👤"
+		           TextWrapping="Wrap" />
+		<Button x:Name="Button"
+		        x:Uid="TestButton"
+		        HorizontalAlignment="Center"
+		        Click="ClickHandler" />
+	</StackPanel>
 </Page>

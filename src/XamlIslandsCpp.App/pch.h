@@ -26,7 +26,10 @@
 #include <restrictederrorinfo.h>
 #include <hstring.h>
 #include <winrt/base.h>
+#include <winrt/Windows.ApplicationModel.Resources.h>
+#include <winrt/Windows.ApplicationModel.Resources.Core.h>
 #include <winrt/Windows.Foundation.h>
+#include <winrt/Windows.Foundation.Collections.h>
 #include <winrt/Windows.UI.Core.h>
 #include <winrt/Windows.UI.Xaml.h>
 #include <winrt/Windows.UI.Xaml.Controls.h>
@@ -39,6 +42,8 @@
 #include <winrt/Microsoft.UI.Xaml.XamlTypeInfo.h>
 
 namespace winrt {
+using namespace Windows::ApplicationModel::Resources;
+using namespace Windows::ApplicationModel::Resources::Core;
 using namespace Windows::System;
 using namespace Windows::UI::Core;
 using namespace Windows::UI::Xaml;

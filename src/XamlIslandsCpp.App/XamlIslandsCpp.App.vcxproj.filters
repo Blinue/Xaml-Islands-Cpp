@@ -22,4 +22,17 @@
   <ItemGroup>
     <Page Include="RootPage.xaml" />
   </ItemGroup>
+  <ItemGroup>
+    <PRIResource Include="Resources.language-en-US.resw">
+      <Filter>Strings</Filter>
+    </PRIResource>
+    <PRIResource Include="Resources.language-zh-CN.resw">
+      <Filter>Strings</Filter>
+    </PRIResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Strings">
+      <UniqueIdentifier>{5eada0b6-44d6-43f3-b681-72c03b51659b}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
 </Project>
