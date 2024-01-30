@@ -7,8 +7,7 @@
       xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
       Loaded="Loaded"
       mc:Ignorable="d">
-	<StackPanel Padding="20"
-	            HorizontalAlignment="Center"
+	<StackPanel HorizontalAlignment="Center"
 	            VerticalAlignment="Center"
 	            Spacing="10">
 		<TextBlock x:Uid="GreetingTextBlock"

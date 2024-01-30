@@ -31,11 +31,10 @@ else:
                 if f.read() != winuiPkg:
                     return True
 
-            for path in [
+            for path in (
                 "Microsoft.UI.Xaml.dll",
                 "Microsoft.UI.Xaml.pri",
-                "Microsoft.UI.Xaml",
-            ]:
+            ):
                 if not os.access(path, os.F_OK):
                     return True
         except:
@@ -52,13 +51,7 @@ else:
                 )
             )
         ) as appx:
-            # 收集要解压的文件
-            members = ["Microsoft.UI.Xaml.dll", "resources.pri"]
-            # 编译需要 Assets 文件夹，编译完成后会删除它
-            for file in appx.namelist():
-                if file.startswith("Microsoft.UI.Xaml/Assets"):
-                    members.append(file)
-            appx.extractall(members=members)
+            appx.extractall(members=("Microsoft.UI.Xaml.dll", "resources.pri"))
 
         # 将 resources.pri 重命名为 Microsoft.UI.Xaml.pri
         try:

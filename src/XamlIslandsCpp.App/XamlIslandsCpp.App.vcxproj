@@ -32,12 +32,28 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="DebugPackaged|ARM64">
+      <Configuration>DebugPackaged</Configuration>
+      <Platform>ARM64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="DebugPackaged|x64">
+      <Configuration>DebugPackaged</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
     <ProjectConfiguration Include="Debug|ARM64">
       <Configuration>Debug</Configuration>
       <Platform>ARM64</Platform>
     </ProjectConfiguration>
     <ProjectConfiguration Include="Debug|x64">
       <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleasePackaged|ARM64">
+      <Configuration>ReleasePackaged</Configuration>
+      <Platform>ARM64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleasePackaged|x64">
+      <Configuration>ReleasePackaged</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
     <ProjectConfiguration Include="Release|ARM64">
@@ -58,7 +74,16 @@
     <UseDebugLibraries>true</UseDebugLibraries>
     <LinkIncremental>true</LinkIncremental>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)'=='DebugPackaged'" Label="Configuration">
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)'=='Release'" Label="Configuration">
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)'=='ReleasePackaged'" Label="Configuration">
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <LinkIncremental>false</LinkIncremental>
@@ -144,7 +169,7 @@
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <!-- resources.pri 中 App.xbf 必须是 Files 的根节点，否则程序将无法运行 -->
-  <!-- 来自 https://github.com/TranslucentTB/TranslucentTB/blob/f84233b10c7b5ac60c8bed68080d93a056d3f712/Xaml/Xaml.vcxproj#L433 -->
+  <!-- https://github.com/microsoft/terminal/blob/a2bb3136bb52c253060aa281396dbd12316b33a6/src/cascadia/TerminalApp/TerminalAppLib.vcxproj#L458 -->
   <Target Name="PlaceAppXbfAtRootOfResourceTree" AfterTargets="GetPackagingOutputs">
     <ItemGroup>
       <_RelocatedAppXamlData Include="@(PackagingOutputs)" Condition="'%(Filename)' == 'App' and ('%(Extension)' == '.xaml' or '%(Extension)' == '.xbf')" />
@@ -154,9 +179,9 @@
       </PackagingOutputs>
     </ItemGroup>
   </Target>
-  <!-- 打包为 AppX (即设置 AppxPackage 属性) 会自动生成 resources.pri，但会让 XAML 热重载不起作用，最好避免。 -->
-  <!-- 我们自己生成 resources.pri，它由 PackagingOutputs 包含的 pri 合并而成。 -->
-  <Target Name="MakeResourcesPri" AfterTargets="_GenerateProjectPriFileCore">
+  <!-- 编译为非打包应用时应自行生成 resources.pri。 -->
+  <!-- 设置 AppxPackage 属性会自动生成 resources.pri，但会让 XAML 热重载不起作用，最好避免。 -->
+  <Target Name="MakeResourcesPri" AfterTargets="_GenerateProjectPriFileCore" Condition="!$(IsPackaged)">
     <ItemGroup>
       <_PrisToMerge Include="@(PackagingOutputs)" Condition="'%(Extension)' == '.pri'" KeepMetadata="DoesntExist" />
     </ItemGroup>
@@ -165,9 +190,6 @@
     <ItemGroup>
       <!-- 删除 resources.pri 后应触发重新编译 -->
       <FileWrites Include="$(OutDir)resources.pri" />
-      <!-- 有些 pri 引用了额外的负载（例如 WinUI 的噪声图片），编译系统会将它们复制到输出文件夹，但不会监视它们是否有更改。 -->
-      <!-- 我们需要在负载有更改时触发重新编译，因为 WinUI 的负载是从 AppX 包中提取出来的，见 extract_winui_runtime.py。 -->
-      <FileReads Include="@(_ExtraPriPayloadFiles)" />
     </ItemGroup>
   </Target>
   <ImportGroup Label="ExtensionTargets">
