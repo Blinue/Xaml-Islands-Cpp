@@ -15,7 +15,7 @@
 
 :heavy_check_mark: [修剪 resources.pri](https://github.com/microsoft/microsoft-ui-xaml/pull/4400)
 
-:heavy_check_mark: 无外部依赖，无需打包
+:heavy_check_mark: 支持打包为 msix
 
 :heavy_check_mark: 支持 x64 和 ARM64 架构
 
