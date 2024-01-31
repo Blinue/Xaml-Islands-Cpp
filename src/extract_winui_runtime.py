@@ -4,21 +4,23 @@ import glob
 import zipfile
 import shutil
 
-if len(sys.argv) != 2:
+if len(sys.argv) != 3:
     raise Exception("请勿直接运行此脚本")
 
 platform = sys.argv[1]
 if not platform in ["x64", "ARM64"]:
     raise Exception("非法参数")
 
-os.chdir(os.path.dirname(__file__) + "\\..\\packages")
-packagesFolder = os.getcwd()
+# sys.argv[2] 为 winmd 路径
+winuiWinmdPath = sys.argv[2]
+if not winuiWinmdPath.endswith("\\lib\\uap10.0\\Microsoft.UI.Xaml.winmd"):
+    raise Exception("非法参数")
+winuiPkgDir = winuiWinmdPath[: -len("\\lib\\uap10.0\\Microsoft.UI.Xaml.winmd")]
+winuiPkgId = winuiPkgDir[winuiPkgDir.rfind("\\") + 1 :]
 
-winuiPkg = max(glob.glob("Microsoft.UI.Xaml*"))
+intDir = os.path.dirname(__file__) + f"\\..\\obj\\{platform}\\WinUI"
 
-intDir = f"..\\obj\\{platform}\\WinUI"
-
-if "prerelease" in winuiPkg:
+if "prerelease" in winuiPkgId:
     # 预览版本的 WinUI 无需解压
     shutil.rmtree(intDir, ignore_errors=True)
 else:
@@ -28,7 +30,7 @@ else:
     def needExtract():
         try:
             with open("version.txt") as f:
-                if f.read() != winuiPkg:
+                if f.read() != winuiPkgId:
                     return True
 
             for path in (
@@ -44,12 +46,7 @@ else:
 
     if needExtract():
         with zipfile.ZipFile(
-            # 取最新的包
-            max(
-                glob.glob(
-                    f"{packagesFolder}\\{winuiPkg}\\tools\\AppX\\{platform}\\Release\\Microsoft.UI.Xaml*.appx"
-                )
-            )
+            glob.glob(f"{winuiPkgDir}\\tools\\AppX\\{platform}\\Release\\*.appx")[0]
         ) as appx:
             appx.extractall(members=("Microsoft.UI.Xaml.dll", "resources.pri"))
 
@@ -61,4 +58,4 @@ else:
         os.rename("resources.pri", "Microsoft.UI.Xaml.pri")
 
         with open("version.txt", mode="w") as f:
-            f.write(winuiPkg)
+            f.write(winuiPkgId)

@@ -63,12 +63,16 @@
   
   <!-- 编译为非打包应用时修正正式版 WinUI 引用的 dll 和 pri -->
   <Target Name="FixWinUIReference" Condition="!$(IsPackaged)" AfterTargets="ResolveAssemblyReferences">
+    <ItemGroup>
+      <_WinUIWinmdReference Include="@(ReferencePath)" Condition="'%(Filename)%(Extension)' == 'Microsoft.UI.Xaml.winmd'" />
+    </ItemGroup>
+      
     <!-- 正式版 WinUI 打包为 AppX，从中提取出 dll 和 pri，预发行版则不做任何操作 -->
-    <Exec Command="python $(MSBuildThisFileDirectory)extract_winui_runtime.py $(Platform)" />
+	<!-- _WinUIWinmdReference 帮助定位 WinUI 包 -->
+    <Exec Command="python $(MSBuildThisFileDirectory)extract_winui_runtime.py $(Platform) @(_WinUIWinmdReference)" />
     
     <ItemGroup Condition="Exists('$(SolutionDir)obj\$(Platform)\WinUI\version.txt')">
       <!-- 为 winmd 添加 Implementation 为提取出的 dll -->
-      <_WinUIWinmdReference Include="@(ReferencePath)" Condition="'%(Filename)%(Extension)' == 'Microsoft.UI.Xaml.winmd'" />
       <ReferencePath Remove="@(_WinUIWinmdReference)" />
       <ReferencePath Include="@(_WinUIWinmdReference)">
         <Implementation>$(SolutionDir)obj\$(Platform)\WinUI\Microsoft.UI.Xaml.dll</Implementation>
