@@ -12,9 +12,9 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "XamlIslandsCpp.App", "src\X
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{00AB63C3-0CD3-4944-B8E6-58C86138618D}"
 	ProjectSection(SolutionItems) = preProject
-		src\extract_winui_runtime.py = src\extract_winui_runtime.py
 		src\HybridCRT.props = src\HybridCRT.props
 		src\Solution.props = src\Solution.props
+		src\WinUI.targets = src\WinUI.targets
 	EndProjectSection
 EndProject
 Project("{C7167F0D-BC9F-4E6E-AFE1-012C56B48DB5}") = "AppPackage", "src\AppPackage\AppPackage.wapproj", "{E3AA150F-D6E7-44AB-B8D8-EF290C0889EF}"

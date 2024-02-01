@@ -93,9 +93,8 @@
   </ImportGroup>
   <ImportGroup Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-  </ImportGroup>
-  <ImportGroup Label="PropertySheets">
     <Import Project="..\Solution.props" />
+    <Import Project="..\WinUI.targets" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets">
     <Import Project="$([Microsoft.Build.Utilities.ToolLocationHelper]::GetPlatformExtensionSDKLocation(`WindowsDesktop, Version=10.0.22621.0`, $(TargetPlatformIdentifier), $(TargetPlatformVersion),  $(SDKReferenceDirectoryRoot), $(SDKExtensionDirectoryRoot), $(SDKReferenceRegistryRoot)))\DesignTime\CommonConfiguration\Neutral\WindowsDesktop.props" Condition="exists('$([Microsoft.Build.Utilities.ToolLocationHelper]::GetPlatformExtensionSDKLocation(`WindowsDesktop, Version=10.0.22621.0`, $(TargetPlatformIdentifier), $(TargetPlatformVersion),  $(SDKReferenceDirectoryRoot), $(SDKExtensionDirectoryRoot), $(SDKReferenceRegistryRoot)))\DesignTime\CommonConfiguration\Neutral\WindowsDesktop.props')" />
@@ -190,8 +189,7 @@
       <Using Namespace="System" />
       <Using Namespace="System.IO" />
       <Using Namespace="System.Diagnostics" />
-      <Code Type="Fragment" Language="cs">
-        <![CDATA[
+      <Code Type="Fragment" Language="cs"><![CDATA[
 string windowsSdkDir = WindowsSDKDir.Split(';')[0];
 string makepriPath = Path.Combine(windowsSdkDir, "makepri.exe");
 if (!File.Exists(makepriPath)) {
@@ -230,7 +228,7 @@ using (StreamWriter priConfig = File.CreateText("priconfig.xml")) {
 }
 
 // 调用 makepri 生成 resources.pri
-Process p = Process.Start(new ProcessStartInfo{
+Process p = Process.Start(new ProcessStartInfo {
     FileName = makepriPath,
     Arguments = "New /pr . /cf priconfig.xml /of resources.pri /o",
     WorkingDirectory = OutDir,
@@ -243,8 +241,7 @@ if (p.ExitCode != 0) {
 }
 
 File.Delete("priconfig.xml");
-        ]]>
-      </Code>
+      ]]></Code>
     </Task>
   </UsingTask>
   <Target Name="MakeResourcesPri" AfterTargets="_GenerateProjectPriFileCore" Condition="!$(IsPackaged)">
