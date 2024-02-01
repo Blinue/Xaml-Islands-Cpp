@@ -152,7 +152,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="XamlIslandsCpp.App.def" />
-    <None Include="make_resources_pri.py" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
@@ -181,12 +180,78 @@
   </Target>
   <!-- 编译为非打包应用时应自行生成 resources.pri。 -->
   <!-- 设置 AppxPackage 属性会自动生成 resources.pri，但会让 XAML 热重载不起作用，最好避免。 -->
+  <UsingTask TaskName="MakeResourcesPriTask" TaskFactory="RoslynCodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
+    <ParameterGroup>
+      <WindowsSDKDir Required="true" />
+      <OutDir Required="true" />
+      <PriPaths Required="true" />
+    </ParameterGroup>
+    <Task>
+      <Using Namespace="System" />
+      <Using Namespace="System.IO" />
+      <Using Namespace="System.Diagnostics" />
+      <Code Type="Fragment" Language="cs">
+        <![CDATA[
+string windowsSdkDir = WindowsSDKDir.Split(';')[0];
+string makepriPath = Path.Combine(windowsSdkDir, "makepri.exe");
+if (!File.Exists(makepriPath)) {
+    throw new Exception("未找到 makepri");
+}
+
+Directory.SetCurrentDirectory(OutDir);
+
+// 创建配置文件合并输入的 pri
+using (StreamWriter priConfig = File.CreateText("priconfig.xml")) {
+    priConfig.WriteLine("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
+    priConfig.WriteLine("<resources targetOsVersion=\"10.0.0\" majorVersion=\"1\">");
+    
+    foreach (string priPath in PriPaths.Split(';')) {
+        priConfig.WriteLine($"  <index root=\"\\\" startIndexAt=\"{priPath}\">");
+        priConfig.WriteLine("""
+      <default>
+        <qualifier name="Language" value="en-US" />
+        <qualifier name="Contrast" value="standard" />
+        <qualifier name="Scale" value="200" />
+        <qualifier name="HomeRegion" value="001" />
+        <qualifier name="TargetSize" value="256" />
+        <qualifier name="LayoutDirection" value="LTR" />
+        <qualifier name="DXFeatureLevel" value="DX9" />
+        <qualifier name="Configuration" value="" />
+        <qualifier name="AlternateForm" value="" />
+        <qualifier name="Platform" value="UAP" />
+      </default>
+      <indexer-config type="PRI" />
+      <indexer-config type="RESFILES" qualifierDelimiter="." />
+    </index>
+  """);
+    }
+    
+    priConfig.WriteLine("</resources>");
+}
+
+// 调用 makepri 生成 resources.pri
+Process p = Process.Start(new ProcessStartInfo{
+    FileName = makepriPath,
+    Arguments = "New /pr . /cf priconfig.xml /of resources.pri /o",
+    WorkingDirectory = OutDir,
+    UseShellExecute = false
+});
+p.WaitForExit();
+
+if (p.ExitCode != 0) {
+    throw new Exception("生成 resources.pri 失败");
+}
+
+File.Delete("priconfig.xml");
+        ]]>
+      </Code>
+    </Task>
+  </UsingTask>
   <Target Name="MakeResourcesPri" AfterTargets="_GenerateProjectPriFileCore" Condition="!$(IsPackaged)">
     <ItemGroup>
       <_PrisToMerge Include="@(PackagingOutputs)" Condition="'%(Extension)' == '.pri'" KeepMetadata="DoesntExist" />
     </ItemGroup>
-    <Message Text="Generating resources.pri" Importance="high" />
-    <Exec Command="python $(MSBuildThisFileDirectory)make_resources_pri.py &quot;$(OutDir)\&quot; &quot;@(_PrisToMerge)&quot;" />
+    <MakeResourcesPriTask WindowsSDKDir="$(WindowsSDK_ExecutablePath_x64)" OutDir="$(OutDir)" PriPaths="@(_PrisToMerge)" />
     <ItemGroup>
       <!-- 删除 resources.pri 后应触发重新编译 -->
       <FileWrites Include="$(OutDir)resources.pri" />
