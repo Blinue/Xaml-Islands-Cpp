@@ -5,23 +5,48 @@
       xmlns:local="using:XamlIslandsCpp.App"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
-      Loaded="Loaded"
+      muxc:BackdropMaterial.ApplyToRootOrPageBackground="False"
       mc:Ignorable="d">
-	<StackPanel HorizontalAlignment="Center"
+	<StackPanel Width="300"
+	            Padding="40"
+	            HorizontalAlignment="Center"
 	            VerticalAlignment="Center"
-	            Spacing="10">
-		<TextBlock x:Uid="GreetingTextBlock"
-		           HorizontalAlignment="Center"
-		           FontSize="30"
-		           TextWrapping="Wrap" />
-		<TextBlock Margin="15"
-		           HorizontalAlignment="Center"
-		           FontSize="16"
-		           Text="😍❤💋🌹🎉😎🐱‍👤"
-		           TextWrapping="Wrap" />
-		<Button x:Name="Button"
-		        x:Uid="TestButton"
-		        HorizontalAlignment="Center"
-		        Click="ClickHandler" />
+	            Background="#80FFFFFF"
+	            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+	            BorderThickness="1"
+	            CornerRadius="8"
+	            Spacing="8">
+		<Grid HorizontalAlignment="Stretch">
+			<TextBlock x:Uid="CustomTitlebarTextBlock"
+			           VerticalAlignment="Center" />
+			<ToggleSwitch Margin="0,-4"
+			              HorizontalAlignment="Right"
+			              VerticalAlignment="Center"
+			              Style="{StaticResource ToggleSwitchWithoutText}" />
+		</Grid>
+		<Grid HorizontalAlignment="Stretch">
+			<TextBlock x:Uid="ThemeTextBlock"
+			           VerticalAlignment="Center" />
+			<ComboBox MinWidth="120"
+			          HorizontalAlignment="Right"
+			          VerticalAlignment="Center"
+			          SelectedIndex="0">
+				<ComboBoxItem x:Uid="Theme_Light" />
+				<ComboBoxItem x:Uid="Theme_Dark" />
+			</ComboBox>
+		</Grid>
+		<Grid HorizontalAlignment="Stretch">
+			<TextBlock x:Uid="BackgroundTextBlock"
+			           VerticalAlignment="Center" />
+			<ComboBox MinWidth="120"
+			          HorizontalAlignment="Right"
+			          VerticalAlignment="Center"
+			          SelectedIndex="0">
+				<ComboBoxItem x:Uid="Background_Solid" />
+				<ComboBoxItem>Acrylic</ComboBoxItem>
+				<ComboBoxItem>Mica</ComboBoxItem>
+				<ComboBoxItem>Mica Alt</ComboBoxItem>
+			</ComboBox>
+		</Grid>
 	</StackPanel>
 </Page>

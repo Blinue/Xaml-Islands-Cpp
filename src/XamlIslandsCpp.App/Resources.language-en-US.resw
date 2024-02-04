@@ -117,13 +117,22 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="GreetingTextBlock.Text" xml:space="preserve">
-    <value>Hello from XAML Islands</value>
+  <data name="BackgroundTextBlock.Text" xml:space="preserve">
+    <value>Background</value>
   </data>
-  <data name="TestButton.Content" xml:space="preserve">
-    <value>Click Me</value>
+  <data name="Background_Solid.Content" xml:space="preserve">
+    <value>Solid color</value>
   </data>
-  <data name="TestText" xml:space="preserve">
-    <value>Test</value>
+  <data name="CustomTitlebarTextBlock.Text" xml:space="preserve">
+    <value>Custom titlebar</value>
+  </data>
+  <data name="ThemeTextBlock.Text" xml:space="preserve">
+    <value>Theme</value>
+  </data>
+  <data name="Theme_Dark.Content" xml:space="preserve">
+    <value>Dark</value>
+  </data>
+  <data name="Theme_Light.Content" xml:space="preserve">
+    <value>Light</value>
   </data>
 </root>

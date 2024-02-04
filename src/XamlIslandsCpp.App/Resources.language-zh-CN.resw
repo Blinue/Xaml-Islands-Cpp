@@ -117,13 +117,22 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="GreetingTextBlock.Text" xml:space="preserve">
-    <value>爱来自 XAML Islands</value>
+  <data name="BackgroundTextBlock.Text" xml:space="preserve">
+    <value>背景</value>
   </data>
-  <data name="TestButton.Content" xml:space="preserve">
-    <value>点我</value>
+  <data name="Background_Solid.Content" xml:space="preserve">
+    <value>纯色</value>
   </data>
-  <data name="TestText" xml:space="preserve">
-    <value>测试</value>
+  <data name="CustomTitlebarTextBlock.Text" xml:space="preserve">
+    <value>自定义标题栏</value>
+  </data>
+  <data name="ThemeTextBlock.Text" xml:space="preserve">
+    <value>主题</value>
+  </data>
+  <data name="Theme_Dark.Content" xml:space="preserve">
+    <value>暗</value>
+  </data>
+  <data name="Theme_Light.Content" xml:space="preserve">
+    <value>亮</value>
   </data>
 </root>
