@@ -1,0 +1,33 @@
+﻿<UserControl x:Class="XamlIslandsCpp.App.TitleBarControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="using:XamlIslandsCpp.App"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             Height="40"
+             HorizontalAlignment="Stretch"
+             VerticalAlignment="Top"
+             mc:Ignorable="d">
+	<Grid>
+		<TextBlock x:Name="TitleTextBlock"
+		           Margin="16,0,0,0"
+		           VerticalAlignment="Center"
+		           FontSize="12"
+		           Text="XamlIslandsCpp" />
+
+		<local:CaptionButtonsControl x:Name="CaptionButtons"
+		                             HorizontalAlignment="Right"
+		                             VerticalAlignment="Top" />
+
+		<VisualStateManager.VisualStateGroups>
+			<VisualStateGroup x:Name="ActiveStates">
+				<VisualState x:Name="Active" />
+				<VisualState x:Name="NotActive">
+					<VisualState.Setters>
+						<Setter Target="TitleTextBlock.Foreground" Value="#8E8E8E" />
+					</VisualState.Setters>
+				</VisualState>
+			</VisualStateGroup>
+		</VisualStateManager.VisualStateGroups>
+	</Grid>
+</UserControl>

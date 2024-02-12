@@ -91,6 +91,9 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
   </ImportGroup>
+  <ImportGroup Label="Shared">
+    <Import Project="..\Shared\Shared.vcxitems" Label="Shared" />
+  </ImportGroup>
   <ImportGroup Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="..\Solution.props" />
@@ -113,6 +116,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="CaptionButtonsControl.h">
+      <DependentUpon>CaptionButtonsControl.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </ClInclude>
     <ClInclude Include="RootPage.h">
       <DependentUpon>RootPage.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -121,6 +128,10 @@
     <ClInclude Include="App.h">
       <DependentUpon>App.xaml</DependentUpon>
     </ClInclude>
+    <ClInclude Include="TitleBarControl.h">
+      <DependentUpon>TitleBarControl.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml">
@@ -128,6 +139,10 @@
     </ApplicationDefinition>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="CaptionButtonsControl.cpp">
+      <DependentUpon>CaptionButtonsControl.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </ClCompile>
     <ClCompile Include="RootPage.cpp">
       <DependentUpon>RootPage.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -139,22 +154,40 @@
       <DependentUpon>App.xaml</DependentUpon>
     </ClCompile>
     <ClCompile Include="$(GeneratedFilesDir)module.g.cpp" />
+    <ClCompile Include="TitleBarControl.cpp">
+      <DependentUpon>TitleBarControl.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Midl Include="App.idl">
       <DependentUpon>App.xaml</DependentUpon>
     </Midl>
-    <Midl Include="RootPage.idl">
+    <None Include="CaptionButtonsControl.idl">
+      <DependentUpon>CaptionButtonsControl.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </None>
+    <None Include="RootPage.idl">
       <DependentUpon>RootPage.xaml</DependentUpon>
       <SubType>Code</SubType>
-    </Midl>
+    </None>
+    <None Include="TitleBarControl.idl">
+      <DependentUpon>TitleBarControl.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <None Include="XamlIslandsCpp.App.def" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <Page Include="CaptionButtonsControl.xaml">
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="RootPage.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="TitleBarControl.xaml">
       <SubType>Designer</SubType>
     </Page>
   </ItemGroup>

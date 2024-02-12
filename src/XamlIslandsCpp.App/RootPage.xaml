@@ -5,48 +5,54 @@
       xmlns:local="using:XamlIslandsCpp.App"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
-      muxc:BackdropMaterial.ApplyToRootOrPageBackground="False"
+      muxc:BackdropMaterial.ApplyToRootOrPageBackground="True"
       mc:Ignorable="d">
-	<StackPanel Width="300"
-	            Padding="40"
-	            HorizontalAlignment="Center"
-	            VerticalAlignment="Center"
-	            Background="#80FFFFFF"
-	            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-	            BorderThickness="1"
-	            CornerRadius="8"
-	            Spacing="8">
-		<Grid HorizontalAlignment="Stretch">
-			<TextBlock x:Uid="CustomTitlebarTextBlock"
-			           VerticalAlignment="Center" />
-			<ToggleSwitch Margin="0,-4"
-			              HorizontalAlignment="Right"
-			              VerticalAlignment="Center"
-			              Style="{StaticResource ToggleSwitchWithoutText}" />
-		</Grid>
-		<Grid HorizontalAlignment="Stretch">
-			<TextBlock x:Uid="ThemeTextBlock"
-			           VerticalAlignment="Center" />
-			<ComboBox MinWidth="120"
-			          HorizontalAlignment="Right"
-			          VerticalAlignment="Center"
-			          SelectedIndex="0">
-				<ComboBoxItem x:Uid="Theme_Light" />
-				<ComboBoxItem x:Uid="Theme_Dark" />
-			</ComboBox>
-		</Grid>
-		<Grid HorizontalAlignment="Stretch">
-			<TextBlock x:Uid="BackgroundTextBlock"
-			           VerticalAlignment="Center" />
-			<ComboBox MinWidth="120"
-			          HorizontalAlignment="Right"
-			          VerticalAlignment="Center"
-			          SelectedIndex="0">
-				<ComboBoxItem x:Uid="Background_Solid" />
-				<ComboBoxItem>Acrylic</ComboBoxItem>
-				<ComboBoxItem>Mica</ComboBoxItem>
-				<ComboBoxItem>Mica Alt</ComboBoxItem>
-			</ComboBox>
-		</Grid>
-	</StackPanel>
+	<Grid>
+		<local:TitleBarControl x:Name="TitleBar"
+		                       Canvas.ZIndex="1" />
+
+		<StackPanel Width="300"
+		            Padding="40"
+		            HorizontalAlignment="Center"
+		            VerticalAlignment="Center"
+		            Background="#80FFFFFF"
+		            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+		            BorderThickness="1"
+		            Canvas.ZIndex="0"
+		            CornerRadius="8"
+		            Spacing="8">
+			<Grid HorizontalAlignment="Stretch">
+				<TextBlock x:Uid="CustomTitlebarTextBlock"
+				           VerticalAlignment="Center" />
+				<ToggleSwitch Margin="0,-4"
+				              HorizontalAlignment="Right"
+				              VerticalAlignment="Center"
+				              Style="{StaticResource ToggleSwitchWithoutText}" />
+			</Grid>
+			<Grid HorizontalAlignment="Stretch">
+				<TextBlock x:Uid="ThemeTextBlock"
+				           VerticalAlignment="Center" />
+				<ComboBox MinWidth="120"
+				          HorizontalAlignment="Right"
+				          VerticalAlignment="Center"
+				          SelectedIndex="0">
+					<ComboBoxItem x:Uid="Theme_Light" />
+					<ComboBoxItem x:Uid="Theme_Dark" />
+				</ComboBox>
+			</Grid>
+			<Grid HorizontalAlignment="Stretch">
+				<TextBlock x:Uid="BackgroundTextBlock"
+				           VerticalAlignment="Center" />
+				<ComboBox MinWidth="120"
+				          HorizontalAlignment="Right"
+				          VerticalAlignment="Center"
+				          SelectedIndex="0">
+					<ComboBoxItem x:Uid="Background_Solid" />
+					<ComboBoxItem>Acrylic</ComboBoxItem>
+					<ComboBoxItem>Mica</ComboBoxItem>
+					<ComboBoxItem>Mica Alt</ComboBoxItem>
+				</ComboBox>
+			</Grid>
+		</StackPanel>
+	</Grid>
 </Page>

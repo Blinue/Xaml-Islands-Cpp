@@ -1,0 +1,7 @@
+namespace XamlIslandsCpp.App {
+    runtimeclass TitleBarControl : Windows.UI.Xaml.Controls.UserControl {
+        TitleBarControl();
+
+        void IsWindowActive(Boolean value);
+    }
+}

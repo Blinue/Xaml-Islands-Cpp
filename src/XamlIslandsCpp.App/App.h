@@ -11,8 +11,17 @@ public:
 
 	void Close();
 
+	uint64_t HwndMain() const noexcept {
+		return (uint64_t)_hwndMain;
+	}
+
+	void HwndMain(uint64_t value) noexcept {
+		_hwndMain = (HWND)value;
+	}
+
 private:
 	Hosting::WindowsXamlManager _windowsXamlManager{ nullptr };
+	HWND _hwndMain = NULL;
 	bool _isClosed = false;
 
 	////////////////////////////////////////////////////

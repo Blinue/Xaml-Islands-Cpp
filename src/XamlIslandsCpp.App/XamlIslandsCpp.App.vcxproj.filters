@@ -17,10 +17,15 @@
   <ItemGroup>
     <None Include="packages.config" />
     <None Include="XamlIslandsCpp.App.def" />
-    <None Include="make_resources_pri.py" />
   </ItemGroup>
   <ItemGroup>
     <Page Include="RootPage.xaml" />
+    <Page Include="TitleBarControl.xaml">
+      <Filter>Controls</Filter>
+    </Page>
+    <Page Include="CaptionButtonsControl.xaml">
+      <Filter>Controls</Filter>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <PRIResource Include="Resources.language-en-US.resw">
@@ -33,6 +38,9 @@
   <ItemGroup>
     <Filter Include="Strings">
       <UniqueIdentifier>{5eada0b6-44d6-43f3-b681-72c03b51659b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Controls">
+      <UniqueIdentifier>{1e0add64-b965-43a0-9877-611a5bf0af6e}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

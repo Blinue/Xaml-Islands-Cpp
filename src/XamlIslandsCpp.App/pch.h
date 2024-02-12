@@ -44,6 +44,7 @@
 namespace winrt {
 using namespace Windows::ApplicationModel::Resources;
 using namespace Windows::ApplicationModel::Resources::Core;
+using namespace Windows::Foundation;
 using namespace Windows::System;
 using namespace Windows::UI::Core;
 using namespace Windows::UI::Xaml;

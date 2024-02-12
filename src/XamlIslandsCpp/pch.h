@@ -9,7 +9,9 @@
 #include <SDKDDKVer.h>
 
 // Windows 头文件
-#include <windows.h>
+#include <Windows.h>
+#include <windowsx.h>
+#include <dwmapi.h>
 
 // C++ 运行时头文件
 #include <cstdlib>
@@ -33,6 +35,8 @@
 #include <winrt/Windows.UI.Xaml.Hosting.h>
 #include <winrt/Windows.UI.Xaml.Media.h>
 #include <winrt/Windows.UI.Xaml.Shapes.h>
+
+#pragma comment(lib, "dwmapi.lib")
 
 namespace winrt {
 using namespace Windows::Foundation;

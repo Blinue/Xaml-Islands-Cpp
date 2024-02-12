@@ -1,5 +1,11 @@
+#include "CaptionButtonsControl.idl"
+#include "TitleBarControl.idl"
+#include "RootPage.idl"
+
 namespace XamlIslandsCpp.App {
 	runtimeclass App : Windows.UI.Xaml.Application, [default] Windows.Foundation.IClosable {
 		App();
+
+		UInt64 HwndMain;
 	}
 }

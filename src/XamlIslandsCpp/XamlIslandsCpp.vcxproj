@@ -45,6 +45,9 @@
     <!-- OutDir 不能放入 Solution.props，否则有时会导致编译失败 -->
     <OutDir>$(SolutionDir)bin\$(Platform)\$(Configuration)\</OutDir>
     <ProjectName>XamlIslandsCpp</ProjectName>
+    <!-- Up-to-date 检查无法检测到 UWP 项目的更改 -->
+    <!-- https://github.com/dotnet/project-system/issues/5543 -->
+    <DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Label="Configuration">
@@ -73,6 +76,9 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
   </ImportGroup>
+  <ImportGroup Label="Shared">
+    <Import Project="..\Shared\Shared.vcxitems" Label="Shared" />
+  </ImportGroup>
   <ImportGroup Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="..\Solution.props" />
@@ -91,6 +97,7 @@
   <ItemGroup>
     <ClInclude Include="MainWindow.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="ThemeHelper.h" />
     <ClInclude Include="XamlApp.h" />
     <ClInclude Include="XamlWindow.h" />
   </ItemGroup>
@@ -106,6 +113,7 @@
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="ThemeHelper.cpp" />
     <ClCompile Include="XamlApp.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -126,12 +134,14 @@
       </_UnpackagedWin32WinmdManifest>
       <!-- 为引用的项目生成的 winmd 生成清单文件 -->
       <_UnpackagedWin32WinmdProjectReference Condition="'%(_ResolvedNativeProjectReferencePaths.ProjectType)' != 'StaticLibrary' And '%(_ResolvedNativeProjectReferencePaths.DeploymentContent)' != 'false'" Include="@(_ResolvedNativeProjectReferencePaths-&gt;WithMetadataValue('FileType','winmd')-&gt;'%(RootDir)%(Directory)%(TargetPath)')" />
+		<FileReads Include="@(_UnpackagedWin32WinmdProjectReference)" />
       <_UnpackagedWin32WinmdManifest Include="@(_UnpackagedWin32WinmdProjectReference->'$(IntDir)%(FileName).manifest')">
         <WinMDPath>%(Identity)</WinMDPath>
       </_UnpackagedWin32WinmdManifest>
     </ItemGroup>
   </Target>
   <Target Name="UnpackagedWin32GenerateAdditionalWinmdManifests" Condition="!$(IsPackaged)" Inputs="@(UnpackagedWin32WinmdManifest.WinMDPath)" Outputs="@(_UnpackagedWin32WinmdManifest)" BeforeTargets="Link" DependsOnTargets="UnpackagedWin32MapWinmdsToManifestFiles">
+	  <Message Text="@(_UnpackagedWin32WinmdProjectReference)" Importance="high" />
     <Message Text="Generating manifest for %(_UnpackagedWin32WinmdManifest.WinMDPath)" Importance="High" />
     <!-- 并行处理 _UnpackagedWin32WinmdManifest 中的每一个元素 -->
     <Exec Command="mt.exe -nologo -winmd:&quot;%(_UnpackagedWin32WinmdManifest.WinMDPath)&quot; -dll:%(_UnpackagedWin32WinmdManifest.Implementation) -out:&quot;%(_UnpackagedWin32WinmdManifest.Identity)&quot;" />
