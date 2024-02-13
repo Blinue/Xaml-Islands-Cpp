@@ -162,6 +162,8 @@ protected:
 				return 0;
 			}
 
+			_isWindowShown = IsWindowVisible(_hWnd);
+
 			NCCALCSIZE_PARAMS* params = (NCCALCSIZE_PARAMS*)lParam;
 			RECT& clientRect = params->rgrc[0];
 

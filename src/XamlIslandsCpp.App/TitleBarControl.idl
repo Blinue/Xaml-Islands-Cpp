@@ -2,6 +2,7 @@ namespace XamlIslandsCpp.App {
     runtimeclass TitleBarControl : Windows.UI.Xaml.Controls.UserControl {
         TitleBarControl();
 
+        CaptionButtonsControl CaptionButtons { get; };
         void IsWindowActive(Boolean value);
     }
 }
