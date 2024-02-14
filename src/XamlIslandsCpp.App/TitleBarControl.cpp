@@ -11,6 +11,7 @@ namespace winrt::XamlIslandsCpp::App::implementation {
 
 void TitleBarControl::IsWindowActive(bool value) {
 	VisualStateManager::GoToState(*this, value ? L"Active" : L"NotActive", false);
+	CaptionButtons().IsWindowActive(value);
 }
 
 }

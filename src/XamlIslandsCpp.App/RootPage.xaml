@@ -48,6 +48,7 @@
 				<ComboBox MinWidth="120"
 				          HorizontalAlignment="Right"
 				          VerticalAlignment="Center"
+				          DropDownOpened="ComboBox_DropDownOpened"
 				          SelectedIndex="{x:Bind Theme, Mode=TwoWay}">
 					<ComboBoxItem x:Uid="Theme_Light" />
 					<ComboBoxItem x:Uid="Theme_Dark" />
@@ -59,6 +60,7 @@
 				<ComboBox MinWidth="120"
 				          HorizontalAlignment="Right"
 				          VerticalAlignment="Center"
+				          DropDownOpened="ComboBox_DropDownOpened"
 				          SelectedIndex="0">
 					<ComboBoxItem x:Uid="Background_Solid" />
 					<ComboBoxItem>Acrylic</ComboBoxItem>

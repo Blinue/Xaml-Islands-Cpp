@@ -5,6 +5,7 @@
 #endif
 #include "Win32Helper.h"
 #include "CommonSharedConstants.h"
+#include "XamlHelper.h"
 
 using namespace XamlIslandsCpp;
 
@@ -41,6 +42,12 @@ void RootPage::Theme(int value) {
 	_settings.Theme((AppTheme)value);
 	_SetTheme((AppTheme)value);
 	_propertyChangedEvent(*this, PropertyChangedEventArgs(L"Theme"));
+}
+
+void RootPage::ComboBox_DropDownOpened(IInspectable const&, IInspectable const&) const {
+	// 修复下拉框不适配主题的问题
+	// https://github.com/microsoft/microsoft-ui-xaml/issues/6622
+	XamlHelper::UpdateThemeOfXamlPopups(XamlRoot(), ActualTheme());
 }
 
 static Color Win32ColorToWinRTColor(COLORREF color) {

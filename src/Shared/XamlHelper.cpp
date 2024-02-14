@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "XamlHelper.h"
+#include "Win32Helper.h"
 #include <winrt/Windows.UI.Xaml.Media.h>
+#include <vector>
 
 namespace winrt {
 using namespace Windows::UI::Xaml;
@@ -82,6 +84,49 @@ void XamlHelper::CloseComboBoxPopup(winrt::XamlRoot const& root) {
 			return;
 		}
 	}
+}
+
+void XamlHelper::UpdateThemeOfXamlPopups(winrt::XamlRoot const& root, winrt::ElementTheme theme) {
+	for (const auto& popup : winrt::VisualTreeHelper::GetOpenPopupsForXamlRoot(root)) {
+		winrt::FrameworkElement child = popup.Child().as<winrt::FrameworkElement>();
+		child.RequestedTheme(theme);
+		UpdateThemeOfTooltips(child, theme);
+	}
+}
+
+void XamlHelper::UpdateThemeOfTooltips(winrt::DependencyObject const& root, winrt::ElementTheme theme) {
+	if (Win32Helper::GetOSVersion().IsWin11()) {
+		// Win11 中 Tooltip 自动适应主题
+		return;
+	}
+
+	// 遍历 XAML 树
+	std::vector<winrt::DependencyObject> elems{ root };
+	do {
+		std::vector<winrt::DependencyObject> temp;
+
+		for (const winrt::DependencyObject& elem : elems) {
+			const int count = winrt::VisualTreeHelper::GetChildrenCount(elem);
+			for (int i = 0; i < count; ++i) {
+				winrt::DependencyObject current = winrt::VisualTreeHelper::GetChild(elem, i);
+
+				if (winrt::IInspectable tooltipContent = winrt::ToolTipService::GetToolTip(current)) {
+					if (winrt::ToolTip tooltip = tooltipContent.try_as<winrt::ToolTip>()) {
+						tooltip.RequestedTheme(theme);
+					} else {
+						winrt::ToolTip themedTooltip;
+						themedTooltip.Content(tooltipContent);
+						themedTooltip.RequestedTheme(theme);
+						winrt::ToolTipService::SetToolTip(current, themedTooltip);
+					}
+				}
+
+				temp.emplace_back(std::move(current));
+			}
+		}
+
+		elems = std::move(temp);
+	} while (!elems.empty());
 }
 
 }
