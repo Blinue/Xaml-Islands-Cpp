@@ -30,6 +30,7 @@ private:
 
 	winrt::XamlIslandsCpp::App::Settings::ThemeChanged_revoker _themeChangedRevoker;
 	winrt::XamlIslandsCpp::App::Settings::IsCustomTitleBarEnabledChanged_revoker _isCustomTitleBarEnabledChangedRevoker;
+	winrt::XamlIslandsCpp::App::Settings::BackdropChanged_revoker _backdropChangedRevoker;
 };
 
 }

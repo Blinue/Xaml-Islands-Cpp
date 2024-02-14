@@ -6,5 +6,8 @@ namespace XamlIslandsCpp.App {
 
 		Boolean IsCustomTitleBarEnabled;
 		Int32 Theme;
+
+		static Boolean IsMicaAvailable { get; };
+		Int32 Backdrop;
 	}
 }

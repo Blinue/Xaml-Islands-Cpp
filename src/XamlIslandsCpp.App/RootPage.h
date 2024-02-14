@@ -24,10 +24,15 @@ struct RootPage : RootPageT<RootPage> {
 	int Theme() const noexcept;
 	void Theme(int value);
 
+	static bool IsMicaAvailable() noexcept;
+
+	int Backdrop() const noexcept;
+	void Backdrop(int value);
+
 	void ComboBox_DropDownOpened(IInspectable const&, IInspectable const&) const;
 
 private:
-	void _SetTheme(AppTheme theme);
+	void _SetTheme(AppTheme theme, WindowBackdrop backdrop);
 
 	event<PropertyChangedEventHandler> _propertyChangedEvent;
 

@@ -2,6 +2,7 @@
 #include <windows.ui.xaml.hosting.desktopwindowxamlsource.h>
 #include <CoreWindow.h>
 #include <shellapi.h>
+#include <winrt/XamlIslandsCpp.App.h>
 #include "Win32Helper.h"
 #include "XamlHelper.h"
 #include "ThemeHelper.h"
@@ -100,19 +101,25 @@ protected:
 		);
 	}
 
-	void _SetTheme(bool isDarkTheme) noexcept {
-		_isDarkTheme = isDarkTheme;
+	void _SetTheme(
+		winrt::XamlIslandsCpp::App::AppTheme theme,
+		winrt::XamlIslandsCpp::App::WindowBackdrop backdrop) noexcept
+	{
+		_isDarkTheme = theme == winrt::XamlIslandsCpp::App::AppTheme::Dark;
 
 		// Win10 中即使在亮色主题下我们也使用暗色边框，这也是 UWP 窗口的行为
 		ThemeHelper::SetWindowTheme(
 			_hWnd,
-			Win32Helper::GetOSVersion().IsWin11() ? isDarkTheme : true,
-			isDarkTheme
+			Win32Helper::GetOSVersion().IsWin11() ? _isDarkTheme : true,
+			_isDarkTheme
 		);
 
 		if (Win32Helper::GetOSVersion().Is22H2OrNewer()) {
-			// 设置 Mica 背景
-			DWM_SYSTEMBACKDROP_TYPE value = DWMSBT_MAINWINDOW;
+			// 设置背景
+			static const DWM_SYSTEMBACKDROP_TYPE BACKDROP_MAP[] = {
+				DWMSBT_AUTO, DWMSBT_TRANSIENTWINDOW, DWMSBT_MAINWINDOW, DWMSBT_TABBEDWINDOW
+			};
+			DWM_SYSTEMBACKDROP_TYPE value = BACKDROP_MAP[(int)backdrop];
 			DwmSetWindowAttribute(_hWnd, DWMWA_SYSTEMBACKDROP_TYPE, &value, sizeof(value));
 			return;
 		}
@@ -123,7 +130,7 @@ protected:
 			HBRUSH hbrOld = (HBRUSH)SetClassLongPtr(
 				_hWnd,
 				GCLP_HBRBACKGROUND,
-				(INT_PTR)CreateSolidBrush(isDarkTheme ?
+				(INT_PTR)CreateSolidBrush(_isDarkTheme ?
 					CommonSharedConstants::DARK_TINT_COLOR : CommonSharedConstants::LIGHT_TINT_COLOR));
 			if (hbrOld) {
 				DeleteObject(hbrOld);
@@ -213,7 +220,7 @@ protected:
 							data.rc = monInfo.rcMonitor;
 							HWND hTaskbar = (HWND)SHAppBarMessage(ABM_GETAUTOHIDEBAREX, &data);
 							return hTaskbar != nullptr;
-							};
+						};
 
 						static constexpr int AUTO_HIDE_TASKBAR_HEIGHT = 2;
 
@@ -459,7 +466,7 @@ protected:
 		}
 	}
 
-	int _GetResizeHandleHeight() noexcept {
+	int _GetResizeHandleHeight() const noexcept {
 		// 没有 SM_CYPADDEDBORDER
 		return GetSystemMetricsForDpi(SM_CXPADDEDBORDER, _currentDpi) +
 			GetSystemMetricsForDpi(SM_CYSIZEFRAME, _currentDpi);

@@ -5,7 +5,6 @@
       xmlns:local="using:XamlIslandsCpp.App"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
-      muxc:BackdropMaterial.ApplyToRootOrPageBackground="True"
       mc:Ignorable="d">
 	<Page.Resources>
 		<ResourceDictionary>
@@ -61,11 +60,11 @@
 				          HorizontalAlignment="Right"
 				          VerticalAlignment="Center"
 				          DropDownOpened="ComboBox_DropDownOpened"
-				          SelectedIndex="0">
+				          SelectedIndex="{x:Bind Backdrop, Mode=TwoWay}">
 					<ComboBoxItem x:Uid="Background_Solid" />
 					<ComboBoxItem>Acrylic</ComboBoxItem>
-					<ComboBoxItem>Mica</ComboBoxItem>
-					<ComboBoxItem>Mica Alt</ComboBoxItem>
+					<ComboBoxItem IsEnabled="{x:Bind local:RootPage.IsMicaAvailable}">Mica</ComboBoxItem>
+					<ComboBoxItem IsEnabled="{x:Bind local:RootPage.IsMicaAvailable}">Mica Alt</ComboBoxItem>
 				</ComboBox>
 			</Grid>
 		</StackPanel>

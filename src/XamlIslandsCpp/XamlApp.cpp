@@ -42,7 +42,8 @@ bool XamlApp::_CreateMainWindow(HINSTANCE hInstance) noexcept {
 
 	if (!_mainWindow.Create(
 		hInstance,
-		settings.Theme() == winrt::AppTheme::Dark,
+		settings.Theme(),
+		settings.Backdrop(),
 		settings.IsCustomTitleBarEnabled()
 	)) {
 		return false;
@@ -52,15 +53,24 @@ bool XamlApp::_CreateMainWindow(HINSTANCE hInstance) noexcept {
 
 	_themeChangedRevoker = settings.ThemeChanged(
 		winrt::auto_revoke,
-		[&](winrt::IInspectable const&, winrt::AppTheme theme) {
-			_mainWindow.SetTheme(theme == winrt::AppTheme::Dark);
+		[&](winrt::IInspectable const& sender, winrt::AppTheme theme) {
+			winrt::Settings settings = sender.as<winrt::Settings>();
+			_mainWindow.SetTheme(theme, settings.Backdrop());
+		}
+	);
+
+	_backdropChangedRevoker = settings.BackdropChanged(
+		winrt::auto_revoke,
+		[&](winrt::IInspectable const& sender, winrt::WindowBackdrop backdrop) {
+			winrt::Settings settings = sender.as<winrt::Settings>();
+			_mainWindow.SetTheme(settings.Theme(), backdrop);
 		}
 	);
 
 	_isCustomTitleBarEnabledChangedRevoker = settings.IsCustomTitleBarEnabledChanged(
 		winrt::auto_revoke,
-		[&](winrt::IInspectable const&, bool value) {
-			_mainWindow.SetCustomTitleBar(value);
+		[&](winrt::IInspectable const&, bool enabled) {
+			_mainWindow.SetCustomTitleBar(enabled);
 		}
 	);
 
@@ -70,6 +80,7 @@ bool XamlApp::_CreateMainWindow(HINSTANCE hInstance) noexcept {
 void XamlApp::_MainWindow_Destoryed() {
 	_themeChangedRevoker.revoke();
 	_isCustomTitleBarEnabledChangedRevoker.revoke();
+	_backdropChangedRevoker.revoke();
 
 	_uwpApp.HwndMain(0);
 }

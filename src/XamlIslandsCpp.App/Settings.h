@@ -1,10 +1,10 @@
-﻿#pragma once
+#pragma once
 #include "Settings.g.h"
 
 namespace winrt::XamlIslandsCpp::App::implementation {
 
 struct Settings : SettingsT<Settings> {
-    Settings();
+	Settings();
 
 	bool IsCustomTitleBarEnabled() const noexcept {
 		return _isCustomTitleBarEnabled;
@@ -34,11 +34,27 @@ struct Settings : SettingsT<Settings> {
 		_appThemeChangedEvent.remove(token);
 	}
 
+	WindowBackdrop Backdrop() const noexcept {
+		return _backdrop;
+	}
+
+	void Backdrop(WindowBackdrop value);
+
+	event_token BackdropChanged(EventHandler<WindowBackdrop> const& handler) {
+		return _backdropChangedEvent.add(handler);
+	}
+
+	void BackdropChanged(event_token const& token) {
+		_backdropChangedEvent.remove(token);
+	}
+
 private:
 	event<EventHandler<AppTheme>> _appThemeChangedEvent;
 	event<EventHandler<bool>> _isCustomTitleBarEnabledChangedEvent;
+	event<EventHandler<WindowBackdrop>> _backdropChangedEvent;
 
 	AppTheme _theme = AppTheme::Light;
+	WindowBackdrop _backdrop = WindowBackdrop::SolidColor;
 	bool _isCustomTitleBarEnabled = true;
 };
 

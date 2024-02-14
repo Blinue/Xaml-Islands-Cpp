@@ -1,10 +1,12 @@
-﻿#include "pch.h"
+#include "pch.h"
 #include "Settings.h"
 #if __has_include("Settings.g.cpp")
 #include "Settings.g.cpp"
 #endif
 #include <winrt/Windows.UI.ViewManagement.h>
+#include "Win32Helper.h"
 
+using namespace ::XamlIslandsCpp;
 using namespace winrt;
 using namespace Windows::UI;
 using namespace Windows::UI::ViewManagement;
@@ -19,6 +21,9 @@ static bool IsColorLight(const Color& clr) noexcept {
 Settings::Settings() {
 	Color foregroundColor = UISettings().GetColorValue(UIColorType::Foreground);
 	_theme = IsColorLight(foregroundColor) ? AppTheme::Dark : AppTheme::Light;
+
+	_backdrop = Win32Helper::GetOSVersion().Is22H2OrNewer() ?
+		WindowBackdrop::Mica : WindowBackdrop::SolidColor;
 }
 
 void Settings::IsCustomTitleBarEnabled(bool value) {
@@ -37,6 +42,15 @@ void Settings::Theme(AppTheme value) {
 
 	_theme = value;
 	_appThemeChangedEvent(*this, value);
+}
+
+void Settings::Backdrop(WindowBackdrop value) {
+	if (_backdrop == value) {
+		return;
+	}
+
+	_backdrop = value;
+	_backdropChangedEvent(*this, value);
 }
 
 }

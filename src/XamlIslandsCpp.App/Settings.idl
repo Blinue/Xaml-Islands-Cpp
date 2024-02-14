@@ -1,16 +1,26 @@
 namespace XamlIslandsCpp.App {
-    enum AppTheme {
-        Light,
-        Dark
-    };
+	enum AppTheme {
+		Light,
+		Dark
+	};
 
-    runtimeclass Settings {
-        Settings();
-        
-        Boolean IsCustomTitleBarEnabled;
-        event Windows.Foundation.EventHandler<Boolean> IsCustomTitleBarEnabledChanged;
+	enum WindowBackdrop {
+		SolidColor,
+		Acrylic,
+		Mica,
+		MicaAlt
+	};
 
-        AppTheme Theme;
-        event Windows.Foundation.EventHandler<AppTheme> ThemeChanged;
-    }
+	runtimeclass Settings {
+		Settings();
+		
+		Boolean IsCustomTitleBarEnabled;
+		event Windows.Foundation.EventHandler<Boolean> IsCustomTitleBarEnabledChanged;
+
+		AppTheme Theme;
+		event Windows.Foundation.EventHandler<AppTheme> ThemeChanged;
+
+		WindowBackdrop Backdrop;
+		event Windows.Foundation.EventHandler<WindowBackdrop> BackdropChanged;
+	}
 }

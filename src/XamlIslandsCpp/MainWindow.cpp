@@ -5,9 +5,18 @@
 
 #pragma comment(lib, "UxTheme.lib")
 
+namespace winrt {
+using namespace XamlIslandsCpp::App;
+}
+
 namespace XamlIslandsCpp {
 
-bool MainWindow::Create(HINSTANCE hInstance, bool isDarkTheme, bool isCustomTitleBarEnabled) noexcept {
+bool MainWindow::Create(
+	HINSTANCE hInstance,
+	winrt::AppTheme theme,
+	winrt::WindowBackdrop backdrop,
+	bool isCustomTitleBarEnabled
+) noexcept {
 	static const int _ = [](HINSTANCE hInstance) {
 		WNDCLASSEXW wcex{
 			.cbSize = sizeof(WNDCLASSEX),
@@ -30,7 +39,7 @@ bool MainWindow::Create(HINSTANCE hInstance, bool isDarkTheme, bool isCustomTitl
 	_isCustomTitleBarEnabled = isCustomTitleBarEnabled;
 
 	CreateWindowEx(
-		Win32Helper::GetOSVersion().Is22H2OrNewer() ? WS_EX_NOREDIRECTIONBITMAP : 0,
+		Win32Helper::GetOSVersion().Is22H2OrNewer() && backdrop != winrt::WindowBackdrop::SolidColor ? WS_EX_NOREDIRECTIONBITMAP : 0,
 		CommonSharedConstants::MAIN_WINDOW_CLASS_NAME,
 		L"XamlIslandsCpp",
 		WS_OVERLAPPEDWINDOW,
@@ -42,9 +51,9 @@ bool MainWindow::Create(HINSTANCE hInstance, bool isDarkTheme, bool isCustomTitl
 	);
 	assert(_hWnd);
 
-	_SetContent(winrt::XamlIslandsCpp::App::RootPage());
+	_SetContent(winrt::RootPage());
 
-	SetTheme(isDarkTheme);
+	SetTheme(theme, backdrop);
 
 	// 隐藏原生标题栏上的图标
 	SetWindowThemeNonClientAttributes(_hWnd, WTNCA_NODRAWICON | WTNCA_NOSYSMENU, WTNCA_VALIDBITS);
@@ -100,8 +109,8 @@ bool MainWindow::Create(HINSTANCE hInstance, bool isDarkTheme, bool isCustomTitl
 	return true;
 }
 
-void MainWindow::SetTheme(bool isDarkTheme) noexcept {
-	XamlWindowT::_SetTheme(isDarkTheme);
+void MainWindow::SetTheme(winrt::AppTheme theme, winrt::WindowBackdrop backdrop) noexcept {
+	XamlWindowT::_SetTheme(theme, backdrop);
 }
 
 void MainWindow::SetCustomTitleBar(bool enabled) noexcept {
@@ -241,30 +250,30 @@ LRESULT MainWindow::_TitleBarMessageHandler(UINT msg, WPARAM wParam, LPARAM lPar
 
 		static const winrt::Size buttonSizeInDips = [this]() {
 			return _content.TitleBar().CaptionButtons().CaptionButtonSize();
-			}();
+		}();
 
-			const float buttonWidthInPixels = buttonSizeInDips.Width * _currentDpi / USER_DEFAULT_SCREEN_DPI;
-			const float buttonHeightInPixels = buttonSizeInDips.Height * _currentDpi / USER_DEFAULT_SCREEN_DPI;
+		const float buttonWidthInPixels = buttonSizeInDips.Width * _currentDpi / USER_DEFAULT_SCREEN_DPI;
+		const float buttonHeightInPixels = buttonSizeInDips.Height * _currentDpi / USER_DEFAULT_SCREEN_DPI;
 
-			if (cursorPos.y >= buttonHeightInPixels) {
-				// 鼠标位于标题按钮下方，如果标题栏很宽，这里也可以拖动
-				return HTCAPTION;
-			}
+		if (cursorPos.y >= buttonHeightInPixels) {
+			// 鼠标位于标题按钮下方，如果标题栏很宽，这里也可以拖动
+			return HTCAPTION;
+		}
 
-			// 从右向左检查鼠标是否位于某个标题栏按钮上
-			const LONG cursorToRight = titleBarClientRect.right - cursorPos.x;
-			if (cursorToRight < buttonWidthInPixels) {
-				return HTCLOSE;
-			} else if (cursorToRight < buttonWidthInPixels * 2) {
-				// 支持 Win11 的贴靠布局
-				// FIXME: 最大化时贴靠布局的位置不对，目前没有找到解决方案。似乎只适配了系统原生框架和 UWP
-				return HTMAXBUTTON;
-			} else if (cursorToRight < buttonWidthInPixels * 3) {
-				return HTMINBUTTON;
-			} else {
-				// 不在任何标题栏按钮上则在可拖拽区域
-				return HTCAPTION;
-			}
+		// 从右向左检查鼠标是否位于某个标题栏按钮上
+		const LONG cursorToRight = titleBarClientRect.right - cursorPos.x;
+		if (cursorToRight < buttonWidthInPixels) {
+			return HTCLOSE;
+		} else if (cursorToRight < buttonWidthInPixels * 2) {
+			// 支持 Win11 的贴靠布局
+			// FIXME: 最大化时贴靠布局的位置不对，目前没有找到解决方案。似乎只适配了系统原生框架和 UWP
+			return HTMAXBUTTON;
+		} else if (cursorToRight < buttonWidthInPixels * 3) {
+			return HTMINBUTTON;
+		} else {
+			// 不在任何标题栏按钮上则在可拖拽区域
+			return HTCAPTION;
+		}
 	}
 	// 在捕获光标时会收到
 	case WM_MOUSEMOVE:
@@ -292,7 +301,7 @@ LRESULT MainWindow::_TitleBarMessageHandler(UINT msg, WPARAM wParam, LPARAM lPar
 		case HTMINBUTTON:
 		case HTMAXBUTTON:
 		case HTCLOSE:
-			captionButtons.HoverButton((winrt::XamlIslandsCpp::App::CaptionButton)wParam);
+			captionButtons.HoverButton((winrt::CaptionButton)wParam);
 
 			// 追踪鼠标以确保鼠标离开标题栏时我们能收到 WM_NCMOUSELEAVE 消息，否则无法
 			// 可靠的收到这个消息，尤其是在用户快速移动鼠标的时候。
@@ -350,7 +359,7 @@ LRESULT MainWindow::_TitleBarMessageHandler(UINT msg, WPARAM wParam, LPARAM lPar
 		case HTMINBUTTON:
 		case HTMAXBUTTON:
 		case HTCLOSE:
-			_content.TitleBar().CaptionButtons().PressButton((winrt::XamlIslandsCpp::App::CaptionButton)wParam);
+			_content.TitleBar().CaptionButtons().PressButton((winrt::CaptionButton)wParam);
 			// 在标题栏按钮上按下左键后我们便捕获光标，这样才能在释放时得到通知。注意捕获光标后
 			// 便不会再收到 NC 族消息，这就是为什么我们要处理 WM_MOUSEMOVE 和 WM_LBUTTONUP
 			SetCapture(_hwndTitleBar);
@@ -383,7 +392,7 @@ LRESULT MainWindow::_TitleBarMessageHandler(UINT msg, WPARAM wParam, LPARAM lPar
 		case HTMAXBUTTON:
 		case HTCLOSE:
 			// 在标题栏按钮上释放左键
-			_content.TitleBar().CaptionButtons().ReleaseButton((winrt::XamlIslandsCpp::App::CaptionButton)wParam);
+			_content.TitleBar().CaptionButtons().ReleaseButton((winrt::CaptionButton)wParam);
 			break;
 		default:
 			_content.TitleBar().CaptionButtons().ReleaseButtons();
