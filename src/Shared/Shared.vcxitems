@@ -14,11 +14,11 @@
     <ProjectCapability Include="SourceItemsFromImports" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\XamlIslandsCpp\Win32Helper.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Win32Helper.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)XamlHelper.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\XamlIslandsCpp\Win32Helper.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Win32Helper.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)CommonSharedConstants.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)XamlHelper.h" />
   </ItemGroup>

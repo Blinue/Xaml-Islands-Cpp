@@ -2,6 +2,10 @@
 #include "XamlApp.h"
 #include "ThemeHelper.h"
 
+namespace winrt {
+using namespace XamlIslandsCpp::App;
+}
+
 namespace XamlIslandsCpp {
 
 // 提前加载 twinapi.appcore.dll 和 threadpoolwinrt.dll 以避免退出时崩溃。应在 Windows.UI.Xaml.dll 被加载前调用
@@ -18,7 +22,7 @@ bool XamlApp::Initialize(HINSTANCE hInstance) {
 	ThemeHelper::Initialize();
 
 	// 初始化 UWP 应用
-	_uwpApp = winrt::XamlIslandsCpp::App::App();
+	_uwpApp = winrt::App();
 
 	_mainWindow.Destroyed({ this, &XamlApp::_MainWindow_Destoryed });
 
@@ -34,16 +38,24 @@ int XamlApp::Run() {
 }
 
 bool XamlApp::_CreateMainWindow(HINSTANCE hInstance) noexcept {
-	if (!_mainWindow.Create(hInstance)) {
+	winrt::Settings settings = _uwpApp.Settings();
+
+	if (!_mainWindow.Create(hInstance, settings.Theme() == winrt::AppTheme::Dark)) {
 		return false;
 	}
 
 	_uwpApp.HwndMain((uint64_t)_mainWindow.Handle());
 
+	_themeChangedRevoker = settings.ThemeChanged(winrt::auto_revoke, [&](winrt::IInspectable const&, winrt::AppTheme theme) {
+		_mainWindow.SetTheme(theme == winrt::AppTheme::Dark);
+	});
+
 	return true;
 }
 
 void XamlApp::_MainWindow_Destoryed() {
+	_themeChangedRevoker.revoke();
+
 	_uwpApp.HwndMain(0);
 }
 

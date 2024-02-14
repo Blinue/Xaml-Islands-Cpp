@@ -1,0 +1,13 @@
+namespace XamlIslandsCpp.App {
+    enum AppTheme {
+        Light,
+        Dark
+    };
+
+    runtimeclass Settings {
+        Settings();
+        
+        AppTheme Theme;
+        event Windows.Foundation.EventHandler<AppTheme> ThemeChanged;
+    }
+}

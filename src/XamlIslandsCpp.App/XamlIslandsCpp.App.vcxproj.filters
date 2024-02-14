@@ -17,6 +17,7 @@
   <ItemGroup>
     <None Include="packages.config" />
     <None Include="XamlIslandsCpp.App.def" />
+    <None Include="Settings.idl" />
   </ItemGroup>
   <ItemGroup>
     <Page Include="RootPage.xaml" />

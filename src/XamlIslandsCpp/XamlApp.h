@@ -27,6 +27,8 @@ private:
 
 	winrt::XamlIslandsCpp::App::App _uwpApp{ nullptr };
 	MainWindow _mainWindow;
+
+	winrt::XamlIslandsCpp::App::Settings::ThemeChanged_revoker _themeChangedRevoker;
 };
 
 }

@@ -7,15 +7,26 @@
       xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
       muxc:BackdropMaterial.ApplyToRootOrPageBackground="True"
       mc:Ignorable="d">
+	<Page.Resources>
+		<ResourceDictionary>
+			<ResourceDictionary.ThemeDictionaries>
+				<ResourceDictionary x:Key="Light">
+					<Color x:Key="CardBackgroundColor">#80FFFFFF</Color>
+				</ResourceDictionary>
+				<ResourceDictionary x:Key="Dark">
+					<Color x:Key="CardBackgroundColor">#80000000</Color>
+				</ResourceDictionary>
+			</ResourceDictionary.ThemeDictionaries>
+		</ResourceDictionary>
+	</Page.Resources>
 	<Grid>
 		<local:TitleBarControl x:Name="TitleBar"
 		                       Canvas.ZIndex="1" />
-
 		<StackPanel Width="300"
 		            Padding="40"
 		            HorizontalAlignment="Center"
 		            VerticalAlignment="Center"
-		            Background="#80FFFFFF"
+		            Background="{ThemeResource CardBackgroundColor}"
 		            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
 		            BorderThickness="1"
 		            Canvas.ZIndex="0"
@@ -35,7 +46,7 @@
 				<ComboBox MinWidth="120"
 				          HorizontalAlignment="Right"
 				          VerticalAlignment="Center"
-				          SelectedIndex="0">
+				          SelectedIndex="{x:Bind Theme, Mode=TwoWay}">
 					<ComboBoxItem x:Uid="Theme_Light" />
 					<ComboBoxItem x:Uid="Theme_Dark" />
 				</ComboBox>

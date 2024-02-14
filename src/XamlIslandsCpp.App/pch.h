@@ -46,9 +46,11 @@ using namespace Windows::ApplicationModel::Resources;
 using namespace Windows::ApplicationModel::Resources::Core;
 using namespace Windows::Foundation;
 using namespace Windows::System;
+using namespace Windows::UI;
 using namespace Windows::UI::Core;
 using namespace Windows::UI::Xaml;
 using namespace Windows::UI::Xaml::Data;
+using namespace Windows::UI::Xaml::Media;
 
 namespace MUXC = Microsoft::UI::Xaml::Controls;
 }

@@ -7,7 +7,7 @@
 
 namespace XamlIslandsCpp {
 
-bool MainWindow::Create(HINSTANCE hInstance) noexcept {
+bool MainWindow::Create(HINSTANCE hInstance, bool isDarkTheme) noexcept {
 	static const int _ = [](HINSTANCE hInstance) {
 		WNDCLASSEXW wcex{
 			.cbSize = sizeof(WNDCLASSEX),
@@ -42,7 +42,7 @@ bool MainWindow::Create(HINSTANCE hInstance) noexcept {
 
 	_SetContent(winrt::XamlIslandsCpp::App::RootPage());
 
-	_UpdateTheme(false);
+	SetTheme(isDarkTheme);
 
 	// 隐藏原生标题栏上的图标
 	SetWindowThemeNonClientAttributes(_hWnd, WTNCA_NODRAWICON | WTNCA_NOSYSMENU, WTNCA_VALIDBITS);
@@ -96,6 +96,10 @@ bool MainWindow::Create(HINSTANCE hInstance) noexcept {
 	});
 
 	return true;
+}
+
+void MainWindow::SetTheme(bool isDarkTheme) noexcept {
+	XamlWindowT::_SetTheme(isDarkTheme);
 }
 
 LRESULT MainWindow::_MessageHandler(UINT msg, WPARAM wParam, LPARAM lParam) noexcept {
@@ -171,10 +175,6 @@ LRESULT MainWindow::_MessageHandler(UINT msg, WPARAM wParam, LPARAM lParam) noex
 	}
 	}
 	return base_type::_MessageHandler(msg, wParam, lParam);
-}
-
-void MainWindow::_UpdateTheme(bool isDarkTheme) noexcept {
-	XamlWindowT::_SetTheme(isDarkTheme);
 }
 
 LRESULT MainWindow::_TitleBarWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept {
