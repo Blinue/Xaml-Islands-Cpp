@@ -29,6 +29,7 @@ private:
 	MainWindow _mainWindow;
 
 	winrt::XamlIslandsCpp::App::Settings::ThemeChanged_revoker _themeChangedRevoker;
+	winrt::XamlIslandsCpp::App::Settings::IsCustomTitleBarEnabledChanged_revoker _isCustomTitleBarEnabledChangedRevoker;
 };
 
 }

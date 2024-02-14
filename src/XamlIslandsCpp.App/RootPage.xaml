@@ -21,7 +21,8 @@
 	</Page.Resources>
 	<Grid>
 		<local:TitleBarControl x:Name="TitleBar"
-		                       Canvas.ZIndex="1" />
+		                       Canvas.ZIndex="1"
+		                       Visibility="{x:Bind IsCustomTitleBarEnabled, Mode=OneWay}" />
 		<StackPanel Width="300"
 		            Padding="40"
 		            HorizontalAlignment="Center"
@@ -38,6 +39,7 @@
 				<ToggleSwitch Margin="0,-4"
 				              HorizontalAlignment="Right"
 				              VerticalAlignment="Center"
+				              IsOn="{x:Bind IsCustomTitleBarEnabled, Mode=TwoWay}"
 				              Style="{StaticResource ToggleSwitchWithoutText}" />
 			</Grid>
 			<Grid HorizontalAlignment="Stretch">

@@ -7,9 +7,11 @@ namespace XamlIslandsCpp {
 class MainWindow : public XamlWindowT<MainWindow, winrt::XamlIslandsCpp::App::RootPage> {
 	friend base_type;
 public:
-	bool Create(HINSTANCE hInstance, bool isDarkTheme) noexcept;
+	bool Create(HINSTANCE hInstance, bool isDarkTheme, bool isCustomTitleBarEnabled) noexcept;
 
 	void SetTheme(bool isDarkTheme) noexcept;
+
+	void SetCustomTitleBar(bool enabled) noexcept;
 
 protected:
 	LRESULT _MessageHandler(UINT msg, WPARAM wParam, LPARAM lParam) noexcept;

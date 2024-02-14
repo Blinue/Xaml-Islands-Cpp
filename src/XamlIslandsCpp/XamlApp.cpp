@@ -40,21 +40,36 @@ int XamlApp::Run() {
 bool XamlApp::_CreateMainWindow(HINSTANCE hInstance) noexcept {
 	winrt::Settings settings = _uwpApp.Settings();
 
-	if (!_mainWindow.Create(hInstance, settings.Theme() == winrt::AppTheme::Dark)) {
+	if (!_mainWindow.Create(
+		hInstance,
+		settings.Theme() == winrt::AppTheme::Dark,
+		settings.IsCustomTitleBarEnabled()
+	)) {
 		return false;
 	}
 
 	_uwpApp.HwndMain((uint64_t)_mainWindow.Handle());
 
-	_themeChangedRevoker = settings.ThemeChanged(winrt::auto_revoke, [&](winrt::IInspectable const&, winrt::AppTheme theme) {
-		_mainWindow.SetTheme(theme == winrt::AppTheme::Dark);
-	});
+	_themeChangedRevoker = settings.ThemeChanged(
+		winrt::auto_revoke,
+		[&](winrt::IInspectable const&, winrt::AppTheme theme) {
+			_mainWindow.SetTheme(theme == winrt::AppTheme::Dark);
+		}
+	);
+
+	_isCustomTitleBarEnabledChangedRevoker = settings.IsCustomTitleBarEnabledChanged(
+		winrt::auto_revoke,
+		[&](winrt::IInspectable const&, bool value) {
+			_mainWindow.SetCustomTitleBar(value);
+		}
+	);
 
 	return true;
 }
 
 void XamlApp::_MainWindow_Destoryed() {
 	_themeChangedRevoker.revoke();
+	_isCustomTitleBarEnabledChangedRevoker.revoke();
 
 	_uwpApp.HwndMain(0);
 }

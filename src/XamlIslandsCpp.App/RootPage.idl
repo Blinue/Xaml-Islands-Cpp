@@ -4,6 +4,7 @@ namespace XamlIslandsCpp.App {
 
 		TitleBarControl TitleBar { get; };
 
+		Boolean IsCustomTitleBarEnabled;
 		Int32 Theme;
 	}
 }

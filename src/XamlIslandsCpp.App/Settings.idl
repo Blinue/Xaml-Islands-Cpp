@@ -7,6 +7,9 @@ namespace XamlIslandsCpp.App {
     runtimeclass Settings {
         Settings();
         
+        Boolean IsCustomTitleBarEnabled;
+        event Windows.Foundation.EventHandler<Boolean> IsCustomTitleBarEnabledChanged;
+
         AppTheme Theme;
         event Windows.Foundation.EventHandler<AppTheme> ThemeChanged;
     }

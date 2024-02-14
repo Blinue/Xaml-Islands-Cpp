@@ -7,7 +7,6 @@
 #include "CommonSharedConstants.h"
 
 using namespace XamlIslandsCpp;
-using namespace winrt;
 
 namespace winrt::XamlIslandsCpp::App::implementation {
 
@@ -21,15 +20,27 @@ void RootPage::InitializeComponent() {
 	_SetTheme(_settings.Theme());
 }
 
+bool RootPage::IsCustomTitleBarEnabled() const noexcept {
+	return _settings.IsCustomTitleBarEnabled();
+}
+
+void RootPage::IsCustomTitleBarEnabled(bool value) {
+	_settings.IsCustomTitleBarEnabled(value);
+	_propertyChangedEvent(*this, PropertyChangedEventArgs(L"IsCustomTitleBarEnabled"));
+}
+
 int RootPage::Theme() const noexcept {
 	return (int)_settings.Theme();
 }
 
 void RootPage::Theme(int value) {
-	if (value >= 0) {
-		_settings.Theme((AppTheme)value);
-		_SetTheme((AppTheme)value);
+	if (value < 0) {
+		return;
 	}
+
+	_settings.Theme((AppTheme)value);
+	_SetTheme((AppTheme)value);
+	_propertyChangedEvent(*this, PropertyChangedEventArgs(L"Theme"));
 }
 
 static Color Win32ColorToWinRTColor(COLORREF color) {

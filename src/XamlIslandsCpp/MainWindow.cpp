@@ -7,7 +7,7 @@
 
 namespace XamlIslandsCpp {
 
-bool MainWindow::Create(HINSTANCE hInstance, bool isDarkTheme) noexcept {
+bool MainWindow::Create(HINSTANCE hInstance, bool isDarkTheme, bool isCustomTitleBarEnabled) noexcept {
 	static const int _ = [](HINSTANCE hInstance) {
 		WNDCLASSEXW wcex{
 			.cbSize = sizeof(WNDCLASSEX),
@@ -26,6 +26,8 @@ bool MainWindow::Create(HINSTANCE hInstance, bool isDarkTheme) noexcept {
 
 		return 0;
 	}(hInstance);
+
+	_isCustomTitleBarEnabled = isCustomTitleBarEnabled;
 
 	CreateWindowEx(
 		Win32Helper::GetOSVersion().Is22H2OrNewer() ? WS_EX_NOREDIRECTIONBITMAP : 0,
@@ -102,6 +104,27 @@ void MainWindow::SetTheme(bool isDarkTheme) noexcept {
 	XamlWindowT::_SetTheme(isDarkTheme);
 }
 
+void MainWindow::SetCustomTitleBar(bool enabled) noexcept {
+	if (_isCustomTitleBarEnabled == enabled) {
+		return;
+	}
+
+	ShowWindow(_hwndTitleBar, enabled ? SW_SHOW : SW_HIDE);
+
+	if (enabled) {
+		XamlWindowT::_SetCustomTitleBar(true);
+	} else {
+		// 优化动画
+		_content.Dispatcher().TryRunAsync(winrt::CoreDispatcherPriority::Normal, [this]() -> winrt::fire_and_forget {
+			MainWindow* that = this;
+			winrt::CoreDispatcher dispatcher = _content.Dispatcher();
+			co_await 10ms;
+			co_await dispatcher;
+			that->XamlWindowT::_SetCustomTitleBar(false);
+		});
+	}
+}
+
 LRESULT MainWindow::_MessageHandler(UINT msg, WPARAM wParam, LPARAM lParam) noexcept {
 	switch (msg) {
 	case WM_SIZE:
@@ -123,8 +146,8 @@ LRESULT MainWindow::_MessageHandler(UINT msg, WPARAM wParam, LPARAM lParam) noex
 	}
 	case WM_NCRBUTTONUP:
 	{
-		// 我们自己处理标题栏右键，不知为何 DefWindowProc 没有作用
-		if (wParam == HTCAPTION) {
+		if (_isCustomTitleBarEnabled && wParam == HTCAPTION) {
+			// 我们自己处理标题栏右键，不知为何 DefWindowProc 没有作用
 			const POINT cursorPt{ GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
 
 			// 在标题栏上按下右键，在其他地方释放也会收到此消息。确保只有在标题栏上释放时才显示菜单
@@ -158,11 +181,15 @@ LRESULT MainWindow::_MessageHandler(UINT msg, WPARAM wParam, LPARAM lParam) noex
 				PostMessage(_hWnd, WM_SYSCOMMAND, cmd, 0);
 			}
 		}
+
 		break;
 	}
 	case WM_ACTIVATE:
 	{
-		_content.TitleBar().IsWindowActive(LOWORD(wParam) != WA_INACTIVE);
+		if (_isCustomTitleBarEnabled) {
+			_content.TitleBar().IsWindowActive(LOWORD(wParam) != WA_INACTIVE);
+		}
+		
 		break;
 	}
 	case WM_DESTROY:
@@ -378,7 +405,7 @@ LRESULT MainWindow::_TitleBarMessageHandler(UINT msg, WPARAM wParam, LPARAM lPar
 }
 
 void MainWindow::_ResizeTitleBarWindow() noexcept {
-	if (!_hwndTitleBar) {
+	if (!_isCustomTitleBarEnabled || !_hwndTitleBar) {
 		return;
 	}
 

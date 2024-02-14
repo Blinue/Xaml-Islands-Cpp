@@ -135,6 +135,11 @@ protected:
 		UpdateWindow(_hWnd);
 	}
 
+	void _SetCustomTitleBar(bool enabled) noexcept {
+		_isCustomTitleBarEnabled = enabled;
+		SetWindowPos(_hWnd, NULL, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOCOPYBITS | SWP_NOMOVE | SWP_NOSIZE);
+	}
+
 	LRESULT _MessageHandler(UINT msg, WPARAM wParam, LPARAM lParam) noexcept {
 		switch (msg) {
 		case WM_CREATE:
@@ -155,14 +160,18 @@ protected:
 		}
 		case WM_NCCALCSIZE:
 		{
+			_isWindowShown = IsWindowVisible(_hWnd);
+
+			if (!_isCustomTitleBarEnabled) {
+				break;
+			}
+
 			// 移除标题栏的逻辑基本来自 Windows Terminal
 			// https://github.com/microsoft/terminal/blob/0ee2c74cd432eda153f3f3e77588164cde95044f/src/cascadia/WindowsTerminal/NonClientIslandWindow.cpp
 
 			if (!wParam) {
 				return 0;
 			}
-
-			_isWindowShown = IsWindowVisible(_hWnd);
 
 			NCCALCSIZE_PARAMS* params = (NCCALCSIZE_PARAMS*)lParam;
 			RECT& clientRect = params->rgrc[0];
@@ -231,6 +240,10 @@ protected:
 		}
 		case WM_NCHITTEST:
 		{
+			if (!_isCustomTitleBarEnabled) {
+				break;
+			}
+
 			// 让 OS 处理左右下三边，由于我们移除了标题栏，上边框会被视为客户区
 			LRESULT originalRet = DefWindowProc(_hWnd, WM_NCHITTEST, 0, lParam);
 			if (originalRet != HTCLIENT) {
@@ -252,7 +265,7 @@ protected:
 		}
 		case WM_PAINT:
 		{
-			if (Win32Helper::GetOSVersion().IsWin11()) {
+			if (!_isCustomTitleBarEnabled || Win32Helper::GetOSVersion().IsWin11()) {
 				break;
 			}
 
@@ -434,7 +447,7 @@ protected:
 
 	uint32_t _GetTopBorderHeight() const noexcept {
 		// 最大化时没有上边框
-		if (_isMaximized) {
+		if (!_isCustomTitleBarEnabled || _isMaximized) {
 			return 0;
 		}
 
@@ -458,6 +471,7 @@ protected:
 	uint32_t _currentDpi = USER_DEFAULT_SCREEN_DPI;
 	bool _isMaximized = false;
 	bool _isDarkTheme = false;
+	bool _isCustomTitleBarEnabled = false;
 	
 private:
 	void _UpdateIslandPosition(int width, int height) const noexcept {
@@ -503,7 +517,7 @@ private:
 		if (Win32Helper::GetOSVersion().IsWin11()) {
 			return;
 		}
-
+		
 		MARGINS margins{};
 		if (_GetTopBorderHeight() > 0) {
 			// 在 Win10 中，移除标题栏时上边框也被没了。我们的解决方案是：使用 DwmExtendFrameIntoClientArea

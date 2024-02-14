@@ -21,4 +21,22 @@ Settings::Settings() {
 	_theme = IsColorLight(foregroundColor) ? AppTheme::Dark : AppTheme::Light;
 }
 
+void Settings::IsCustomTitleBarEnabled(bool value) {
+	if (_isCustomTitleBarEnabled == value) {
+		return;
+	}
+
+	_isCustomTitleBarEnabled = value;
+	_isCustomTitleBarEnabledChangedEvent(*this, value);
+}
+
+void Settings::Theme(AppTheme value) {
+	if (_theme == value) {
+		return;
+	}
+
+	_theme = value;
+	_appThemeChangedEvent(*this, value);
+}
+
 }
