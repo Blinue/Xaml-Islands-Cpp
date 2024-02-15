@@ -15,7 +15,8 @@ bool MainWindow::Create(
 	HINSTANCE hInstance,
 	winrt::AppTheme theme,
 	winrt::WindowBackdrop backdrop,
-	bool isCustomTitleBarEnabled
+	bool isCustomTitleBarEnabled,
+	const WINDOWPLACEMENT* wp
 ) noexcept {
 	static const int _ = [](HINSTANCE hInstance) {
 		WNDCLASSEXW wcex{
@@ -37,6 +38,9 @@ bool MainWindow::Create(
 	}(hInstance);
 
 	_SetInitialTheme(theme, backdrop, isCustomTitleBarEnabled);
+	if (wp && wp->showCmd == SW_SHOWMAXIMIZED) {
+		_SetInitialMaximized();
+	}
 
 	CreateWindowEx(
 		Win32Helper::GetOSVersion().Is22H2OrNewer() && backdrop != winrt::WindowBackdrop::SolidColor ? WS_EX_NOREDIRECTIONBITMAP : 0,
@@ -64,9 +68,22 @@ bool MainWindow::Create(
 		SWP_NOMOVE | SWP_NOSIZE | SWP_FRAMECHANGED | SWP_NOACTIVATE | SWP_NOCOPYBITS);
 
 	// Xaml 控件加载完成后显示主窗口
-	Content().Loaded([this](winrt::IInspectable const&, winrt::RoutedEventArgs const&) {
-		ShowWindow(Handle(), SW_SHOWNORMAL);
-	});
+	if (wp) {
+		Content().Loaded([this, wp(*wp)](winrt::IInspectable const&, winrt::RoutedEventArgs const&) {
+			// 禁用显示窗口的动画
+			BOOL value = TRUE;
+			DwmSetWindowAttribute(Handle(), DWMWA_TRANSITIONS_FORCEDISABLED, &value, sizeof(value));
+
+			SetWindowPlacement(Handle(), &wp);
+
+			value = FALSE;
+			DwmSetWindowAttribute(Handle(), DWMWA_TRANSITIONS_FORCEDISABLED, &value, sizeof(value));
+		});
+	} else {
+		Content().Loaded([this](winrt::IInspectable const&, winrt::RoutedEventArgs const&) {
+			ShowWindow(Handle(), SW_SHOWNORMAL);
+		});
+	}
 
 	// 创建标题栏窗口，它是主窗口的子窗口。我们将它置于 XAML Islands 窗口之上以防止鼠标事件被吞掉
 	// 

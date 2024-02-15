@@ -39,14 +39,15 @@ int XamlApp::Run() {
 	return _mainWindow.MessageLoop();
 }
 
-bool XamlApp::_CreateMainWindow() noexcept {
+bool XamlApp::_CreateMainWindow(const WINDOWPLACEMENT* wp) noexcept {
 	winrt::Settings settings = _uwpApp.Settings();
 
 	if (!_mainWindow.Create(
 		_hInstance,
 		settings.Theme(),
 		settings.Backdrop(),
-		settings.IsCustomTitleBarEnabled()
+		settings.IsCustomTitleBarEnabled(),
+		wp
 	)) {
 		return false;
 	}
@@ -66,12 +67,22 @@ bool XamlApp::_CreateMainWindow() noexcept {
 		[this](winrt::IInspectable const& sender, winrt::WindowBackdrop backdrop) {
 			winrt::Settings settings = sender.as<winrt::Settings>();
 			if (_mainWindow.SetTheme(settings.Theme(), backdrop)) {
+				// 由于无法更改 WS_EX_NOREDIRECTIONBITMAP 样式，必须重新创建主窗口
 				shouldQuit = false;
+
+				WINDOWPLACEMENT wp{ .length = sizeof(wp) };
+				GetWindowPlacement(_mainWindow.Handle(), &wp);
+
+				// 禁用关闭窗口的动画
+				BOOL value = TRUE;
+				DwmSetWindowAttribute(
+					_mainWindow.Handle(), DWMWA_TRANSITIONS_FORCEDISABLED, &value, sizeof(value));
+
 				winrt::CoreDispatcher dispatcher = _mainWindow.Content().Dispatcher();
 				_mainWindow.Destroy();
-				dispatcher.TryRunAsync(winrt::CoreDispatcherPriority::Normal, [this]() {
+				dispatcher.TryRunAsync(winrt::CoreDispatcherPriority::Normal, [this, wp]() {
 					shouldQuit = true;
-					_CreateMainWindow();
+					_CreateMainWindow(&wp);
 				});
 			}
 		}

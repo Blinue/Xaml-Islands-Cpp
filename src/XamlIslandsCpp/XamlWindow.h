@@ -105,6 +105,12 @@ protected:
 		);
 	}
 
+	// 窗口尚未显示无法最大化，通过这个方法设置 _isMaximized 使 _UpdateIslandPosition 估计 XAML Islands 窗口尺寸。
+	// 否则在显示窗口时可能会看到 NavigationView 的导航栏的展开动画。
+	void _SetInitialMaximized() noexcept {
+		_isMaximized = true;
+	}
+
 	void _SetInitialTheme(
 		winrt::XamlIslandsCpp::App::AppTheme theme,
 		winrt::XamlIslandsCpp::App::WindowBackdrop backdrop,

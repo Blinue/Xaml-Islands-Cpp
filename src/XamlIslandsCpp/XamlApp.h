@@ -21,7 +21,7 @@ public:
 private:
 	XamlApp() = default;
 
-	bool _CreateMainWindow() noexcept;
+	bool _CreateMainWindow(const WINDOWPLACEMENT* wp = nullptr) noexcept;
 
 	void _MainWindow_Destoryed();
 
@@ -33,6 +33,7 @@ private:
 	winrt::XamlIslandsCpp::App::Settings::IsCustomTitleBarEnabledChanged_revoker _isCustomTitleBarEnabledChangedRevoker;
 	winrt::XamlIslandsCpp::App::Settings::BackdropChanged_revoker _backdropChangedRevoker;
 
+	// 防止重新主窗口时退出
 	bool shouldQuit = true;
 };
 

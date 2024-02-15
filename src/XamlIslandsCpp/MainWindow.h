@@ -11,7 +11,8 @@ public:
 		HINSTANCE hInstance,
 		winrt::XamlIslandsCpp::App::AppTheme theme,
 		winrt::XamlIslandsCpp::App::WindowBackdrop backdrop,
-		bool isCustomTitleBarEnabled
+		bool isCustomTitleBarEnabled,
+		const WINDOWPLACEMENT* wp = nullptr
 	) noexcept;
 
 	bool SetTheme(winrt::XamlIslandsCpp::App::AppTheme theme, winrt::XamlIslandsCpp::App::WindowBackdrop backdrop) noexcept;
