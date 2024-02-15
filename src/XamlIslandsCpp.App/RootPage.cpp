@@ -86,10 +86,23 @@ void RootPage::_SetTheme(AppTheme theme, WindowBackdrop backdrop) {
 			
 		MUXC::BackdropMaterial::SetApplyToRootOrPageBackground(*this, false);
 	}
-
+	
 	const Windows::UI::Color bkgColor = Win32ColorToWinRTColor(
 		isDarkTheme ? CommonSharedConstants::DARK_TINT_COLOR : CommonSharedConstants::LIGHT_TINT_COLOR);
-	Background(SolidColorBrush(bkgColor));
+
+	if (backdrop == WindowBackdrop::SolidColor) {
+		Background(SolidColorBrush(bkgColor));
+	} else {
+		// 22H2 之前的系统使用背景刷子实现 Acrylic
+		assert(backdrop == WindowBackdrop::Acrylic);
+		AcrylicBrush brush;
+		brush.BackgroundSource(AcrylicBackgroundSource::HostBackdrop);
+		// 来自 https://github.com/microsoft/microsoft-ui-xaml/blob/75f7666f5907aad29de1cb2e49405cc06d433fba/dev/Materials/Acrylic/AcrylicBrush_19h1_themeresources.xaml#L12
+		brush.TintColor(isDarkTheme ? Color{ 255,44,44,44 } : Color{ 255,252,252,252 });
+		brush.TintOpacity(isDarkTheme ? 0.15 : 0.0);
+		brush.FallbackColor(bkgColor);
+		Background(brush);
+	}
 }
 
 }
