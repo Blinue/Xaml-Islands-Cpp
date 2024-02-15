@@ -76,7 +76,7 @@ protected:
 		return DefWindowProc(hWnd, msg, wParam, lParam);
 	}
 
-	void _SetContent(C const& content) {
+	void _Content(C const& content) {
 		_content = content;
 
 		// 初始化 XAML Islands
@@ -101,11 +101,28 @@ protected:
 		);
 	}
 
+	const C& _Content() {
+		return _content;
+	}
+
+	void _SetInitialTheme(
+		winrt::XamlIslandsCpp::App::AppTheme theme,
+		winrt::XamlIslandsCpp::App::WindowBackdrop backdrop,
+		bool isCustomTitleBarEnabled
+	) {
+		using namespace winrt::XamlIslandsCpp::App;
+		_isDarkTheme = theme == AppTheme::Dark;
+		_isBackgroundSolidColor = backdrop == WindowBackdrop::SolidColor;
+		_isCustomTitleBarEnabled = isCustomTitleBarEnabled;
+	}
+
 	void _SetTheme(
 		winrt::XamlIslandsCpp::App::AppTheme theme,
 		winrt::XamlIslandsCpp::App::WindowBackdrop backdrop) noexcept
 	{
-		_isDarkTheme = theme == winrt::XamlIslandsCpp::App::AppTheme::Dark;
+		using namespace winrt::XamlIslandsCpp::App;
+
+		_SetInitialTheme(theme, backdrop, _isCustomTitleBarEnabled);
 
 		// Win10 中即使在亮色主题下我们也使用暗色边框，这也是 UWP 窗口的行为
 		ThemeHelper::SetWindowTheme(
@@ -114,37 +131,33 @@ protected:
 			_isDarkTheme
 		);
 
-		if (Win32Helper::GetOSVersion().Is22H2OrNewer()) {
-			// 设置背景
-			static const DWM_SYSTEMBACKDROP_TYPE BACKDROP_MAP[] = {
-				DWMSBT_AUTO, DWMSBT_TRANSIENTWINDOW, DWMSBT_MAINWINDOW, DWMSBT_TABBEDWINDOW
-			};
-			DWM_SYSTEMBACKDROP_TYPE value = BACKDROP_MAP[(int)backdrop];
-			DwmSetWindowAttribute(_hWnd, DWMWA_SYSTEMBACKDROP_TYPE, &value, sizeof(value));
+		if (!Win32Helper::GetOSVersion().Is22H2OrNewer()) {
 			return;
 		}
 
-		if (Win32Helper::GetOSVersion().IsWin11()) {
-			// Win11 21H1/21H2 对 Mica 的支持不完善，改为使用纯色背景。Win10 在 WM_PAINT 中
-			// 绘制背景。背景色在更改窗口大小时会短暂可见。
-			HBRUSH hbrOld = (HBRUSH)SetClassLongPtr(
-				_hWnd,
-				GCLP_HBRBACKGROUND,
-				(INT_PTR)CreateSolidBrush(_isDarkTheme ?
-					CommonSharedConstants::DARK_TINT_COLOR : CommonSharedConstants::LIGHT_TINT_COLOR));
-			if (hbrOld) {
-				DeleteObject(hbrOld);
-			}
-		}
-
-		// 立即重新绘制
-		InvalidateRect(_hWnd, nullptr, FALSE);
-		UpdateWindow(_hWnd);
+		// 设置背景
+		static const DWM_SYSTEMBACKDROP_TYPE BACKDROP_MAP[] = {
+			DWMSBT_AUTO, DWMSBT_TRANSIENTWINDOW, DWMSBT_MAINWINDOW, DWMSBT_TABBEDWINDOW
+		};
+		DWM_SYSTEMBACKDROP_TYPE value = BACKDROP_MAP[(int)backdrop];
+		DwmSetWindowAttribute(_hWnd, DWMWA_SYSTEMBACKDROP_TYPE, &value, sizeof(value));
 	}
 
 	void _SetCustomTitleBar(bool enabled) noexcept {
 		_isCustomTitleBarEnabled = enabled;
 		SetWindowPos(_hWnd, NULL, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOCOPYBITS | SWP_NOMOVE | SWP_NOSIZE);
+	}
+
+	bool _IsCustomTitleBarEnabled() const noexcept {
+		return _isCustomTitleBarEnabled;
+	}
+
+	uint32_t _CurrentDpi() const noexcept {
+		return _currentDpi;
+	}
+
+	bool _IsMaximized() const noexcept {
+		return _isMaximized;
 	}
 
 	LRESULT _MessageHandler(UINT msg, WPARAM wParam, LPARAM lParam) noexcept {
@@ -471,14 +484,6 @@ protected:
 		return GetSystemMetricsForDpi(SM_CXPADDEDBORDER, _currentDpi) +
 			GetSystemMetricsForDpi(SM_CYSIZEFRAME, _currentDpi);
 	}
-
-	HWND _hWnd = NULL;
-	C _content{ nullptr };
-
-	uint32_t _currentDpi = USER_DEFAULT_SCREEN_DPI;
-	bool _isMaximized = false;
-	bool _isDarkTheme = false;
-	bool _isCustomTitleBarEnabled = false;
 	
 private:
 	void _UpdateIslandPosition(int width, int height) const noexcept {
@@ -548,11 +553,19 @@ private:
 
 	winrt::event<winrt::delegate<>> _destroyedEvent;
 
+	HWND _hWnd = NULL;
 	HWND _hwndXamlIsland = NULL;
 	winrt::DesktopWindowXamlSource _xamlSource{ nullptr };
 	winrt::com_ptr<IDesktopWindowXamlSourceNative2> _xamlSourceNative2;
 
+	C _content{ nullptr };
+
+	uint32_t _currentDpi = USER_DEFAULT_SCREEN_DPI;
+	bool _isMaximized = false;
+	bool _isDarkTheme = false;
 	bool _isWindowShown = false;
+	bool _isCustomTitleBarEnabled = false;
+	bool _isBackgroundSolidColor = false;
 };
 
 }
