@@ -10,10 +10,10 @@
 		<ResourceDictionary>
 			<ResourceDictionary.ThemeDictionaries>
 				<ResourceDictionary x:Key="Light">
-					<Color x:Key="CardBackgroundColor">#80FFFFFF</Color>
+					<Color x:Key="CardBackgroundColor">#60FFFFFF</Color>
 				</ResourceDictionary>
 				<ResourceDictionary x:Key="Dark">
-					<Color x:Key="CardBackgroundColor">#80000000</Color>
+					<Color x:Key="CardBackgroundColor">#60000000</Color>
 				</ResourceDictionary>
 			</ResourceDictionary.ThemeDictionaries>
 		</ResourceDictionary>
