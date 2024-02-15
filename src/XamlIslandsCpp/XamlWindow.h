@@ -56,6 +56,10 @@ public:
 		return _content;
 	}
 
+	void Destroy() {
+		DestroyWindow(_hWnd);
+	}
+
 	winrt::event_token Destroyed(winrt::delegate<> const& handler) {
 		return _destroyedEvent.add(handler);
 	}
@@ -101,10 +105,6 @@ protected:
 		);
 	}
 
-	const C& _Content() {
-		return _content;
-	}
-
 	void _SetInitialTheme(
 		winrt::XamlIslandsCpp::App::AppTheme theme,
 		winrt::XamlIslandsCpp::App::WindowBackdrop backdrop,
@@ -116,11 +116,17 @@ protected:
 		_isCustomTitleBarEnabled = isCustomTitleBarEnabled;
 	}
 
-	void _SetTheme(
+	// 需要重新创建窗口时返回 true
+	bool _SetTheme(
 		winrt::XamlIslandsCpp::App::AppTheme theme,
 		winrt::XamlIslandsCpp::App::WindowBackdrop backdrop) noexcept
 	{
 		using namespace winrt::XamlIslandsCpp::App;
+
+		if (Win32Helper::GetOSVersion().Is22H2OrNewer() &&
+			_isBackgroundSolidColor != (backdrop == WindowBackdrop::SolidColor)) {
+			return true;
+		}
 
 		_SetInitialTheme(theme, backdrop, _isCustomTitleBarEnabled);
 
@@ -132,7 +138,7 @@ protected:
 		);
 
 		if (!Win32Helper::GetOSVersion().Is22H2OrNewer()) {
-			return;
+			return false;
 		}
 
 		// 设置背景
@@ -141,6 +147,8 @@ protected:
 		};
 		DWM_SYSTEMBACKDROP_TYPE value = BACKDROP_MAP[(int)backdrop];
 		DwmSetWindowAttribute(_hWnd, DWMWA_SYSTEMBACKDROP_TYPE, &value, sizeof(value));
+
+		return false;
 	}
 
 	void _SetCustomTitleBar(bool enabled) noexcept {
@@ -285,7 +293,8 @@ protected:
 		}
 		case WM_PAINT:
 		{
-			if (!_isCustomTitleBarEnabled || Win32Helper::GetOSVersion().IsWin11()) {
+			Win32Helper::OSVersion osVersion = Win32Helper::GetOSVersion();
+			if (!_isBackgroundSolidColor && osVersion.Is22H2OrNewer()) {
 				break;
 			}
 
@@ -295,9 +304,9 @@ protected:
 				return 0;
 			}
 
-			const int topBorderHeight = (int)_GetTopBorderHeight();
+			const int topBorderHeight = osVersion.IsWin11() ? 0 : (int)_GetTopBorderHeight();
 
-			// 在顶部绘制黑色实线以显示系统原始边框，见 _UpdateFrameMargins
+			// Win10 中在顶部绘制黑色实线以显示系统原始边框，见 _UpdateFrameMargins
 			if (ps.rcPaint.top < topBorderHeight) {
 				RECT rcTopBorder = ps.rcPaint;
 				rcTopBorder.bottom = topBorderHeight;
@@ -322,9 +331,9 @@ protected:
 						CommonSharedConstants::DARK_TINT_COLOR : CommonSharedConstants::LIGHT_TINT_COLOR);
 				}
 
-				if (isDarkBrush) {
+				if (isDarkBrush && !osVersion.IsWin11()) {
 					// 这里我们想要黑色背景而不是原始边框
-					// hack 来自 https://github.com/microsoft/terminal/blob/0ee2c74cd432eda153f3f3e77588164cde95044f/src/cascadia/WindowsTerminal/NonClientIslandWindow.cpp#L1030-L1047
+					// 来自 https://github.com/microsoft/terminal/blob/0ee2c74cd432eda153f3f3e77588164cde95044f/src/cascadia/WindowsTerminal/NonClientIslandWindow.cpp#L1030-L1047
 					HDC opaqueDc;
 					BP_PAINTPARAMS params = { sizeof(params), BPPF_NOCLIP | BPPF_ERASE };
 					HPAINTBUFFER buf = BeginBufferedPaint(hdc, &rcRest, BPBF_TOPDOWNDIB, &params, &opaqueDc);

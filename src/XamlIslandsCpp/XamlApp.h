@@ -21,16 +21,19 @@ public:
 private:
 	XamlApp() = default;
 
-	bool _CreateMainWindow(HINSTANCE hInstance) noexcept;
+	bool _CreateMainWindow() noexcept;
 
 	void _MainWindow_Destoryed();
 
+	HINSTANCE _hInstance = NULL;
 	winrt::XamlIslandsCpp::App::App _uwpApp{ nullptr };
 	MainWindow _mainWindow;
 
 	winrt::XamlIslandsCpp::App::Settings::ThemeChanged_revoker _themeChangedRevoker;
 	winrt::XamlIslandsCpp::App::Settings::IsCustomTitleBarEnabledChanged_revoker _isCustomTitleBarEnabledChangedRevoker;
 	winrt::XamlIslandsCpp::App::Settings::BackdropChanged_revoker _backdropChangedRevoker;
+
+	bool shouldQuit = true;
 };
 
 }

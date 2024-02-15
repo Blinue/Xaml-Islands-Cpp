@@ -17,6 +17,8 @@ static void FixThreadPoolCrash() noexcept {
 }
 
 bool XamlApp::Initialize(HINSTANCE hInstance) {
+	_hInstance = hInstance;
+
 	FixThreadPoolCrash();
 
 	ThemeHelper::Initialize();
@@ -26,7 +28,7 @@ bool XamlApp::Initialize(HINSTANCE hInstance) {
 
 	_mainWindow.Destroyed({ this, &XamlApp::_MainWindow_Destoryed });
 
-	if (!_CreateMainWindow(hInstance)) {
+	if (!_CreateMainWindow()) {
 		return false;
 	}
 
@@ -37,11 +39,11 @@ int XamlApp::Run() {
 	return _mainWindow.MessageLoop();
 }
 
-bool XamlApp::_CreateMainWindow(HINSTANCE hInstance) noexcept {
+bool XamlApp::_CreateMainWindow() noexcept {
 	winrt::Settings settings = _uwpApp.Settings();
 
 	if (!_mainWindow.Create(
-		hInstance,
+		_hInstance,
 		settings.Theme(),
 		settings.Backdrop(),
 		settings.IsCustomTitleBarEnabled()
@@ -61,9 +63,17 @@ bool XamlApp::_CreateMainWindow(HINSTANCE hInstance) noexcept {
 
 	_backdropChangedRevoker = settings.BackdropChanged(
 		winrt::auto_revoke,
-		[&](winrt::IInspectable const& sender, winrt::WindowBackdrop backdrop) {
+		[this](winrt::IInspectable const& sender, winrt::WindowBackdrop backdrop) {
 			winrt::Settings settings = sender.as<winrt::Settings>();
-			_mainWindow.SetTheme(settings.Theme(), backdrop);
+			if (_mainWindow.SetTheme(settings.Theme(), backdrop)) {
+				shouldQuit = false;
+				winrt::CoreDispatcher dispatcher = _mainWindow.Content().Dispatcher();
+				_mainWindow.Destroy();
+				dispatcher.TryRunAsync(winrt::CoreDispatcherPriority::Normal, [this]() {
+					shouldQuit = true;
+					_CreateMainWindow();
+				});
+			}
 		}
 	);
 
@@ -83,6 +93,10 @@ void XamlApp::_MainWindow_Destoryed() {
 	_backdropChangedRevoker.revoke();
 
 	_uwpApp.HwndMain(0);
+
+	if (shouldQuit) {
+		PostQuitMessage(0);
+	}
 }
 
 }
