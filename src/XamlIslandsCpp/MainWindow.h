@@ -1,6 +1,5 @@
 #pragma once
 #include "XamlWindow.h"
-#include <winrt/XamlIslandsCpp.App.h>
 
 namespace XamlIslandsCpp {
 

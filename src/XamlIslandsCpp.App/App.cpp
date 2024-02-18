@@ -4,38 +4,17 @@
 #include "App.g.cpp"
 #endif
 #include <CoreWindow.h>
+#include "Win32Helper.h"
+
+using namespace XamlIslandsCpp;
 
 namespace winrt::XamlIslandsCpp::App::implementation {
-
-static UINT GetOSBuild() noexcept {
-	static UINT build = 0;
-
-	if (build == 0) {
-		HMODULE hNtDll = GetModuleHandle(L"ntdll.dll");
-		if (!hNtDll) {
-			return {};
-		}
-
-		auto rtlGetVersion = (LONG(WINAPI*)(PRTL_OSVERSIONINFOW))GetProcAddress(hNtDll, "RtlGetVersion");
-		if (rtlGetVersion == nullptr) {
-			return {};
-		}
-
-		OSVERSIONINFOW version{};
-		version.dwOSVersionInfoSize = sizeof(version);
-		rtlGetVersion(&version);
-
-		build = version.dwBuildNumber;
-	}
-
-	return build;
-}
 
 App::App() {
 	// 初始化 XAML 框架
 	_windowsXamlManager = Hosting::WindowsXamlManager::InitializeForCurrentThread();
 
-	if (GetOSBuild() < 22000) {
+	if (!Win32Helper::GetOSVersion().IsWin11()) {
 		// Win10 中隐藏 DesktopWindowXamlSource 窗口
 		if (CoreWindow coreWindow = CoreWindow::GetForCurrentThread()) {
 			HWND hwndDWXS;

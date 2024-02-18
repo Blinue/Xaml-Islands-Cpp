@@ -1,6 +1,5 @@
 #include "pch.h"
 #include "MainWindow.h"
-#include <CoreWindow.h>
 #include "CommonSharedConstants.h"
 
 #pragma comment(lib, "UxTheme.lib")
