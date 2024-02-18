@@ -68,7 +68,7 @@ void RootPage::ComboBox_DropDownOpened(IInspectable const&, IInspectable const&)
 	XamlHelper::UpdateThemeOfXamlPopups(XamlRoot(), ActualTheme());
 }
 
-static Color Win32ColorToWinRTColor(COLORREF color) {
+static Color Win32ColorToWinRTColor(COLORREF color) noexcept {
 	return { 255, GetRValue(color), GetGValue(color), GetBValue(color) };
 }
 
@@ -102,6 +102,10 @@ void RootPage::_SetTheme(AppTheme theme, WindowBackdrop backdrop) {
 		brush.TintOpacity(isDarkTheme ? 0.15 : 0.0);
 		brush.FallbackColor(bkgColor);
 		Background(brush);
+
+		// 切换前台窗口以刷新背景
+		SetForegroundWindow(GetDesktopWindow());
+		SetForegroundWindow((HWND)Application::Current().as<App>().HwndMain());
 	}
 }
 
