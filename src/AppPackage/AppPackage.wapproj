@@ -89,6 +89,51 @@
   <Target Name="VerifyConfiguration" BeforeTargets="BeforeBuild">
     <Error Text="Unsupported configuration!" Condition="!$(Configuration.EndsWith('Packaged'))" />
   </Target>
+  <!-- 由于 x-generate 不起作用，这个脚本用于检测支持的语言并填充 Resources 节点 -->
+  <UsingTask TaskName="GenerateResourcesNode" TaskFactory="RoslynCodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
+    <ParameterGroup>
+      <ManifestPath Required="true" />
+      <TargetPath Required="true" />
+      <ResourcesDir Required="true" />
+    </ParameterGroup>
+    <Task>
+	  <Using Namespace="System" />
+	  <Using Namespace="System.IO" />
+	  <Using Namespace="System.Xml" />
+	  <Code Type="Fragment" Language="cs"><![CDATA[
+XmlDocument doc = new XmlDocument();
+doc.Load(ManifestPath);
+
+XmlElement resourcesNode = doc.DocumentElement["Resources"];
+
+const string PREFIX = "Resources.language-";
+const string SUFFIX = ".resw";
+
+foreach (string filePath in Directory.GetFiles(ResourcesDir)) {
+    string fileName = Path.GetFileName(filePath);
+
+    if (!fileName.StartsWith(PREFIX) || !fileName.EndsWith(SUFFIX)) {
+        continue;
+    }
+
+    string tag = fileName.Substring(PREFIX.Length, fileName.Length - PREFIX.Length - SUFFIX.Length).ToUpper();
+
+    XmlElement resourceNode = doc.CreateElement("Resource", resourcesNode.NamespaceURI);
+    resourceNode.SetAttribute("Language", tag);
+    resourcesNode.AppendChild(resourceNode);
+}
+
+doc.Save(TargetPath);
+      ]]></Code>
+    </Task>
+  </UsingTask>
+  <Target Name="GenerateResourcesNodeForAppxManifest" BeforeTargets="ResolveProjectReferences">
+    <GenerateResourcesNode ManifestPath="@(AppxManifest)" TargetPath="$(BaseIntermediateOutputPath)Package.appxmanifest" ResourcesDir="..\XamlIslandsCpp.App\" />
+    <ItemGroup>
+      <AppxManifest Remove="@(AppxManifest)" />
+      <AppxManifest Include="$(BaseIntermediateOutputPath)Package.appxmanifest" />
+    </ItemGroup>
+  </Target>
   <!-- 将依赖项移到包的根目录 -->
   <!-- https://github.com/microsoft/terminal/blob/a2bb3136bb52c253060aa281396dbd12316b33a6/src/cascadia/CascadiaPackage/CascadiaPackage.wapproj#L100 -->
   <Target Name="FlattenPackage" BeforeTargets="_ConvertItems">

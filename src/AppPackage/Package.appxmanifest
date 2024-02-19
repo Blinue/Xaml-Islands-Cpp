@@ -21,10 +21,8 @@
     <TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.18362.0" MaxVersionTested="10.0.22621.0" />
   </Dependencies>
 
-  <Resources>
-    <Resource Language="EN-US"/>
-    <Resource Language="ZH-CN"/>
-  </Resources>
+  <!-- 由于 x-generate 不起作用，编译时使用脚本检测支持的语言并填充此节点 -->
+  <Resources />
 
   <Applications>
     <Application Id="XamlIslandsCpp"
