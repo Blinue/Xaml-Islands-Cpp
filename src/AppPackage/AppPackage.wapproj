@@ -97,11 +97,11 @@
       <ResourcesDir Required="true" />
     </ParameterGroup>
     <Task>
-	  <Using Namespace="System" />
-	  <Using Namespace="System.IO" />
-	  <Using Namespace="System.Xml" />
-	  <Code Type="Fragment" Language="cs"><![CDATA[
-XmlDocument doc = new XmlDocument();
+      <Using Namespace="System" />
+      <Using Namespace="System.IO" />
+      <Using Namespace="System.Xml" />
+      <Code Type="Fragment" Language="cs"><![CDATA[
+XmlDocument doc = new();
 doc.Load(ManifestPath);
 
 XmlElement resourcesNode = doc.DocumentElement["Resources"];
