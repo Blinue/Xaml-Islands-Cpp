@@ -197,6 +197,7 @@ protected:
 			_isWindowShown = IsWindowVisible(_hWnd);
 
 			if (!_isCustomTitleBarEnabled) {
+				_UpdateFrameMargins();
 				break;
 			}
 
