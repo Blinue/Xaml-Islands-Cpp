@@ -178,7 +178,7 @@ protected:
 		switch (msg) {
 		case WM_CREATE:
 		{
-			_currentDpi = GetDpiForWindow(_hWnd);
+			_UpdateDpi(GetDpiForWindow(_hWnd));
 
 			if (!Win32Helper::GetOSVersion().IsWin11()) {
 				// 初始化双缓冲绘图
@@ -372,6 +372,8 @@ protected:
 		}
 		case WM_DPICHANGED:
 		{
+			_UpdateDpi(HIWORD(wParam));
+
 			RECT* newRect = (RECT*)lParam;
 			SetWindowPos(_hWnd,
 				NULL,
@@ -483,16 +485,7 @@ protected:
 
 	uint32_t _GetTopBorderHeight() const noexcept {
 		// 最大化时没有上边框
-		if (!_isCustomTitleBarEnabled || _isMaximized) {
-			return 0;
-		}
-
-		// Win10 中窗口边框始终只有一个像素宽，Win11 中的窗口边框宽度和 DPI 缩放有关
-		if (Win32Helper::GetOSVersion().IsWin11()) {
-			return (_currentDpi + USER_DEFAULT_SCREEN_DPI / 2) / USER_DEFAULT_SCREEN_DPI;
-		} else {
-			return 1;
-		}
+		return _isCustomTitleBarEnabled && !_isMaximized ? _nativeTopBorderHeight : 0;
 	}
 
 	int _GetResizeHandleHeight() const noexcept {
@@ -567,6 +560,20 @@ private:
 		DwmExtendFrameIntoClientArea(_hWnd, &margins);
 	}
 
+	void _UpdateDpi(uint32_t dpi) noexcept {
+		_currentDpi = dpi;
+
+		// Win10 中窗口边框始终只有一个像素宽，Win11 中的窗口边框宽度和 DPI 缩放有关
+		if (Win32Helper::GetOSVersion().IsWin11()) {
+			DwmGetWindowAttribute(
+				_hWnd,
+				DWMWA_VISIBLE_FRAME_BORDER_THICKNESS,
+				&_nativeTopBorderHeight,
+				sizeof(_nativeTopBorderHeight)
+			);
+		}
+	}
+
 	winrt::event<winrt::delegate<>> _destroyedEvent;
 
 	HWND _hWnd = NULL;
@@ -577,6 +584,8 @@ private:
 	C _content{ nullptr };
 
 	uint32_t _currentDpi = USER_DEFAULT_SCREEN_DPI;
+	uint32_t _nativeTopBorderHeight = 1;
+
 	bool _isMaximized = false;
 	bool _isDarkTheme = false;
 	bool _isWindowShown = false;
