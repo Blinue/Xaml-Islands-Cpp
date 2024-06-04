@@ -162,10 +162,10 @@ LRESULT MainWindow::_MessageHandler(UINT msg, WPARAM wParam, LPARAM lParam) noex
 	case WM_GETMINMAXINFO:
 	{
 		// 设置窗口最小尺寸
-		MINMAXINFO* mmi = (MINMAXINFO*)lParam;
-		mmi->ptMinTrackSize = {
-			std::lroundf(500 * _CurrentDpi() / float(USER_DEFAULT_SCREEN_DPI)),
-			std::lroundf(300 * _CurrentDpi() / float(USER_DEFAULT_SCREEN_DPI))
+		const double dpiScale = _CurrentDpi() / double(USER_DEFAULT_SCREEN_DPI);
+		((MINMAXINFO*)lParam)->ptMinTrackSize = {
+			std::lround(500 * dpiScale),
+			std::lround(300 * dpiScale)
 		};
 		return 0;
 	}
@@ -185,12 +185,13 @@ LRESULT MainWindow::_MessageHandler(UINT msg, WPARAM wParam, LPARAM lParam) noex
 			HMENU systemMenu = GetSystemMenu(Handle(), FALSE);
 
 			// 根据窗口状态更新选项
-			MENUITEMINFO mii{};
-			mii.cbSize = sizeof(MENUITEMINFO);
-			mii.fMask = MIIM_STATE;
-			mii.fType = MFT_STRING;
 			auto setState = [&](UINT item, bool enabled) {
-				mii.fState = enabled ? MF_ENABLED : MF_DISABLED;
+				MENUITEMINFO mii{
+					.cbSize = sizeof(MENUITEMINFO),
+					.fMask = MIIM_STATE,
+					.fType = MFT_STRING,
+					.fState = UINT(enabled ? MF_ENABLED : MF_DISABLED)
+				};
 				SetMenuItemInfo(systemMenu, item, FALSE, &mii);
 			};
 			const bool isMaximized = _IsMaximized();
@@ -267,8 +268,9 @@ LRESULT MainWindow::_TitleBarMessageHandler(UINT msg, WPARAM wParam, LPARAM lPar
 			return Content().TitleBar().CaptionButtons().CaptionButtonSize();
 		}();
 
-		const float buttonWidthInPixels = buttonSizeInDips.Width * _CurrentDpi() / USER_DEFAULT_SCREEN_DPI;
-		const float buttonHeightInPixels = buttonSizeInDips.Height * _CurrentDpi() / USER_DEFAULT_SCREEN_DPI;
+		const double dpiScale = _CurrentDpi() / double(USER_DEFAULT_SCREEN_DPI);
+		const double buttonWidthInPixels = buttonSizeInDips.Width * dpiScale;
+		const double buttonHeightInPixels = buttonSizeInDips.Height * dpiScale;
 
 		if (cursorPos.y >= buttonHeightInPixels) {
 			// 鼠标位于标题按钮下方，如果标题栏很宽，这里也可以拖动
@@ -281,7 +283,6 @@ LRESULT MainWindow::_TitleBarMessageHandler(UINT msg, WPARAM wParam, LPARAM lPar
 			return HTCLOSE;
 		} else if (cursorToRight < buttonWidthInPixels * 2) {
 			// 支持 Win11 的贴靠布局
-			// FIXME: 最大化时贴靠布局的位置不对，目前没有找到解决方案。似乎只适配了系统原生框架和 UWP
 			return HTMAXBUTTON;
 		} else if (cursorToRight < buttonWidthInPixels * 3) {
 			return HTMINBUTTON;
@@ -321,11 +322,12 @@ LRESULT MainWindow::_TitleBarMessageHandler(UINT msg, WPARAM wParam, LPARAM lPar
 			// 追踪鼠标以确保鼠标离开标题栏时我们能收到 WM_NCMOUSELEAVE 消息，否则无法
 			// 可靠的收到这个消息，尤其是在用户快速移动鼠标的时候。
 			if (!_trackingMouse && msg == WM_NCMOUSEMOVE) {
-				TRACKMOUSEEVENT ev{};
-				ev.cbSize = sizeof(TRACKMOUSEEVENT);
-				ev.dwFlags = TME_LEAVE | TME_NONCLIENT;
-				ev.hwndTrack = _hwndTitleBar;
-				ev.dwHoverTime = HOVER_DEFAULT; // 不关心 HOVER 消息
+				TRACKMOUSEEVENT ev{
+					.cbSize = sizeof(TRACKMOUSEEVENT),
+					.dwFlags = TME_LEAVE | TME_NONCLIENT,
+					.hwndTrack = _hwndTitleBar,
+					.dwHoverTime = HOVER_DEFAULT // 不关心 HOVER 消息
+				};
 				TrackMouseEvent(&ev);
 				_trackingMouse = true;
 			}
