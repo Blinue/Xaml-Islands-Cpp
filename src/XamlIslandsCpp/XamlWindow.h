@@ -136,10 +136,10 @@ protected:
 
 		_SetInitialTheme(theme, backdrop, _isCustomTitleBarEnabled);
 
-		// Win10 中即使在亮色主题下我们也使用暗色边框，这也是 UWP 窗口的行为
+		// 在 Win10 中如果自定义标题栏，那么即使在亮色主题下我们也使用暗色边框，这也是 UWP 窗口的行为
 		ThemeHelper::SetWindowTheme(
 			_hWnd,
-			Win32Helper::GetOSVersion().IsWin11() ? _isDarkTheme : true,
+			Win32Helper::GetOSVersion().IsWin11() || !_isCustomTitleBarEnabled ? _isDarkTheme : true,
 			_isDarkTheme
 		);
 
@@ -159,6 +159,16 @@ protected:
 
 	void _SetCustomTitleBar(bool enabled) noexcept {
 		_isCustomTitleBarEnabled = enabled;
+
+		if (!Win32Helper::GetOSVersion().IsWin11()) {
+			// Win10 中需要更新边框主题
+			ThemeHelper::SetWindowTheme(
+				_hWnd,
+				!_isCustomTitleBarEnabled ? _isDarkTheme : true,
+				_isDarkTheme
+			);
+		}
+
 		SetWindowPos(_hWnd, NULL, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOCOPYBITS | SWP_NOMOVE | SWP_NOSIZE);
 	}
 
