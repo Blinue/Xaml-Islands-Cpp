@@ -3,9 +3,6 @@
 #if __has_include("App.g.cpp")
 #include "App.g.cpp"
 #endif
-#if __has_include("MyXamlMetaDataProvider.g.cpp")
-#include "MyXamlMetaDataProvider.g.cpp"
-#endif
 #include <CoreWindow.h>
 #include "Win32Helper.h"
 

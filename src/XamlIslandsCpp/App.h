@@ -1,15 +1,8 @@
 #pragma once
 #include "App.g.h"
-#include "MyXamlMetaDataProvider.g.h"
 #include <winrt/Windows.UI.Xaml.Hosting.h>
 
 namespace winrt::XamlIslandsCpp::implementation {
-
-struct MyXamlMetaDataProvider : public MyXamlMetaDataProviderT<MyXamlMetaDataProvider> {
-	Markup::IXamlType GetXamlType(Interop::TypeName const&) { return nullptr; }
-	Markup::IXamlType GetXamlType(hstring const&) { return nullptr; }
-	com_array<Markup::XmlnsDefinition> GetXmlnsDefinitions() { return {}; }
-};
 
 class App : public App_base<App, Markup::IXamlMetadataProvider> {
 public:
@@ -42,10 +35,6 @@ private:
 	// 
 	/////////////////////////////////////////////////////
 public:
-	static Markup::IXamlMetadataProvider XamlMetaDataProvider() {
-		return make<MyXamlMetaDataProvider>();
-	}
-
 	Markup::IXamlType GetXamlType(Interop::TypeName const& type) {
 		return _AppProvider()->GetXamlType(type);
 	}

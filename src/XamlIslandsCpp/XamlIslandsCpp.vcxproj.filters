@@ -11,13 +11,36 @@
     <ClCompile Include="App.cpp" />
     <ClCompile Include="$(GeneratedFilesDir)module.g.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="MainWindow.cpp" />
+    <ClCompile Include="XamlApp.cpp" />
+    <ClCompile Include="ThemeHelper.cpp">
+      <Filter>Helpers</Filter>
+    </ClCompile>
+    <ClCompile Include="Win32Helper.cpp">
+      <Filter>Helpers</Filter>
+    </ClCompile>
+    <ClCompile Include="XamlHelper.cpp">
+      <Filter>Helpers</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
+    <ClInclude Include="CommonSharedConstants.h" />
+    <ClInclude Include="MainWindow.h" />
+    <ClInclude Include="XamlApp.h" />
+    <ClInclude Include="XamlWindow.h" />
+    <ClInclude Include="ThemeHelper.h">
+      <Filter>Helpers</Filter>
+    </ClInclude>
+    <ClInclude Include="Win32Helper.h">
+      <Filter>Helpers</Filter>
+    </ClInclude>
+    <ClInclude Include="XamlHelper.h">
+      <Filter>Helpers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-    <None Include="XamlIslandsCpp.App.def" />
     <None Include="Settings.idl" />
   </ItemGroup>
   <ItemGroup>
@@ -44,5 +67,11 @@
     <Filter Include="Controls">
       <UniqueIdentifier>{1e0add64-b965-43a0-9877-611a5bf0af6e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Helpers">
+      <UniqueIdentifier>{7f2ecbbe-088a-4e6a-8217-7bde4fa65b15}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Manifest Include="app.manifest" />
   </ItemGroup>
 </Project>
