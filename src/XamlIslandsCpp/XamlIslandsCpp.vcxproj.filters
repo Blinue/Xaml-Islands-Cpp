@@ -22,6 +22,7 @@
     <ClCompile Include="XamlHelper.cpp">
       <Filter>Helpers</Filter>
     </ClCompile>
+    <ClCompile Include="AppSettings.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -38,10 +39,11 @@
     <ClInclude Include="XamlHelper.h">
       <Filter>Helpers</Filter>
     </ClInclude>
+    <ClInclude Include="AppSettings.h" />
+    <ClInclude Include="WinRTHelper.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-    <None Include="Settings.idl" />
   </ItemGroup>
   <ItemGroup>
     <Page Include="RootPage.xaml" />

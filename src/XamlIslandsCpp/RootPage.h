@@ -1,13 +1,10 @@
 #pragma once
 #include "pch.h"
 #include "RootPage.g.h"
-#include "Settings.h"
 
 namespace winrt::XamlIslandsCpp::implementation {
 
 struct RootPage : RootPageT<RootPage> {
-	RootPage();
-
 	void InitializeComponent();
 
 	event_token PropertyChanged(PropertyChangedEventHandler const& handler) {
@@ -32,11 +29,9 @@ struct RootPage : RootPageT<RootPage> {
 	void ComboBox_DropDownOpened(IInspectable const&, IInspectable const&) const;
 
 private:
-	void _SetTheme(AppTheme theme, WindowBackdrop backdrop);
+	void _UpdateTheme();
 
 	event<PropertyChangedEventHandler> _propertyChangedEvent;
-
-	XamlIslandsCpp::Settings _settings{ nullptr };
 };
 
 }

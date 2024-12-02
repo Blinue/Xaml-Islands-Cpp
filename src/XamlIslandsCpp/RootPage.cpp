@@ -6,32 +6,28 @@
 #include "Win32Helper.h"
 #include "CommonSharedConstants.h"
 #include "XamlHelper.h"
+#include "AppSettings.h"
 
 using namespace XamlIslandsCpp;
 
 namespace winrt::XamlIslandsCpp::implementation {
 
-RootPage::RootPage() {
-	_settings = Application::Current().as<App>().Settings();
-}
-
 void RootPage::InitializeComponent() {
 	RootPageT::InitializeComponent();
-
-	_SetTheme(_settings.Theme(), _settings.Backdrop());
+	_UpdateTheme();
 }
 
 bool RootPage::IsCustomTitleBarEnabled() const noexcept {
-	return _settings.IsCustomTitleBarEnabled();
+	return AppSettings::Get().IsCustomTitleBarEnabled();
 }
 
 void RootPage::IsCustomTitleBarEnabled(bool value) {
-	_settings.IsCustomTitleBarEnabled(value);
+	AppSettings::Get().IsCustomTitleBarEnabled(value);
 	_propertyChangedEvent(*this, PropertyChangedEventArgs(L"IsCustomTitleBarEnabled"));
 }
 
 int RootPage::Theme() const noexcept {
-	return (int)_settings.Theme();
+	return (int)AppSettings::Get().Theme();
 }
 
 void RootPage::Theme(int value) {
@@ -39,8 +35,9 @@ void RootPage::Theme(int value) {
 		return;
 	}
 
-	_settings.Theme((AppTheme)value);
-	_SetTheme((AppTheme)value, _settings.Backdrop());
+	AppSettings::Get().Theme((AppTheme)value);
+	_UpdateTheme();
+
 	_propertyChangedEvent(*this, PropertyChangedEventArgs(L"Theme"));
 }
 
@@ -49,7 +46,7 @@ bool RootPage::IsMicaAvailable() noexcept {
 }
 
 int RootPage::Backdrop() const noexcept {
-	return (int)_settings.Backdrop();
+	return (int)AppSettings::Get().Backdrop();
 }
 
 void RootPage::Backdrop(int value) {
@@ -57,8 +54,9 @@ void RootPage::Backdrop(int value) {
 		return;
 	}
 
-	_settings.Backdrop((WindowBackdrop)value);
-	_SetTheme(_settings.Theme(), (WindowBackdrop)value);
+	AppSettings::Get().Backdrop((WindowBackdrop)value);
+	_UpdateTheme();
+
 	_propertyChangedEvent(*this, PropertyChangedEventArgs(L"Backdrop"));
 }
 
@@ -72,8 +70,10 @@ static Color Win32ColorToWinRTColor(COLORREF color) noexcept {
 	return { 255, GetRValue(color), GetGValue(color), GetBValue(color) };
 }
 
-void RootPage::_SetTheme(AppTheme theme, WindowBackdrop backdrop) {
-	const bool isDarkTheme = theme == AppTheme::Dark;
+void RootPage::_UpdateTheme() {
+	const AppSettings& settings = AppSettings::Get();
+	const bool isDarkTheme = settings.Theme() == AppTheme::Dark;
+	const WindowBackdrop backdrop = settings.Backdrop();
 
 	ElementTheme newTheme = isDarkTheme ? ElementTheme::Dark : ElementTheme::Light;
 	RequestedTheme(newTheme);

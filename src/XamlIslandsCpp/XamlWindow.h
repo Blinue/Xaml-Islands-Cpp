@@ -9,6 +9,7 @@
 #include "ThemeHelper.h"
 #include "CommonSharedConstants.h"
 #include <dwmapi.h>
+#include "AppSettings.h"
 
 namespace XamlIslandsCpp {
 
@@ -116,8 +117,8 @@ protected:
 	}
 
 	void _SetInitialTheme(
-		winrt::XamlIslandsCpp::AppTheme theme,
-		winrt::XamlIslandsCpp::WindowBackdrop backdrop,
+		AppTheme theme,
+		WindowBackdrop backdrop,
 		bool isCustomTitleBarEnabled
 	) {
 		using namespace winrt::XamlIslandsCpp;
@@ -127,10 +128,7 @@ protected:
 	}
 
 	// 需要重新创建窗口时返回 true
-	bool _SetTheme(
-		winrt::XamlIslandsCpp::AppTheme theme,
-		winrt::XamlIslandsCpp::WindowBackdrop backdrop) noexcept
-	{
+	bool _SetTheme(AppTheme theme, WindowBackdrop backdrop) noexcept {
 		using namespace winrt::XamlIslandsCpp;
 
 		if (Win32Helper::GetOSVersion().Is22H2OrNewer() &&

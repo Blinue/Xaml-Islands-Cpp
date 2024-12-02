@@ -19,14 +19,9 @@ public:
 		_hwndMain = (HWND)value;
 	}
 
-	XamlIslandsCpp::Settings Settings() const noexcept {
-		return _settings;
-	}
-
 private:
 	Hosting::WindowsXamlManager _windowsXamlManager{ nullptr };
 	HWND _hwndMain = NULL;
-	XamlIslandsCpp::Settings _settings;
 	bool _isClosed = false;
 
 	////////////////////////////////////////////////////

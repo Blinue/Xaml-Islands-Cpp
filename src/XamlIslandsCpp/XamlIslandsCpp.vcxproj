@@ -114,6 +114,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="AppSettings.h" />
     <ClInclude Include="CaptionButtonsControl.h">
       <DependentUpon>CaptionButtonsControl.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -128,16 +129,13 @@
     <ClInclude Include="App.h">
       <DependentUpon>App.xaml</DependentUpon>
     </ClInclude>
-    <ClInclude Include="Settings.h">
-      <DependentUpon>Settings.idl</DependentUpon>
-      <SubType>Code</SubType>
-    </ClInclude>
     <ClInclude Include="ThemeHelper.h" />
     <ClInclude Include="TitleBarControl.h">
       <DependentUpon>TitleBarControl.xaml</DependentUpon>
       <SubType>Code</SubType>
     </ClInclude>
     <ClInclude Include="Win32Helper.h" />
+    <ClInclude Include="WinRTHelper.h" />
     <ClInclude Include="XamlApp.h" />
     <ClInclude Include="XamlHelper.h" />
     <ClInclude Include="XamlWindow.h" />
@@ -148,6 +146,7 @@
     </ApplicationDefinition>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AppSettings.cpp" />
     <ClCompile Include="CaptionButtonsControl.cpp">
       <DependentUpon>CaptionButtonsControl.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -165,10 +164,6 @@
       <DependentUpon>App.xaml</DependentUpon>
     </ClCompile>
     <ClCompile Include="$(GeneratedFilesDir)module.g.cpp" />
-    <ClCompile Include="Settings.cpp">
-      <DependentUpon>Settings.idl</DependentUpon>
-      <SubType>Code</SubType>
-    </ClCompile>
     <ClCompile Include="ThemeHelper.cpp" />
     <ClCompile Include="TitleBarControl.cpp">
       <DependentUpon>TitleBarControl.xaml</DependentUpon>
@@ -182,9 +177,6 @@
     <Midl Include="App.idl">
       <DependentUpon>App.xaml</DependentUpon>
     </Midl>
-    <None Include="Settings.idl">
-      <SubType>Designer</SubType>
-    </None>
     <None Include="CaptionButtonsControl.idl">
       <DependentUpon>CaptionButtonsControl.xaml</DependentUpon>
       <SubType>Code</SubType>

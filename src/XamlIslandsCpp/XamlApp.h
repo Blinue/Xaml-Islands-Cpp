@@ -29,9 +29,9 @@ private:
 	winrt::XamlIslandsCpp::App _uwpApp{ nullptr };
 	MainWindow _mainWindow;
 
-	winrt::XamlIslandsCpp::Settings::ThemeChanged_revoker _themeChangedRevoker;
-	winrt::XamlIslandsCpp::Settings::IsCustomTitleBarEnabledChanged_revoker _isCustomTitleBarEnabledChangedRevoker;
-	winrt::XamlIslandsCpp::Settings::BackdropChanged_revoker _backdropChangedRevoker;
+	WinRTHelper::EventRevoker _themeChangedRevoker;
+	WinRTHelper::EventRevoker _isCustomTitleBarEnabledChangedRevoker;
+	WinRTHelper::EventRevoker _backdropChangedRevoker;
 
 	// 防止重新创建主窗口时退出
 	bool shouldQuit = true;

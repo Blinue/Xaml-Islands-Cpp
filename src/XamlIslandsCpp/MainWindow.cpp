@@ -12,8 +12,8 @@ namespace XamlIslandsCpp {
 
 bool MainWindow::Create(
 	HINSTANCE hInstance,
-	winrt::AppTheme theme,
-	winrt::WindowBackdrop backdrop,
+	AppTheme theme,
+	WindowBackdrop backdrop,
 	bool isCustomTitleBarEnabled,
 	const WINDOWPLACEMENT* wp
 ) noexcept {
@@ -42,7 +42,7 @@ bool MainWindow::Create(
 	}
 
 	CreateWindowEx(
-		Win32Helper::GetOSVersion().Is22H2OrNewer() && backdrop != winrt::WindowBackdrop::SolidColor ? WS_EX_NOREDIRECTIONBITMAP : 0,
+		Win32Helper::GetOSVersion().Is22H2OrNewer() && backdrop != WindowBackdrop::SolidColor ? WS_EX_NOREDIRECTIONBITMAP : 0,
 		CommonSharedConstants::MAIN_WINDOW_CLASS_NAME,
 		L"XamlIslandsCpp",
 		WS_OVERLAPPEDWINDOW,
@@ -126,7 +126,7 @@ bool MainWindow::Create(
 	return true;
 }
 
-bool MainWindow::SetTheme(winrt::AppTheme theme, winrt::WindowBackdrop backdrop) noexcept {
+bool MainWindow::SetTheme(AppTheme theme, WindowBackdrop backdrop) noexcept {
 	return XamlWindowT::_SetTheme(theme, backdrop);
 }
 

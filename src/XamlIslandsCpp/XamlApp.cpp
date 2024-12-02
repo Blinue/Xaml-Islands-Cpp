@@ -2,6 +2,7 @@
 #include "XamlApp.h"
 #include "ThemeHelper.h"
 #include <dwmapi.h>
+#include "AppSettings.h"
 
 namespace winrt {
 using namespace XamlIslandsCpp;
@@ -41,7 +42,7 @@ int XamlApp::Run() {
 }
 
 bool XamlApp::_CreateMainWindow(const WINDOWPLACEMENT* wp) noexcept {
-	winrt::Settings settings = _uwpApp.Settings();
+	AppSettings& settings = AppSettings::Get();
 
 	if (!_mainWindow.Create(
 		_hInstance,
@@ -57,41 +58,41 @@ bool XamlApp::_CreateMainWindow(const WINDOWPLACEMENT* wp) noexcept {
 
 	_themeChangedRevoker = settings.ThemeChanged(
 		winrt::auto_revoke,
-		[&](winrt::IInspectable const& sender, winrt::AppTheme theme) {
-			winrt::Settings settings = sender.as<winrt::Settings>();
-			_mainWindow.SetTheme(theme, settings.Backdrop());
+		[&](AppTheme theme) {
+			_mainWindow.SetTheme(theme, AppSettings::Get().Backdrop());
 		}
 	);
 
 	_backdropChangedRevoker = settings.BackdropChanged(
 		winrt::auto_revoke,
-		[this](winrt::IInspectable const& sender, winrt::WindowBackdrop backdrop) {
-			winrt::Settings settings = sender.as<winrt::Settings>();
-			if (_mainWindow.SetTheme(settings.Theme(), backdrop)) {
-				// 由于无法更改 WS_EX_NOREDIRECTIONBITMAP 样式，必须重新创建主窗口
-				shouldQuit = false;
-
-				WINDOWPLACEMENT wp{ .length = sizeof(wp) };
-				GetWindowPlacement(_mainWindow.Handle(), &wp);
-
-				// 禁用关闭窗口的动画
-				BOOL value = TRUE;
-				DwmSetWindowAttribute(
-					_mainWindow.Handle(), DWMWA_TRANSITIONS_FORCEDISABLED, &value, sizeof(value));
-
-				winrt::CoreDispatcher dispatcher = _mainWindow.Content().Dispatcher();
-				_mainWindow.Destroy();
-				dispatcher.TryRunAsync(winrt::CoreDispatcherPriority::Normal, [this, wp]() {
-					shouldQuit = true;
-					_CreateMainWindow(&wp);
-				});
+		[this](WindowBackdrop backdrop) {
+			if (!_mainWindow.SetTheme(AppSettings::Get().Theme(), backdrop)) {
+				return;
 			}
+
+			// 由于无法更改 WS_EX_NOREDIRECTIONBITMAP 样式，必须重新创建主窗口
+			shouldQuit = false;
+
+			WINDOWPLACEMENT wp{ .length = sizeof(wp) };
+			GetWindowPlacement(_mainWindow.Handle(), &wp);
+
+			// 禁用关闭窗口的动画
+			BOOL value = TRUE;
+			DwmSetWindowAttribute(
+				_mainWindow.Handle(), DWMWA_TRANSITIONS_FORCEDISABLED, &value, sizeof(value));
+
+			winrt::CoreDispatcher dispatcher = _mainWindow.Content().Dispatcher();
+			_mainWindow.Destroy();
+			dispatcher.TryRunAsync(winrt::CoreDispatcherPriority::Normal, [this, wp]() {
+				shouldQuit = true;
+				_CreateMainWindow(&wp);
+			});
 		}
 	);
 
 	_isCustomTitleBarEnabledChangedRevoker = settings.IsCustomTitleBarEnabledChanged(
 		winrt::auto_revoke,
-		[&](winrt::IInspectable const&, bool enabled) {
+		[&](bool enabled) {
 			_mainWindow.SetCustomTitleBar(enabled);
 		}
 	);
@@ -100,9 +101,9 @@ bool XamlApp::_CreateMainWindow(const WINDOWPLACEMENT* wp) noexcept {
 }
 
 void XamlApp::_MainWindow_Destoryed() {
-	_themeChangedRevoker.revoke();
-	_isCustomTitleBarEnabledChangedRevoker.revoke();
-	_backdropChangedRevoker.revoke();
+	_themeChangedRevoker.Revoke();
+	_isCustomTitleBarEnabledChangedRevoker.Revoke();
+	_backdropChangedRevoker.Revoke();
 
 	_uwpApp.HwndMain(0);
 

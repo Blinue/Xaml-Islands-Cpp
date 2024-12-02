@@ -1,5 +1,6 @@
 #pragma once
 #include "XamlWindow.h"
+#include "AppSettings.h"
 
 namespace XamlIslandsCpp {
 
@@ -8,13 +9,13 @@ class MainWindow : public XamlWindowT<MainWindow, winrt::XamlIslandsCpp::RootPag
 public:
 	bool Create(
 		HINSTANCE hInstance,
-		winrt::XamlIslandsCpp::AppTheme theme,
-		winrt::XamlIslandsCpp::WindowBackdrop backdrop,
+		AppTheme theme,
+		WindowBackdrop backdrop,
 		bool isCustomTitleBarEnabled,
 		const WINDOWPLACEMENT* wp = nullptr
 	) noexcept;
 
-	bool SetTheme(winrt::XamlIslandsCpp::AppTheme theme, winrt::XamlIslandsCpp::WindowBackdrop backdrop) noexcept;
+	bool SetTheme(AppTheme theme, WindowBackdrop backdrop) noexcept;
 
 	void SetCustomTitleBar(bool enabled) noexcept;
 
