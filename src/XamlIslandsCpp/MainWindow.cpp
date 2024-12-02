@@ -10,13 +10,7 @@ using namespace XamlIslandsCpp;
 
 namespace XamlIslandsCpp {
 
-bool MainWindow::Create(
-	HINSTANCE hInstance,
-	AppTheme theme,
-	WindowBackdrop backdrop,
-	bool isCustomTitleBarEnabled,
-	const WINDOWPLACEMENT* wp
-) noexcept {
+bool MainWindow::Create(HINSTANCE hInstance, const WINDOWPLACEMENT* wp) noexcept {
 	static const int _ = [](HINSTANCE hInstance) {
 		WNDCLASSEXW wcex{
 			.cbSize = sizeof(WNDCLASSEX),
@@ -36,7 +30,11 @@ bool MainWindow::Create(
 		return 0;
 	}(hInstance);
 
-	_SetInitialTheme(theme, backdrop, isCustomTitleBarEnabled);
+	AppSettings& settings = AppSettings::Get();
+	const AppTheme theme = settings.Theme();
+	const WindowBackdrop backdrop = settings.Backdrop();
+
+	_SetInitialTheme(theme, backdrop, settings.IsCustomTitleBarEnabled());
 	if (wp && wp->showCmd == SW_SHOWMAXIMIZED) {
 		_SetInitialMaximized();
 	}
@@ -56,7 +54,7 @@ bool MainWindow::Create(
 
 	_Content(winrt::RootPage());
 
-	SetTheme(theme, backdrop);
+	_SetTheme(theme, backdrop);
 
 	// 隐藏原生标题栏上的图标
 	SetWindowThemeNonClientAttributes(Handle(), WTNCA_NODRAWICON | WTNCA_NOSYSMENU, WTNCA_VALIDBITS);
@@ -123,32 +121,64 @@ bool MainWindow::Create(
 		_ResizeTitleBarWindow();
 	});
 
-	return true;
-}
+	_themeChangedRevoker = settings.ThemeChanged(
+		winrt::auto_revoke,
+		[&](AppTheme theme) {
+			_SetTheme(theme, AppSettings::Get().Backdrop());
+		}
+	);
 
-bool MainWindow::SetTheme(AppTheme theme, WindowBackdrop backdrop) noexcept {
-	return XamlWindowT::_SetTheme(theme, backdrop);
-}
+	_backdropChangedRevoker = settings.BackdropChanged(
+		winrt::auto_revoke,
+		[this, hInstance](WindowBackdrop backdrop) {
+			if (!_SetTheme(AppSettings::Get().Theme(), backdrop)) {
+				return;
+			}
 
-void MainWindow::SetCustomTitleBar(bool enabled) noexcept {
-	if (_IsCustomTitleBarEnabled() == enabled) {
-		return;
-	}
+			// 由于无法更改 WS_EX_NOREDIRECTIONBITMAP 样式，必须重新创建主窗口
+			_closingForRecreate = true;
 
-	ShowWindow(_hwndTitleBar, enabled ? SW_SHOW : SW_HIDE);
+			WINDOWPLACEMENT wp{ .length = sizeof(wp) };
+			GetWindowPlacement(Handle(), &wp);
 
-	if (enabled) {
-		XamlWindowT::_SetCustomTitleBar(true);
-	} else {
-		// 优化动画
-		Content().Dispatcher().TryRunAsync(winrt::CoreDispatcherPriority::Normal, [this]() -> winrt::fire_and_forget {
-			MainWindow* that = this;
+			// 禁用关闭窗口的动画
+			BOOL value = TRUE;
+			DwmSetWindowAttribute(Handle(), DWMWA_TRANSITIONS_FORCEDISABLED, &value, sizeof(value));
+
 			winrt::CoreDispatcher dispatcher = Content().Dispatcher();
-			co_await 10ms;
-			co_await dispatcher;
-			that->XamlWindowT::_SetCustomTitleBar(false);
-		});
-	}
+			Destroy();
+			dispatcher.TryRunAsync(winrt::CoreDispatcherPriority::Normal, [this, wp, hInstance]() {
+				_closingForRecreate = false;
+				Create(hInstance, &wp);
+			});
+		}
+	);
+
+	_isCustomTitleBarEnabledChangedRevoker = settings.IsCustomTitleBarEnabledChanged(
+		winrt::auto_revoke,
+		[&](bool enabled) {
+			if (_IsCustomTitleBarEnabled() == enabled) {
+				return;
+			}
+
+			ShowWindow(_hwndTitleBar, enabled ? SW_SHOW : SW_HIDE);
+
+			if (enabled) {
+				_SetCustomTitleBar(true);
+			} else {
+				// 优化动画
+				Content().Dispatcher().TryRunAsync(winrt::CoreDispatcherPriority::Normal, [this]() -> winrt::fire_and_forget {
+					MainWindow* that = this;
+					winrt::CoreDispatcher dispatcher = Content().Dispatcher();
+					co_await 10ms;
+					co_await dispatcher;
+					that->_SetCustomTitleBar(false);
+				});
+			}
+		}
+	);
+
+	return true;
 }
 
 LRESULT MainWindow::_MessageHandler(UINT msg, WPARAM wParam, LPARAM lParam) noexcept {
@@ -221,6 +251,11 @@ LRESULT MainWindow::_MessageHandler(UINT msg, WPARAM wParam, LPARAM lParam) noex
 	{
 		_hwndTitleBar = NULL;
 		_trackingMouse = false;
+
+		if (!_closingForRecreate) {
+			PostQuitMessage(0);
+		}
+
 		break;
 	}
 	}

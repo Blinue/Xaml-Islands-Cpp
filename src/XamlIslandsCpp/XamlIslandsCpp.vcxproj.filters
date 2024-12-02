@@ -12,7 +12,6 @@
     <ClCompile Include="$(GeneratedFilesDir)module.g.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MainWindow.cpp" />
-    <ClCompile Include="XamlApp.cpp" />
     <ClCompile Include="ThemeHelper.cpp">
       <Filter>Helpers</Filter>
     </ClCompile>
@@ -28,7 +27,6 @@
     <ClInclude Include="pch.h" />
     <ClInclude Include="CommonSharedConstants.h" />
     <ClInclude Include="MainWindow.h" />
-    <ClInclude Include="XamlApp.h" />
     <ClInclude Include="XamlWindow.h" />
     <ClInclude Include="ThemeHelper.h">
       <Filter>Helpers</Filter>
@@ -40,7 +38,9 @@
       <Filter>Helpers</Filter>
     </ClInclude>
     <ClInclude Include="AppSettings.h" />
-    <ClInclude Include="WinRTHelper.h" />
+    <ClInclude Include="WinRTHelper.h">
+      <Filter>Helpers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

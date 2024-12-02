@@ -2,7 +2,6 @@
 #include <windows.ui.xaml.hosting.desktopwindowxamlsource.h>
 #include <CoreWindow.h>
 #include <shellapi.h>
-#include <winrt/XamlIslandsCpp.h>
 #include <winrt/Windows.UI.Xaml.Hosting.h>
 #include "Win32Helper.h"
 #include "XamlHelper.h"
@@ -61,10 +60,6 @@ public:
 
 	void Destroy() {
 		DestroyWindow(_hWnd);
-	}
-
-	winrt::event_token Destroyed(winrt::delegate<> const& handler) {
-		return _destroyedEvent.add(handler);
 	}
 
 protected:
@@ -491,8 +486,6 @@ protected:
 
 			_content = nullptr;
 
-			_destroyedEvent();
-
 			return 0;
 		}
 		}
@@ -590,8 +583,6 @@ private:
 			);
 		}
 	}
-
-	winrt::event<winrt::delegate<>> _destroyedEvent;
 
 	HWND _hWnd = NULL;
 	HWND _hwndXamlIsland = NULL;

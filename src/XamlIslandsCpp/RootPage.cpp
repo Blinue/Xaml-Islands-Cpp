@@ -7,6 +7,7 @@
 #include "CommonSharedConstants.h"
 #include "XamlHelper.h"
 #include "AppSettings.h"
+#include "MainWindow.h"
 
 using namespace XamlIslandsCpp;
 
@@ -105,7 +106,7 @@ void RootPage::_UpdateTheme() {
 
 		// 切换前台窗口以刷新背景
 		SetForegroundWindow(GetDesktopWindow());
-		SetForegroundWindow((HWND)Application::Current().as<App>().HwndMain());
+		SetForegroundWindow(MainWindow::Get().Handle());
 	}
 }
 
