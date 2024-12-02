@@ -11,7 +11,7 @@ using namespace winrt;
 using namespace Windows::UI;
 using namespace Windows::UI::ViewManagement;
 
-namespace winrt::XamlIslandsCpp::App::implementation {
+namespace winrt::XamlIslandsCpp::implementation {
 
 // 来自 https://learn.microsoft.com/en-us/windows/apps/desktop/modernize/apply-windows-themes#know-when-dark-mode-is-enabled
 static bool IsColorLight(const Color& clr) noexcept {

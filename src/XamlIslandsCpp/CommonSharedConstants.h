@@ -10,7 +10,7 @@ struct CommonSharedConstants {
 	static constexpr const COLORREF LIGHT_TINT_COLOR = RGB(243, 243, 243);
 	static constexpr const COLORREF DARK_TINT_COLOR = RGB(32, 32, 32);
 
-	static constexpr const wchar_t* APP_RESOURCE_MAP_ID = L"XamlIslandsCpp.App/Resources";
+	static constexpr const wchar_t* APP_RESOURCE_MAP_ID = L"XamlIslandsCpp/Resources";
 };
 
 }

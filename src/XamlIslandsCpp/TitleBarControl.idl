@@ -1,4 +1,4 @@
-namespace XamlIslandsCpp.App {
+namespace XamlIslandsCpp {
     runtimeclass TitleBarControl : Windows.UI.Xaml.Controls.UserControl {
         TitleBarControl();
 

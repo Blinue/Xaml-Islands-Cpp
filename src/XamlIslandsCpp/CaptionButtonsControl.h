@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include "CaptionButtonsControl.g.h"
 
-namespace winrt::XamlIslandsCpp::App::implementation {
+namespace winrt::XamlIslandsCpp::implementation {
 
 struct CaptionButtonsControl : CaptionButtonsControlT<CaptionButtonsControl> {
 	Size CaptionButtonSize() const;
@@ -29,7 +29,7 @@ private:
 
 }
 
-namespace winrt::XamlIslandsCpp::App::factory_implementation {
+namespace winrt::XamlIslandsCpp::factory_implementation {
 
 struct CaptionButtonsControl : CaptionButtonsControlT<CaptionButtonsControl, implementation::CaptionButtonsControl> {
 };

@@ -2,11 +2,13 @@
 #include <windows.ui.xaml.hosting.desktopwindowxamlsource.h>
 #include <CoreWindow.h>
 #include <shellapi.h>
-#include <winrt/XamlIslandsCpp.App.h>
+#include <winrt/XamlIslandsCpp.h>
+#include <winrt/Windows.UI.Xaml.Hosting.h>
 #include "Win32Helper.h"
 #include "XamlHelper.h"
 #include "ThemeHelper.h"
 #include "CommonSharedConstants.h"
+#include <dwmapi.h>
 
 namespace XamlIslandsCpp {
 
@@ -81,10 +83,12 @@ protected:
 	}
 
 	void _Content(C const& content) {
+		using namespace winrt::Windows::UI::Xaml::Hosting;
+
 		_content = content;
 
 		// 初始化 XAML Islands
-		_xamlSource = winrt::DesktopWindowXamlSource();
+		_xamlSource = DesktopWindowXamlSource();
 		_xamlSourceNative2 = _xamlSource.as<IDesktopWindowXamlSourceNative2>();
 
 		auto interop = _xamlSource.as<IDesktopWindowXamlSourceNative>();
@@ -94,11 +98,11 @@ protected:
 
 		// 焦点始终位于 _hwndXamlIsland 中
 		_xamlSource.TakeFocusRequested(
-			[](winrt::DesktopWindowXamlSource const& sender,
-				winrt::DesktopWindowXamlSourceTakeFocusRequestedEventArgs const& args
+			[](DesktopWindowXamlSource const& sender,
+				DesktopWindowXamlSourceTakeFocusRequestedEventArgs const& args
 			) {
-				winrt::XamlSourceFocusNavigationReason reason = args.Request().Reason();
-				if (reason < winrt::XamlSourceFocusNavigationReason::Left) {
+				XamlSourceFocusNavigationReason reason = args.Request().Reason();
+				if (reason < XamlSourceFocusNavigationReason::Left) {
 					sender.NavigateFocus(args.Request());
 				}
 			}
@@ -112,11 +116,11 @@ protected:
 	}
 
 	void _SetInitialTheme(
-		winrt::XamlIslandsCpp::App::AppTheme theme,
-		winrt::XamlIslandsCpp::App::WindowBackdrop backdrop,
+		winrt::XamlIslandsCpp::AppTheme theme,
+		winrt::XamlIslandsCpp::WindowBackdrop backdrop,
 		bool isCustomTitleBarEnabled
 	) {
-		using namespace winrt::XamlIslandsCpp::App;
+		using namespace winrt::XamlIslandsCpp;
 		_isDarkTheme = theme == AppTheme::Dark;
 		_isBackgroundSolidColor = backdrop == WindowBackdrop::SolidColor;
 		_isCustomTitleBarEnabled = isCustomTitleBarEnabled;
@@ -124,10 +128,10 @@ protected:
 
 	// 需要重新创建窗口时返回 true
 	bool _SetTheme(
-		winrt::XamlIslandsCpp::App::AppTheme theme,
-		winrt::XamlIslandsCpp::App::WindowBackdrop backdrop) noexcept
+		winrt::XamlIslandsCpp::AppTheme theme,
+		winrt::XamlIslandsCpp::WindowBackdrop backdrop) noexcept
 	{
-		using namespace winrt::XamlIslandsCpp::App;
+		using namespace winrt::XamlIslandsCpp;
 
 		if (Win32Helper::GetOSVersion().Is22H2OrNewer() &&
 			_isBackgroundSolidColor != (backdrop == WindowBackdrop::SolidColor)) {
@@ -375,9 +379,11 @@ protected:
 			if (wParam == VK_TAB) {
 				// 处理焦点
 				if (_xamlSource) {
-					winrt::XamlSourceFocusNavigationReason reason = (GetKeyState(VK_SHIFT) & 0x80) ?
-						winrt::XamlSourceFocusNavigationReason::Last : winrt::XamlSourceFocusNavigationReason::First;
-					_xamlSource.NavigateFocus(winrt::XamlSourceFocusNavigationRequest(reason));
+					using namespace winrt::Windows::UI::Xaml::Hosting;
+
+					XamlSourceFocusNavigationReason reason = (GetKeyState(VK_SHIFT) & 0x80) ?
+						XamlSourceFocusNavigationReason::Last : XamlSourceFocusNavigationReason::First;
+					_xamlSource.NavigateFocus(XamlSourceFocusNavigationRequest(reason));
 				}
 				return 0;
 			}
@@ -591,7 +597,7 @@ private:
 
 	HWND _hWnd = NULL;
 	HWND _hwndXamlIsland = NULL;
-	winrt::DesktopWindowXamlSource _xamlSource{ nullptr };
+	winrt::Windows::UI::Xaml::Hosting::DesktopWindowXamlSource _xamlSource{nullptr};
 	winrt::com_ptr<IDesktopWindowXamlSourceNative2> _xamlSourceNative2;
 
 	C _content{ nullptr };

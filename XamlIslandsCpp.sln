@@ -3,23 +3,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.1.32228.430
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "XamlIslandsCpp", "src\XamlIslandsCpp\XamlIslandsCpp.vcxproj", "{1801171B-65B6-400F-92FF-73EAF499CFB3}"
-	ProjectSection(ProjectDependencies) = postProject
-		{1239537C-E5B8-427A-9E7F-EA443D1F3529} = {1239537C-E5B8-427A-9E7F-EA443D1F3529}
-	EndProjectSection
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "XamlIslandsCpp.App", "src\XamlIslandsCpp.App\XamlIslandsCpp.App.vcxproj", "{1239537C-E5B8-427A-9E7F-EA443D1F3529}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "XamlIslandsCpp", "src\XamlIslandsCpp\XamlIslandsCpp.vcxproj", "{1239537C-E5B8-427A-9E7F-EA443D1F3529}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{00AB63C3-0CD3-4944-B8E6-58C86138618D}"
 	ProjectSection(SolutionItems) = preProject
 		src\HybridCRT.props = src\HybridCRT.props
 		src\Solution.props = src\Solution.props
-		src\WinUI.targets = src\WinUI.targets
 	EndProjectSection
 EndProject
 Project("{C7167F0D-BC9F-4E6E-AFE1-012C56B48DB5}") = "AppPackage", "src\AppPackage\AppPackage.wapproj", "{E3AA150F-D6E7-44AB-B8D8-EF290C0889EF}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Shared", "src\Shared\Shared.vcxitems", "{BF9882DF-524F-4C55-9629-CA38F125FFBB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,22 +25,6 @@ Global
 		ReleasePackaged|x64 = ReleasePackaged|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{1801171B-65B6-400F-92FF-73EAF499CFB3}.Debug|ARM64.ActiveCfg = Debug|ARM64
-		{1801171B-65B6-400F-92FF-73EAF499CFB3}.Debug|ARM64.Build.0 = Debug|ARM64
-		{1801171B-65B6-400F-92FF-73EAF499CFB3}.Debug|x64.ActiveCfg = Debug|x64
-		{1801171B-65B6-400F-92FF-73EAF499CFB3}.Debug|x64.Build.0 = Debug|x64
-		{1801171B-65B6-400F-92FF-73EAF499CFB3}.DebugPackaged|ARM64.ActiveCfg = DebugPackaged|ARM64
-		{1801171B-65B6-400F-92FF-73EAF499CFB3}.DebugPackaged|ARM64.Build.0 = DebugPackaged|ARM64
-		{1801171B-65B6-400F-92FF-73EAF499CFB3}.DebugPackaged|x64.ActiveCfg = DebugPackaged|x64
-		{1801171B-65B6-400F-92FF-73EAF499CFB3}.DebugPackaged|x64.Build.0 = DebugPackaged|x64
-		{1801171B-65B6-400F-92FF-73EAF499CFB3}.Release|ARM64.ActiveCfg = Release|ARM64
-		{1801171B-65B6-400F-92FF-73EAF499CFB3}.Release|ARM64.Build.0 = Release|ARM64
-		{1801171B-65B6-400F-92FF-73EAF499CFB3}.Release|x64.ActiveCfg = Release|x64
-		{1801171B-65B6-400F-92FF-73EAF499CFB3}.Release|x64.Build.0 = Release|x64
-		{1801171B-65B6-400F-92FF-73EAF499CFB3}.ReleasePackaged|ARM64.ActiveCfg = ReleasePackaged|ARM64
-		{1801171B-65B6-400F-92FF-73EAF499CFB3}.ReleasePackaged|ARM64.Build.0 = ReleasePackaged|ARM64
-		{1801171B-65B6-400F-92FF-73EAF499CFB3}.ReleasePackaged|x64.ActiveCfg = ReleasePackaged|x64
-		{1801171B-65B6-400F-92FF-73EAF499CFB3}.ReleasePackaged|x64.Build.0 = ReleasePackaged|x64
 		{1239537C-E5B8-427A-9E7F-EA443D1F3529}.Debug|ARM64.ActiveCfg = Debug|ARM64
 		{1239537C-E5B8-427A-9E7F-EA443D1F3529}.Debug|ARM64.Build.0 = Debug|ARM64
 		{1239537C-E5B8-427A-9E7F-EA443D1F3529}.Debug|x64.ActiveCfg = Debug|x64
@@ -87,8 +63,5 @@ Global
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {0114F74A-3B0C-43A4-AA0E-AB36FD4935F8}
-	EndGlobalSection
-	GlobalSection(SharedMSBuildProjectFiles) = preSolution
-		src\Shared\Shared.vcxitems*{bf9882df-524f-4c55-9629-ca38f125ffbb}*SharedItemsImports = 9
 	EndGlobalSection
 EndGlobal

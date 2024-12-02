@@ -1,8 +1,15 @@
 #pragma once
 #include "App.g.h"
+#include "MyXamlMetaDataProvider.g.h"
 #include <winrt/Windows.UI.Xaml.Hosting.h>
 
-namespace winrt::XamlIslandsCpp::App::implementation {
+namespace winrt::XamlIslandsCpp::implementation {
+
+struct MyXamlMetaDataProvider : public MyXamlMetaDataProviderT<MyXamlMetaDataProvider> {
+	Markup::IXamlType GetXamlType(Interop::TypeName const&) { return nullptr; }
+	Markup::IXamlType GetXamlType(hstring const&) { return nullptr; }
+	com_array<Markup::XmlnsDefinition> GetXmlnsDefinitions() { return {}; }
+};
 
 class App : public App_base<App, Markup::IXamlMetadataProvider> {
 public:
@@ -19,14 +26,14 @@ public:
 		_hwndMain = (HWND)value;
 	}
 
-	XamlIslandsCpp::App::Settings Settings() const noexcept {
+	XamlIslandsCpp::Settings Settings() const noexcept {
 		return _settings;
 	}
 
 private:
 	Hosting::WindowsXamlManager _windowsXamlManager{ nullptr };
 	HWND _hwndMain = NULL;
-	XamlIslandsCpp::App::Settings _settings;
+	XamlIslandsCpp::Settings _settings;
 	bool _isClosed = false;
 
 	////////////////////////////////////////////////////
@@ -35,6 +42,10 @@ private:
 	// 
 	/////////////////////////////////////////////////////
 public:
+	static Markup::IXamlMetadataProvider XamlMetaDataProvider() {
+		return make<MyXamlMetaDataProvider>();
+	}
+
 	Markup::IXamlType GetXamlType(Interop::TypeName const& type) {
 		return _AppProvider()->GetXamlType(type);
 	}
@@ -48,19 +59,19 @@ public:
 	}
 
 private:
-	com_ptr<XamlMetaDataProvider> _AppProvider() {
+	const com_ptr<implementation::XamlMetaDataProvider>& _AppProvider() {
 		if (!_appProvider) {
-			_appProvider = make_self<XamlMetaDataProvider>();
+			_appProvider = make_self<implementation::XamlMetaDataProvider>();
 		}
 		return _appProvider;
 	}
 
-	com_ptr<XamlMetaDataProvider> _appProvider;
+	com_ptr<implementation::XamlMetaDataProvider> _appProvider;
 };
 
 }
 
-namespace winrt::XamlIslandsCpp::App::factory_implementation {
+namespace winrt::XamlIslandsCpp::factory_implementation {
 
 class App : public AppT<App, implementation::App> {
 };

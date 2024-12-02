@@ -9,7 +9,7 @@
 
 using namespace XamlIslandsCpp;
 
-namespace winrt::XamlIslandsCpp::App::implementation {
+namespace winrt::XamlIslandsCpp::implementation {
 
 RootPage::RootPage() {
 	_settings = Application::Current().as<App>().Settings();

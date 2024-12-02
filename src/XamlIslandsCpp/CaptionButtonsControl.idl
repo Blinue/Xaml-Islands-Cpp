@@ -1,4 +1,4 @@
-namespace XamlIslandsCpp.App {
+namespace XamlIslandsCpp {
 	enum CaptionButton {
 		Minimize = 8,   // HTMINBUTTON
 		Maximize = 9,   // HTMAXBUTTON

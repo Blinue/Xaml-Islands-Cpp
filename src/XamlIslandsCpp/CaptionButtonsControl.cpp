@@ -4,7 +4,7 @@
 #include "CaptionButtonsControl.g.cpp"
 #endif
 
-namespace winrt::XamlIslandsCpp::App::implementation {
+namespace winrt::XamlIslandsCpp::implementation {
 
 Size CaptionButtonsControl::CaptionButtonSize() const {
 	ResourceDictionary resources = Resources();

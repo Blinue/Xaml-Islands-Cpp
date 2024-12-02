@@ -1,0 +1,17 @@
+#include "CaptionButtonsControl.idl"
+#include "TitleBarControl.idl"
+#include "RootPage.idl"
+#include "Settings.idl"
+
+namespace XamlIslandsCpp {
+	runtimeclass MyXamlMetaDataProvider : [default] Windows.UI.Xaml.Markup.IXamlMetadataProvider {}
+
+	runtimeclass App : Windows.UI.Xaml.Application, Windows.Foundation.IClosable {
+		App();
+
+		static Windows.UI.Xaml.Markup.IXamlMetadataProvider XamlMetaDataProvider { get; };
+
+		UInt64 HwndMain;
+		Settings Settings { get; };
+	}
+}

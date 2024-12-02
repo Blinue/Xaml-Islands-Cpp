@@ -11,10 +11,6 @@
     <IsPackaged>$(Configuration.EndsWith('Packaged'))</IsPackaged>
   </PropertyGroup>
   
-  <ImportGroup Label="Shared">
-    <Import Project="Shared\Shared.vcxitems" Label="Shared" />
-  </ImportGroup>
-  
   <ItemDefinitionGroup>
     <ClCompile>
       <PrecompiledHeader>Use</PrecompiledHeader>

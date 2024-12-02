@@ -5,7 +5,7 @@
 #pragma comment(lib, "UxTheme.lib")
 
 namespace winrt {
-using namespace XamlIslandsCpp::App;
+using namespace XamlIslandsCpp;
 }
 
 namespace XamlIslandsCpp {

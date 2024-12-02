@@ -26,12 +26,12 @@ private:
 	void _MainWindow_Destoryed();
 
 	HINSTANCE _hInstance = NULL;
-	winrt::XamlIslandsCpp::App::App _uwpApp{ nullptr };
+	winrt::XamlIslandsCpp::App _uwpApp{ nullptr };
 	MainWindow _mainWindow;
 
-	winrt::XamlIslandsCpp::App::Settings::ThemeChanged_revoker _themeChangedRevoker;
-	winrt::XamlIslandsCpp::App::Settings::IsCustomTitleBarEnabledChanged_revoker _isCustomTitleBarEnabledChangedRevoker;
-	winrt::XamlIslandsCpp::App::Settings::BackdropChanged_revoker _backdropChangedRevoker;
+	winrt::XamlIslandsCpp::Settings::ThemeChanged_revoker _themeChangedRevoker;
+	winrt::XamlIslandsCpp::Settings::IsCustomTitleBarEnabledChanged_revoker _isCustomTitleBarEnabledChangedRevoker;
+	winrt::XamlIslandsCpp::Settings::BackdropChanged_revoker _backdropChangedRevoker;
 
 	// 防止重新创建主窗口时退出
 	bool shouldQuit = true;

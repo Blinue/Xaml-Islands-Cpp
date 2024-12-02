@@ -2,6 +2,36 @@
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="..\..\packages\Microsoft.Windows.CppWinRT.2.0.240405.15\build\native\Microsoft.Windows.CppWinRT.props" Condition="Exists('..\..\packages\Microsoft.Windows.CppWinRT.2.0.240405.15\build\native\Microsoft.Windows.CppWinRT.props')" />
   <Import Project="..\..\packages\Microsoft.UI.Xaml.2.8.6\build\native\Microsoft.UI.Xaml.props" Condition="Exists('..\..\packages\Microsoft.UI.Xaml.2.8.6\build\native\Microsoft.UI.Xaml.props')" />
+  <PropertyGroup Label="Globals">
+    <CppWinRTGenerateWindowsMetadata>true</CppWinRTGenerateWindowsMetadata>
+    <MinimalCoreWin>true</MinimalCoreWin>
+    <ProjectGuid>{1239537c-e5b8-427a-9e7f-ea443d1f3529}</ProjectGuid>
+    <ProjectName>XamlIslandsCpp</ProjectName>
+    <RootNamespace>XamlIslandsCpp</RootNamespace>
+    <MinimumVisualStudioVersion>15.0</MinimumVisualStudioVersion>
+    <AppContainerApplication>false</AppContainerApplication>
+    <ApplicationType>Windows Store</ApplicationType>
+    <ApplicationTypeRevision>10.0</ApplicationTypeRevision>
+    <WindowsTargetPlatformVersion Condition=" '$(WindowsTargetPlatformVersion)' == '' ">10.0.22621.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformMinVersion>10.0.18362.0</WindowsTargetPlatformMinVersion>
+    <OutDir>$(SolutionDir)bin\$(Platform)\$(Configuration)\</OutDir>
+    <AppxBundlePlatforms>x64|arm64</AppxBundlePlatforms>
+    <!-- 将 xbf 文件打包进 pri -->
+    <!-- https://github.com/microsoft/terminal/blob/9eb191d5453fed890bad63952e425e1240aa8df5/src/cascadia/TerminalApp/TerminalAppLib.vcxproj#L17-L18 -->
+    <DisableEmbeddedXbf>false</DisableEmbeddedXbf>
+    <XamlComponentResourceLocation>nested</XamlComponentResourceLocation>
+    <!-- 防止编译到子文件夹中 -->
+    <GenerateProjectSpecificOutputFolder>false</GenerateProjectSpecificOutputFolder>
+    <!-- 防止 XAML 被拷贝到输出文件夹 -->
+    <GenerateLibraryLayout>false</GenerateLibraryLayout>
+    <!-- 链接到桌面版 CRT -->
+    <DesktopCompatible>true</DesktopCompatible>
+    <_NoWinAPIFamilyApp>true</_NoWinAPIFamilyApp>
+    <_VC_Target_Library_Platform>Desktop</_VC_Target_Library_Platform>
+    <UseCrtSDKReferenceStaticWarning>false</UseCrtSDKReferenceStaticWarning>
+    <AppxPackage>false</AppxPackage>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="DebugPackaged|ARM64">
       <Configuration>DebugPackaged</Configuration>
@@ -36,20 +66,6 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
-  <PropertyGroup Label="Globals">
-    <VCProjectVersion>16.0</VCProjectVersion>
-    <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{1801171b-65b6-400f-92ff-73eaf499cfb3}</ProjectGuid>
-    <RootNamespace>Magpie</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.22621.0</WindowsTargetPlatformVersion>
-    <!-- OutDir 不能放入 Solution.props，否则有时会导致编译失败 -->
-    <OutDir>$(SolutionDir)bin\$(Platform)\$(Configuration)\</OutDir>
-    <ProjectName>XamlIslandsCpp</ProjectName>
-    <!-- Up-to-date 检查无法检测到 UWP 项目的更改 -->
-    <!-- https://github.com/dotnet/project-system/issues/5543 -->
-    <DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
-  </PropertyGroup>
-  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <PlatformToolset>v143</PlatformToolset>
@@ -79,46 +95,224 @@
   <ImportGroup Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="..\Solution.props" />
-    <Import Project="..\WinUI.targets" />
+    <Import Project="WinUI.targets" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$([Microsoft.Build.Utilities.ToolLocationHelper]::GetPlatformExtensionSDKLocation(`WindowsDesktop, Version=10.0.22621.0`, $(TargetPlatformIdentifier), $(TargetPlatformVersion),  $(SDKReferenceDirectoryRoot), $(SDKExtensionDirectoryRoot), $(SDKReferenceRegistryRoot)))\DesignTime\CommonConfiguration\Neutral\WindowsDesktop.props" Condition="exists('$([Microsoft.Build.Utilities.ToolLocationHelper]::GetPlatformExtensionSDKLocation(`WindowsDesktop, Version=10.0.22621.0`, $(TargetPlatformIdentifier), $(TargetPlatformVersion),  $(SDKReferenceDirectoryRoot), $(SDKExtensionDirectoryRoot), $(SDKReferenceRegistryRoot)))\DesignTime\CommonConfiguration\Neutral\WindowsDesktop.props')" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <ItemDefinitionGroup>
     <ClCompile>
-      <FloatingPointModel>Fast</FloatingPointModel>
+      <!-- 删除用于 XAML 设计器的几个导出函数，编译为 exe 不需要它们。 -->
+      <!-- 另外这些导出函数不支持 ARM64，所以即使编译为 dll 也应禁用它们，然后自己导出 DllGetActivationFactory。 -->
+      <PreprocessorDefinitions>_VSDESIGNER_DONT_LOAD_AS_DLL;DISABLE_XAML_GENERATED_MAIN;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
+      <GenerateWindowsMetadata>false</GenerateWindowsMetadata>
       <SubSystem>Windows</SubSystem>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>kernel32.lib;ole32.lib;oleaut32.lib;user32.lib;gdi32.lib;Dwmapi.lib;Shell32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="CaptionButtonsControl.h">
+      <DependentUpon>CaptionButtonsControl.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </ClInclude>
+    <ClInclude Include="CommonSharedConstants.h" />
     <ClInclude Include="MainWindow.h" />
+    <ClInclude Include="RootPage.h">
+      <DependentUpon>RootPage.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </ClInclude>
     <ClInclude Include="pch.h" />
+    <ClInclude Include="App.h">
+      <DependentUpon>App.xaml</DependentUpon>
+    </ClInclude>
+    <ClInclude Include="Settings.h">
+      <DependentUpon>Settings.idl</DependentUpon>
+      <SubType>Code</SubType>
+    </ClInclude>
     <ClInclude Include="ThemeHelper.h" />
+    <ClInclude Include="TitleBarControl.h">
+      <DependentUpon>TitleBarControl.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </ClInclude>
+    <ClInclude Include="Win32Helper.h" />
     <ClInclude Include="XamlApp.h" />
+    <ClInclude Include="XamlHelper.h" />
     <ClInclude Include="XamlWindow.h" />
   </ItemGroup>
   <ItemGroup>
+    <ApplicationDefinition Include="App.xaml">
+      <SubType>Designer</SubType>
+    </ApplicationDefinition>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="CaptionButtonsControl.cpp">
+      <DependentUpon>CaptionButtonsControl.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </ClCompile>
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="MainWindow.cpp" />
+    <ClCompile Include="RootPage.cpp">
+      <DependentUpon>RootPage.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </ClCompile>
+    <ClCompile Include="pch.cpp">
+      <PrecompiledHeader>Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="App.cpp">
+      <DependentUpon>App.xaml</DependentUpon>
+    </ClCompile>
+    <ClCompile Include="$(GeneratedFilesDir)module.g.cpp" />
+    <ClCompile Include="Settings.cpp">
+      <DependentUpon>Settings.idl</DependentUpon>
+      <SubType>Code</SubType>
+    </ClCompile>
+    <ClCompile Include="ThemeHelper.cpp" />
+    <ClCompile Include="TitleBarControl.cpp">
+      <DependentUpon>TitleBarControl.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </ClCompile>
+    <ClCompile Include="Win32Helper.cpp" />
+    <ClCompile Include="XamlApp.cpp" />
+    <ClCompile Include="XamlHelper.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Midl Include="App.idl">
+      <DependentUpon>App.xaml</DependentUpon>
+    </Midl>
+    <None Include="Settings.idl">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="CaptionButtonsControl.idl">
+      <DependentUpon>CaptionButtonsControl.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </None>
+    <None Include="RootPage.idl">
+      <DependentUpon>RootPage.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </None>
+    <None Include="TitleBarControl.idl">
+      <DependentUpon>TitleBarControl.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="WinUI.targets" />
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="CaptionButtonsControl.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="RootPage.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="TitleBarControl.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <SDKReference Include="WindowsDesktop, Version=10.0.22621.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <PRIResource Include="Resources.language-en-US.resw" />
+    <PRIResource Include="Resources.language-zh-CN.resw" />
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="app.manifest" />
   </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="MainWindow.cpp" />
-    <ClCompile Include="pch.cpp">
-      <PrecompiledHeader>Create</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="main.cpp" />
-    <ClCompile Include="ThemeHelper.cpp" />
-    <ClCompile Include="XamlApp.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\XamlIslandsCpp.App\XamlIslandsCpp.App.vcxproj">
-      <Project>{1239537c-e5b8-427a-9e7f-ea443d1f3529}</Project>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <Import Project="$(MsAppxPackageTargets)" />
+  <!-- resources.pri 中 App.xbf 必须是 Files 的根节点，否则程序将无法运行 -->
+  <!-- https://github.com/microsoft/terminal/blob/a2bb3136bb52c253060aa281396dbd12316b33a6/src/cascadia/TerminalApp/TerminalAppLib.vcxproj#L458 -->
+  <Target Name="PlaceAppXbfAtRootOfResourceTree" AfterTargets="GetPackagingOutputs">
+    <ItemGroup>
+      <_RelocatedAppXamlData Include="@(PackagingOutputs)" Condition="'%(Filename)' == 'App' and ('%(Extension)' == '.xaml' or '%(Extension)' == '.xbf')" />
+      <PackagingOutputs Remove="@(_RelocatedAppXamlData)" />
+      <PackagingOutputs Include="@(_RelocatedAppXamlData)">
+        <TargetPath>%(Filename)%(Extension)</TargetPath>
+      </PackagingOutputs>
+    </ItemGroup>
+  </Target>
+  <!-- 编译为非打包应用时应自行生成 resources.pri。 -->
+  <!-- 设置 AppxPackage 属性会自动生成 resources.pri，但会让 XAML 热重载不起作用，最好避免。 -->
+  <UsingTask TaskName="MakeResourcesPriTask" TaskFactory="RoslynCodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
+    <ParameterGroup>
+      <WindowsSDKDir Required="true" />
+      <OutDir Required="true" />
+      <PriPaths Required="true" />
+    </ParameterGroup>
+    <Task>
+      <Using Namespace="System" />
+      <Using Namespace="System.IO" />
+      <Using Namespace="System.Diagnostics" />
+      <Code Type="Fragment" Language="cs"><![CDATA[
+string windowsSdkDir = WindowsSDKDir.Split(';')[0];
+string makepriPath = Path.Combine(windowsSdkDir, "makepri.exe");
+if (!File.Exists(makepriPath)) {
+    throw new Exception("未找到 makepri");
+}
+
+Directory.SetCurrentDirectory(OutDir);
+
+// 创建配置文件合并输入的 pri
+using (StreamWriter priConfig = File.CreateText("priconfig.xml")) {
+    priConfig.WriteLine("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
+    priConfig.WriteLine("<resources targetOsVersion=\"10.0.0\" majorVersion=\"1\">");
+    
+    foreach (string priPath in PriPaths.Split(';')) {
+        priConfig.WriteLine($"  <index root=\"\\\" startIndexAt=\"{priPath}\">");
+        priConfig.WriteLine("""
+      <default>
+        <qualifier name="Language" value="en-US" />
+        <qualifier name="Contrast" value="standard" />
+        <qualifier name="Scale" value="200" />
+        <qualifier name="HomeRegion" value="001" />
+        <qualifier name="TargetSize" value="256" />
+        <qualifier name="LayoutDirection" value="LTR" />
+        <qualifier name="DXFeatureLevel" value="DX9" />
+        <qualifier name="Configuration" value="" />
+        <qualifier name="AlternateForm" value="" />
+        <qualifier name="Platform" value="UAP" />
+      </default>
+      <indexer-config type="PRI" />
+      <indexer-config type="RESFILES" qualifierDelimiter="." />
+    </index>
+  """);
+    }
+    
+    priConfig.WriteLine("</resources>");
+}
+
+// 调用 makepri 生成 resources.pri
+Process p = Process.Start(new ProcessStartInfo {
+    FileName = makepriPath,
+    Arguments = "New /pr . /cf priconfig.xml /of resources.pri /o",
+    WorkingDirectory = OutDir,
+    UseShellExecute = false
+});
+p.WaitForExit();
+
+if (p.ExitCode != 0) {
+    throw new Exception("生成 resources.pri 失败");
+}
+
+File.Delete("priconfig.xml");
+      ]]></Code>
+    </Task>
+  </UsingTask>
+  <Target Name="MakeResourcesPri" AfterTargets="_GenerateProjectPriFileCore" Condition="!$(IsPackaged)">
+    <ItemGroup>
+      <_PrisToMerge Include="@(PackagingOutputs)" Condition="'%(Extension)' == '.pri'" KeepMetadata="DoesntExist" />
+    </ItemGroup>
+    <MakeResourcesPriTask WindowsSDKDir="$(WindowsSDK_ExecutablePath_x64)" OutDir="$(OutDir)" PriPaths="@(_PrisToMerge)" />
+    <ItemGroup>
+      <!-- 删除 resources.pri 后应触发重新编译 -->
+      <FileWrites Include="$(OutDir)resources.pri" />
+    </ItemGroup>
+  </Target>
   <!-- 编译为非打包应用时向清单文件添加运行时使用到的 WinRT 组件 -->
   <!-- Reg-free WinRT: https://blogs.windows.com/windowsdeveloper/2019/04/30/enhancing-non-packaged-desktop-apps-using-windows-runtime-components/ -->
   <!-- 来自 https://github.com/microsoft/terminal/blob/a2bb3136bb52c253060aa281396dbd12316b33a6/build/rules/GenerateSxsManifestsFromWinmds.targets -->

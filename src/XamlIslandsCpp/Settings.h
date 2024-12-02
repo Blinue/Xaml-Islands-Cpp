@@ -1,7 +1,7 @@
 #pragma once
 #include "Settings.g.h"
 
-namespace winrt::XamlIslandsCpp::App::implementation {
+namespace winrt::XamlIslandsCpp::implementation {
 
 struct Settings : SettingsT<Settings> {
 	Settings();
@@ -60,7 +60,7 @@ private:
 
 }
 
-namespace winrt::XamlIslandsCpp::App::factory_implementation {
+namespace winrt::XamlIslandsCpp::factory_implementation {
 
 struct Settings : SettingsT<Settings, implementation::Settings> {
 };

@@ -1,9 +1,10 @@
 #include "pch.h"
 #include "XamlApp.h"
 #include "ThemeHelper.h"
+#include <dwmapi.h>
 
 namespace winrt {
-using namespace XamlIslandsCpp::App;
+using namespace XamlIslandsCpp;
 }
 
 namespace XamlIslandsCpp {

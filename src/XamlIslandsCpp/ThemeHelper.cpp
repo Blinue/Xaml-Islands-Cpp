@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "ThemeHelper.h"
 #include "Win32Helper.h"
+#include <dwmapi.h>
 
 namespace XamlIslandsCpp {
 

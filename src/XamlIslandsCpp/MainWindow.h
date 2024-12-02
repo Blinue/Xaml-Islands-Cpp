@@ -3,18 +3,18 @@
 
 namespace XamlIslandsCpp {
 
-class MainWindow : public XamlWindowT<MainWindow, winrt::XamlIslandsCpp::App::RootPage> {
+class MainWindow : public XamlWindowT<MainWindow, winrt::XamlIslandsCpp::RootPage> {
 	friend base_type;
 public:
 	bool Create(
 		HINSTANCE hInstance,
-		winrt::XamlIslandsCpp::App::AppTheme theme,
-		winrt::XamlIslandsCpp::App::WindowBackdrop backdrop,
+		winrt::XamlIslandsCpp::AppTheme theme,
+		winrt::XamlIslandsCpp::WindowBackdrop backdrop,
 		bool isCustomTitleBarEnabled,
 		const WINDOWPLACEMENT* wp = nullptr
 	) noexcept;
 
-	bool SetTheme(winrt::XamlIslandsCpp::App::AppTheme theme, winrt::XamlIslandsCpp::App::WindowBackdrop backdrop) noexcept;
+	bool SetTheme(winrt::XamlIslandsCpp::AppTheme theme, winrt::XamlIslandsCpp::WindowBackdrop backdrop) noexcept;
 
 	void SetCustomTitleBar(bool enabled) noexcept;
 

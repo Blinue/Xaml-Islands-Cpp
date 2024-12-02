@@ -52,13 +52,13 @@
     <TargetPlatformMinVersion>10.0.18362.0</TargetPlatformMinVersion>
     <DefaultLanguage>en-US</DefaultLanguage>
     <DebuggerType>NativeOnly</DebuggerType>
-    <EntryPointProjectUniqueName>..\XamlIslandsCpp\XamlIslandsCpp.vcxproj</EntryPointProjectUniqueName>
     <GenerateAppInstallerFile>true</GenerateAppInstallerFile>
     <AppxPackageSigningTimestampDigestAlgorithm>SHA256</AppxPackageSigningTimestampDigestAlgorithm>
     <AppxBundle>Never</AppxBundle>
     <AppxBundlePlatforms>x64|arm64</AppxBundlePlatforms>
     <AppxAutoIncrementPackageRevision>false</AppxAutoIncrementPackageRevision>
     <GenerateTestArtifacts>false</GenerateTestArtifacts>
+    <EntryPointProjectUniqueName>..\XamlIslandsCpp\XamlIslandsCpp.vcxproj</EntryPointProjectUniqueName>
   </PropertyGroup>
   <PropertyGroup Condition="!Exists('AppPackage_TemporaryKey.pfx')">
     <AppxPackageSigningEnabled>false</AppxPackageSigningEnabled>
@@ -128,7 +128,7 @@ doc.Save(TargetPath);
     </Task>
   </UsingTask>
   <Target Name="GenerateResourcesNodeForAppxManifest" BeforeTargets="ResolveProjectReferences">
-    <GenerateResourcesNode ManifestPath="@(AppxManifest)" TargetPath="$(BaseIntermediateOutputPath)Package.appxmanifest" ResourcesDir="..\XamlIslandsCpp.App\" />
+    <GenerateResourcesNode ManifestPath="@(AppxManifest)" TargetPath="$(BaseIntermediateOutputPath)Package.appxmanifest" ResourcesDir="..\XamlIslandsCpp\" />
     <ItemGroup>
       <AppxManifest Remove="@(AppxManifest)" />
       <AppxManifest Include="$(BaseIntermediateOutputPath)Package.appxmanifest" />

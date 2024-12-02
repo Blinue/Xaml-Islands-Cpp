@@ -7,7 +7,7 @@
 using namespace winrt;
 using namespace Windows::UI::Xaml;
 
-namespace winrt::XamlIslandsCpp::App::implementation {
+namespace winrt::XamlIslandsCpp::implementation {
 
 void TitleBarControl::IsWindowActive(bool value) {
 	VisualStateManager::GoToState(*this, value ? L"Active" : L"NotActive", false);

@@ -1,4 +1,4 @@
-namespace XamlIslandsCpp.App {
+namespace XamlIslandsCpp {
 	runtimeclass RootPage : Windows.UI.Xaml.Controls.Page, Windows.UI.Xaml.Data.INotifyPropertyChanged {
 		RootPage();
 

@@ -3,7 +3,7 @@
 #include "RootPage.g.h"
 #include "Settings.h"
 
-namespace winrt::XamlIslandsCpp::App::implementation {
+namespace winrt::XamlIslandsCpp::implementation {
 
 struct RootPage : RootPageT<RootPage> {
 	RootPage();
@@ -36,12 +36,12 @@ private:
 
 	event<PropertyChangedEventHandler> _propertyChangedEvent;
 
-	XamlIslandsCpp::App::Settings _settings{ nullptr };
+	XamlIslandsCpp::Settings _settings{ nullptr };
 };
 
 }
 
-namespace winrt::XamlIslandsCpp::App::factory_implementation {
+namespace winrt::XamlIslandsCpp::factory_implementation {
 
 struct RootPage : RootPageT<RootPage, implementation::RootPage> {
 };

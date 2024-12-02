@@ -1,7 +1,7 @@
 #pragma once
 #include "TitleBarControl.g.h"
 
-namespace winrt::XamlIslandsCpp::App::implementation {
+namespace winrt::XamlIslandsCpp::implementation {
 
 struct TitleBarControl : TitleBarControlT<TitleBarControl> {
 	void IsWindowActive(bool value);
@@ -9,7 +9,7 @@ struct TitleBarControl : TitleBarControlT<TitleBarControl> {
 
 }
 
-namespace winrt::XamlIslandsCpp::App::factory_implementation {
+namespace winrt::XamlIslandsCpp::factory_implementation {
 
 struct TitleBarControl : TitleBarControlT<TitleBarControl, implementation::TitleBarControl> {
 };
