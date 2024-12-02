@@ -28,7 +28,7 @@ int APIENTRY wWinMain(
 
 	ThemeHelper::Initialize();
 
-	// 初始化 UWP 应用
+	// 初始化 UWP 应用。退出时不要调用 Close，如果正在播放动画会崩溃
 	auto uwpApp = winrt::make_self<winrt::XamlIslandsCpp::implementation::App>();
 
 	if (!MainWindow::Get().Create(hInstance)) {

@@ -1,11 +1,11 @@
 #pragma once
 #include "XamlWindow.h"
 #include "AppSettings.h"
-#include <winrt/XamlIslandsCpp.h>
+#include "RootPage.h"
 
 namespace XamlIslandsCpp {
 
-class MainWindow : public XamlWindowT<MainWindow, winrt::XamlIslandsCpp::RootPage> {
+class MainWindow : public XamlWindowT<MainWindow, winrt::com_ptr<winrt::XamlIslandsCpp::implementation::RootPage>> {
 	friend base_type;
 public:
 	MainWindow(const MainWindow&) = delete;
