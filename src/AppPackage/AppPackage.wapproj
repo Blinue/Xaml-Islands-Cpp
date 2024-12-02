@@ -152,5 +152,11 @@ doc.Save(TargetPath);
       <AppxPackagePayload Remove="@(AppxPackagePayload)" Condition="'%(Extension)' == '.winmd' Or ('%(Filename)' != 'resources' And '%(Extension)' == '.pri')" />
     </ItemGroup>
   </Target>
+  <!-- 默认情况下会合并 WinUI 中一个很小的 pri，其中包含 Compact.xbf，对我们无用 -->
+  <Target Name="RemoveWinUIPriFromPackage" AfterTargets="_RemoveExtraPriFiles">
+    <ItemGroup>
+      <_PriFile Remove="@(_PriFile)" Condition="'%(Filename)%(Extension)' == 'Microsoft.UI.Xaml.pri'" />
+    </ItemGroup>
+  </Target>
   <Import Project="$(WapProjPath)\Microsoft.DesktopBridge.targets" />
 </Project>
