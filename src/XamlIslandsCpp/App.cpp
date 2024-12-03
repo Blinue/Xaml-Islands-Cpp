@@ -11,7 +11,16 @@ using namespace XamlIslandsCpp;
 namespace winrt::XamlIslandsCpp::implementation {
 
 App::App() {
-	// 初始化 XAML 框架
+#ifdef _DEBUG
+	UnhandledException([this](IInspectable const&, UnhandledExceptionEventArgs const& e) {
+		if (IsDebuggerPresent()) {
+			hstring errorMessage = e.Message();
+			__debugbreak();
+		}
+	});
+#endif
+
+	// 初始化 XAML 框架。退出时也不要关闭，如果正在播放动画会崩溃。文档中的清空消息队列的做法无用。
 	_windowsXamlManager = Hosting::WindowsXamlManager::InitializeForCurrentThread();
 
 	if (!Win32Helper::GetOSVersion().IsWin11()) {
@@ -22,31 +31,6 @@ App::App() {
 			ShowWindow(hwndDWXS, SW_HIDE);
 		}
 	}
-
-#ifdef _DEBUG
-	UnhandledException([this](IInspectable const&, UnhandledExceptionEventArgs const& e) {
-		if (IsDebuggerPresent()) {
-			hstring errorMessage = e.Message();
-			__debugbreak();
-		}
-	});
-#endif
-}
-
-App::~App() {
-	Close();
-}
-
-void App::Close() {
-	if (_isClosed) {
-		return;
-	}
-	_isClosed = true;
-
-	_windowsXamlManager.Close();
-	_windowsXamlManager = nullptr;
-
-	Exit();
 }
 
 }

@@ -3,7 +3,8 @@
 #include "RootPage.idl"
 
 namespace XamlIslandsCpp {
-	runtimeclass App : Windows.UI.Xaml.Application, [default] Windows.Foundation.IClosable {
+	[default_interface]
+	runtimeclass App : Windows.UI.Xaml.Application {
 		App();
 	}
 }

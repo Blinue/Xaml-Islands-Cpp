@@ -7,13 +7,9 @@ namespace winrt::XamlIslandsCpp::implementation {
 class App : public App_base<App, Markup::IXamlMetadataProvider> {
 public:
 	App();
-	~App();
-
-	void Close();
 
 private:
 	Hosting::WindowsXamlManager _windowsXamlManager{ nullptr };
-	bool _isClosed = false;
 
 	////////////////////////////////////////////////////
 	// 

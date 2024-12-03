@@ -87,9 +87,8 @@ protected:
 		_xamlSource = DesktopWindowXamlSource();
 		_xamlSourceNative2 = _xamlSource.as<IDesktopWindowXamlSourceNative2>();
 
-		auto interop = _xamlSource.as<IDesktopWindowXamlSourceNative>();
-		interop->AttachToWindow(_hWnd);
-		interop->get_WindowHandle(&_hwndXamlIsland);
+		_xamlSourceNative2->AttachToWindow(_hWnd);
+		_xamlSourceNative2->get_WindowHandle(&_hwndXamlIsland);
 		_xamlSource.Content(*content);
 
 		// 焦点始终位于 _hwndXamlIsland 中
@@ -459,11 +458,9 @@ protected:
 						PostMessage(hwndDWXS, WM_SIZE, wParam, lParam);
 					}
 
-					[](C const& content)->winrt::fire_and_forget {
-						co_await content->Dispatcher().RunAsync(winrt::CoreDispatcherPriority::Normal, [xamlRoot(content->XamlRoot())]() {
-							XamlHelper::RepositionXamlPopups(xamlRoot, true);
-						});
-					}(_content);
+					_content->Dispatcher().RunAsync(winrt::CoreDispatcherPriority::Normal, [xamlRoot(_content->XamlRoot())]() {
+						XamlHelper::RepositionXamlPopups(xamlRoot, true);
+					});
 				}
 			}
 
