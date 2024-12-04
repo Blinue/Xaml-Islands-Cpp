@@ -211,6 +211,13 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <!-- 导入 Microsoft.AppXPackage.Targets 以生成 pri，应在 Microsoft.Cpp.targets 之后 -->
   <Import Project="$(MsAppxPackageTargets)" />
+  <!-- 编译为非打包应用时防止引用项目的 winmd 被复制到输出文件夹。 -->
+  <!-- 打包时不能执行，编译系统需要这些 winmd 来解析可激活类。 -->
+  <Target Name="RemoveReferenceWinMD" AfterTargets="ResolveAssemblyReferences" Condition="!$(IsPackaged)">
+  	<ItemGroup>
+  	  <ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)" Condition="'%(Extension)' == '.winmd'" />
+  	</ItemGroup>
+  </Target>
   <!-- 防止 xbf 被复制到子文件夹 -->
   <Target Name="AddProcessedXamlFilesToCopyLocal" />
   <!-- resources.pri 中 App.xbf 必须是 Files 的根节点，否则程序将无法运行 -->
@@ -345,4 +352,8 @@ File.Delete("priconfig.xml");
     <Error Condition="!Exists('..\..\packages\Microsoft.Windows.CppWinRT.2.0.240405.15\build\native\Microsoft.Windows.CppWinRT.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.Windows.CppWinRT.2.0.240405.15\build\native\Microsoft.Windows.CppWinRT.props'))" />
     <Error Condition="!Exists('..\..\packages\Microsoft.Windows.CppWinRT.2.0.240405.15\build\native\Microsoft.Windows.CppWinRT.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.Windows.CppWinRT.2.0.240405.15\build\native\Microsoft.Windows.CppWinRT.targets'))" />
   </Target>
+  <!-- 防止生成的 winmd 被复制到输出文件夹，也能防止引用其他 winrt 组件后修改 idl 会编译失败的问题 -->
+  <PropertyGroup>
+  	<CppWinRTProjectWinMD>$(CppWinRTMergedDir)$(RootNamespace).winmd</CppWinRTProjectWinMD>
+  </PropertyGroup>
 </Project>

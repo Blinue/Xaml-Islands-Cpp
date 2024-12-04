@@ -93,7 +93,7 @@ if isPackaged:
         if not file.endswith(".msix") and not file.endswith(".cer"):
             remove_file(file)
 else:
-    for pattern in ["*.pdb", "*.lib", "*.exp", "*.winmd"]:
+    for pattern in ["*.pdb", "*.lib", "*.exp"]:
         for file in glob.glob(pattern):
             remove_file(file)
 
