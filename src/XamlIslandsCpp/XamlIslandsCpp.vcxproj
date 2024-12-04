@@ -23,6 +23,8 @@
     <!-- https://github.com/microsoft/terminal/blob/9eb191d5453fed890bad63952e425e1240aa8df5/src/cascadia/TerminalApp/TerminalAppLib.vcxproj#L17-L18 -->
     <DisableEmbeddedXbf>false</DisableEmbeddedXbf>
     <XamlComponentResourceLocation>nested</XamlComponentResourceLocation>
+    <!-- 防止 xbf 被复制到输出文件夹 -->
+    <GenerateLibraryLayout>true</GenerateLibraryLayout>
     <DesktopCompatible>true</DesktopCompatible>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -104,7 +106,7 @@
     <Link>
       <GenerateWindowsMetadata>false</GenerateWindowsMetadata>
       <SubSystem>Windows</SubSystem>
-      <AdditionalDependencies>gdi32.lib;Dwmapi.lib;Shell32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>gdi32.lib;Dwmapi.lib;Shell32.lib;UxTheme.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>

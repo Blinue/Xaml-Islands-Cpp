@@ -248,10 +248,11 @@ protected:
 					if (SHAppBarMessage(ABM_GETSTATE, &appBarData) & ABS_AUTOHIDE) {
 						// 检查显示器的一条边
 						auto hasAutohideTaskbar = [&monInfo](UINT edge) -> bool {
-							APPBARDATA data{};
-							data.cbSize = sizeof(data);
-							data.uEdge = edge;
-							data.rc = monInfo.rcMonitor;
+							APPBARDATA data{
+								.cbSize = sizeof(data),
+								.uEdge = edge,
+								.rc = monInfo.rcMonitor
+							};
 							HWND hTaskbar = (HWND)SHAppBarMessage(ABM_GETAUTOHIDEBAREX, &data);
 							return hTaskbar != nullptr;
 						};
