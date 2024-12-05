@@ -31,7 +31,10 @@
       <Using Namespace="System" />
       <Using Namespace="System.IO" />
       <Using Namespace="System.IO.Compression" />
+      <Using Namespace="System.Diagnostics" />
+      <Using Namespace="System.Linq" />
       <Using Namespace="System.Threading" />
+      <Using Namespace="System.Xml.Linq" />
       <Code Type="Fragment" Language="cs"><![CDATA[
 const string WinUIWinmdSuffix = "\\lib\\uap10.0\\Microsoft.UI.Xaml.winmd";
 if (!WinUIWinmdPath.EndsWith(WinUIWinmdSuffix)) {
@@ -97,6 +100,104 @@ using (ZipArchive appx = ZipFile.OpenRead(appxPath)) {
 using (StreamWriter writer = new("version.txt")) {
     writer.Write(winuiPkgId);
 }
+
+///////////////////////////////////////////////////////////////////
+//
+// 修剪 resources.pri
+// 参考自 https://github.com/microsoft/microsoft-ui-xaml/pull/4400
+//
+///////////////////////////////////////////////////////////////////
+    
+// 获取最新的 Windows SDK 目录
+string programFilesX86Path = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86);
+string windowsSdkDir = Directory.GetDirectories(Path.Combine(programFilesX86Path, "Windows Kits\\10\\bin"))
+    .OrderByDescending(dir => dir)
+    .FirstOrDefault(dir => dir.Contains("10."));
+if (windowsSdkDir == null) {
+    throw new Exception("未找到 Windows SDK");
+}
+
+string makepriPath = Path.Combine(windowsSdkDir, "x64\\makepri.exe");
+if (!File.Exists(makepriPath)) {
+    throw new Exception("未找到 makepri");
+}
+
+void RunProcess(string fileName, string arguments, string errorMsg) {
+	Process process = Process.Start(new ProcessStartInfo {
+		FileName = makepriPath,
+		Arguments = arguments,
+		WorkingDirectory = intDir,
+		UseShellExecute = false
+	});
+	process.WaitForExit();
+
+	if (process.ExitCode != 0) {
+		throw new Exception(errorMsg);
+	}
+}
+
+// 将 pri 转储为 xml
+RunProcess(makepriPath, "dump /if Microsoft.UI.Xaml.pri /dt detailed /o", "转储 pri 失败");
+
+// 加载并解析 resources.pri.xml
+string dumpFileName = "resources.pri.xml";
+XDocument xmlDocument = XDocument.Load(dumpFileName);
+
+// 删除冗余资源
+foreach (var resourceNode in xmlDocument.Descendants("NamedResource")) {
+	string name = resourceNode.Attribute("name")?.Value;
+	if (name == null || !name.EndsWith(".xbf")) {
+        continue;
+	}
+
+	// 我们仅需 19h1 和 21h1 的资源，分别用于 Win10 和 Win11。
+	// 小写 compact 仅存在于预发行版 WinUI 的资源中。
+	foreach (var key in new[] { "compact", "Compact", "v1", "rs2", "rs3", "rs4", "rs5" }) {
+		if (name.Contains(key)) {
+			var base64Value = resourceNode.Descendants("Base64Value").FirstOrDefault();
+			if (base64Value != null) {
+				// 将文件内容替换为一个空格（Base64 为 "IA=="）
+				base64Value.Value = "IA==";
+			}
+			break;
+		}
+	}
+}
+
+xmlDocument.Save(dumpFileName);
+
+// 创建 priconfig.xml
+string configFileName = "priconfig.xml";
+string priconfigContent = @"<?xml version=""1.0"" encoding=""UTF-8"" standalone=""yes""?>
+<resources targetOsVersion=""10.0.0"" majorVersion=""1"">
+  <packaging>
+    <autoResourcePackage qualifier=""Scale"" />
+    <autoResourcePackage qualifier=""DXFeatureLevel"" />
+  </packaging>
+  <index startIndexAt=""" + dumpFileName + @""" root="""">
+    <default>
+      <qualifier name=""Language"" value=""en-US"" />
+      <qualifier name=""Contrast"" value=""standard"" />
+      <qualifier name=""Scale"" value=""200"" />
+      <qualifier name=""HomeRegion"" value=""001"" />
+      <qualifier name=""TargetSize"" value=""256"" />
+      <qualifier name=""LayoutDirection"" value=""LTR"" />
+      <qualifier name=""DXFeatureLevel"" value=""DX9"" />
+      <qualifier name=""Configuration"" value="""" />
+      <qualifier name=""AlternateForm"" value="""" />
+      <qualifier name=""Platform"" value=""UAP"" />
+    </default>
+    <indexer-config type=""priinfo"" emitStrings=""true"" emitPaths=""true"" emitEmbeddedData=""true"" />
+  </index>
+</resources>";
+File.WriteAllText(configFileName, priconfigContent, Encoding.UTF8);
+
+// 将 xml 重新封装成 pri
+RunProcess(makepriPath, "new /pr . /of Microsoft.UI.Xaml.pri /cf " + configFileName + " /in Microsoft.UI.Xaml /o", "封装 pri 失败");
+
+// 删除临时文件
+File.Delete(dumpFileName);
+File.Delete(configFileName);
       ]]></Code>
     </Task>
   </UsingTask>
