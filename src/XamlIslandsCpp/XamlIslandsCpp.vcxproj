@@ -25,6 +25,8 @@
     <XamlComponentResourceLocation>nested</XamlComponentResourceLocation>
     <!-- 防止 xbf 被复制到输出文件夹 -->
     <GenerateLibraryLayout>true</GenerateLibraryLayout>
+    <!-- 直接生成 resources.pri，使用 ComputeInputPriFiles 合并引用的 pri -->
+    <ProjectPriFileName>resources.pri</ProjectPriFileName>
     <DesktopCompatible>true</DesktopCompatible>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -214,9 +216,9 @@
   <!-- 编译为非打包应用时防止引用项目的 winmd 被复制到输出文件夹。 -->
   <!-- 打包时不能执行，编译系统需要这些 winmd 来解析可激活类。 -->
   <Target Name="RemoveReferenceWinMD" AfterTargets="ResolveAssemblyReferences" Condition="!$(IsPackaged)">
-  	<ItemGroup>
-  	  <ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)" Condition="'%(Extension)' == '.winmd'" />
-  	</ItemGroup>
+    <ItemGroup>
+      <ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)" Condition="'%(Extension)' == '.winmd'" />
+    </ItemGroup>
   </Target>
   <!-- 防止 xbf 被复制到子文件夹 -->
   <Target Name="AddProcessedXamlFilesToCopyLocal" />
@@ -231,80 +233,10 @@
       </PackagingOutputs>
     </ItemGroup>
   </Target>
-  <!-- 编译为非打包应用时应自行生成 resources.pri -->
-  <UsingTask TaskName="MakeResourcesPriTask" TaskFactory="RoslynCodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
-    <ParameterGroup>
-      <WindowsSDKDir Required="true" />
-      <OutDir Required="true" />
-      <PriPaths Required="true" />
-    </ParameterGroup>
-    <Task>
-      <Using Namespace="System" />
-      <Using Namespace="System.IO" />
-      <Using Namespace="System.Diagnostics" />
-      <Code Type="Fragment" Language="cs"><![CDATA[
-string windowsSdkDir = WindowsSDKDir.Split(';')[0];
-string makepriPath = Path.Combine(windowsSdkDir, "makepri.exe");
-if (!File.Exists(makepriPath)) {
-    throw new Exception("未找到 makepri");
-}
-
-Directory.SetCurrentDirectory(OutDir);
-
-// 创建配置文件合并输入的 pri
-using (StreamWriter priConfig = File.CreateText("priconfig.xml")) {
-    priConfig.WriteLine("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
-    priConfig.WriteLine("<resources targetOsVersion=\"10.0.0\" majorVersion=\"1\">");
-    
-    foreach (string priPath in PriPaths.Split(';')) {
-        priConfig.WriteLine($"  <index root=\"\\\" startIndexAt=\"{priPath}\">");
-        priConfig.WriteLine("""
-      <default>
-        <qualifier name="Language" value="en-US" />
-        <qualifier name="Contrast" value="standard" />
-        <qualifier name="Scale" value="200" />
-        <qualifier name="HomeRegion" value="001" />
-        <qualifier name="TargetSize" value="256" />
-        <qualifier name="LayoutDirection" value="LTR" />
-        <qualifier name="DXFeatureLevel" value="DX9" />
-        <qualifier name="Configuration" value="" />
-        <qualifier name="AlternateForm" value="" />
-        <qualifier name="Platform" value="UAP" />
-      </default>
-      <indexer-config type="PRI" />
-      <indexer-config type="RESFILES" qualifierDelimiter="." />
-    </index>
-  """);
-    }
-    
-    priConfig.WriteLine("</resources>");
-}
-
-// 调用 makepri 生成 resources.pri
-Process p = Process.Start(new ProcessStartInfo {
-    FileName = makepriPath,
-    Arguments = "New /pr . /cf priconfig.xml /of resources.pri /o",
-    WorkingDirectory = OutDir,
-    UseShellExecute = false
-});
-p.WaitForExit();
-
-if (p.ExitCode != 0) {
-    throw new Exception("生成 resources.pri 失败");
-}
-
-File.Delete("priconfig.xml");
-      ]]></Code>
-    </Task>
-  </UsingTask>
-  <Target Name="MakeResourcesPri" AfterTargets="_GenerateProjectPriFileCore" Condition="!$(IsPackaged)">
+  <!-- 将引用的 pri 合并进 resources.pri -->
+  <Target Name="ComputeInputPriFiles" BeforeTargets="_GenerateProjectPriConfigurationFiles" Condition="!$(IsPackaged)">
     <ItemGroup>
-      <_PrisToMerge Include="@(PackagingOutputs)" Condition="'%(Extension)' == '.pri'" KeepMetadata="DoesntExist" />
-    </ItemGroup>
-    <MakeResourcesPriTask WindowsSDKDir="$(WindowsSDK_ExecutablePath_x64)" OutDir="$(OutDir)" PriPaths="@(_PrisToMerge)" />
-    <ItemGroup>
-      <!-- 删除 resources.pri 后应触发重新编译 -->
-      <FileWrites Include="$(OutDir)resources.pri" />
+      <_PriFile Include="@(PackagingOutputs)" Condition="'%(Extension)' == '.pri' And '%(OutputGroup)' != 'ProjectPriFile'" />
     </ItemGroup>
   </Target>
   <PropertyGroup>
@@ -354,6 +286,6 @@ File.Delete("priconfig.xml");
   </Target>
   <!-- 防止生成的 winmd 被复制到输出文件夹，也能防止引用其他 winrt 组件后修改 idl 会编译失败的问题 -->
   <PropertyGroup>
-  	<CppWinRTProjectWinMD>$(CppWinRTMergedDir)$(RootNamespace).winmd</CppWinRTProjectWinMD>
+    <CppWinRTProjectWinMD>$(CppWinRTMergedDir)$(RootNamespace).winmd</CppWinRTProjectWinMD>
   </PropertyGroup>
 </Project>

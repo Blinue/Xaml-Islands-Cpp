@@ -102,7 +102,7 @@ using (StreamWriter writer = new("version.txt")) {
   </UsingTask>
 
   <!-- 编译为非打包应用时修正正式版 WinUI 引用的 dll 和 pri -->
-  <Target Name="FixWinUIReference" Condition="!$(IsPackaged)" AfterTargets="ResolveAssemblyReferences">
+  <Target Name="FixWinUIReference" Condition="!$(IsPackaged) And '$(DesignTimeBuild)' != 'true'" AfterTargets="ResolveAssemblyReferences">
     <ItemGroup>
       <_WinUIWinmdReference Include="@(ReferencePath)" Condition="'%(Filename)%(Extension)' == 'Microsoft.UI.Xaml.winmd'" />
     </ItemGroup>
