@@ -25,7 +25,7 @@
     <XamlComponentResourceLocation>nested</XamlComponentResourceLocation>
     <!-- 防止 xbf 被复制到输出文件夹。不适用于 Debug 配置，会使 XAML 热重载失效。 -->
     <!-- Solution.props 尚未导入，不要使用 $(IsDebug)。 -->
-	<GenerateLibraryLayout Condition="!$(Configuration.EndsWith('Debug'))">true</GenerateLibraryLayout>
+	<GenerateLibraryLayout>!$(Configuration.StartsWith('Debug'))</GenerateLibraryLayout>
     <!-- 直接生成 resources.pri，使用 ComputeInputPriFiles 合并引用的 pri -->
     <ProjectPriFileName>resources.pri</ProjectPriFileName>
     <DesktopCompatible>true</DesktopCompatible>
