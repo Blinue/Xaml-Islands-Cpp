@@ -42,6 +42,8 @@
 #include <winrt/Microsoft.UI.Xaml.Controls.h>
 #include <winrt/Microsoft.UI.Xaml.XamlTypeInfo.h>
 
+#include <winrt/ClassLibrary.h>
+
 namespace winrt {
 using namespace Windows::ApplicationModel::Resources;
 using namespace Windows::ApplicationModel::Resources::Core;

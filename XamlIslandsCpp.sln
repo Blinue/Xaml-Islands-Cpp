@@ -14,6 +14,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{C7167F0D-BC9F-4E6E-AFE1-012C56B48DB5}") = "AppPackage", "src\AppPackage\AppPackage.wapproj", "{E3AA150F-D6E7-44AB-B8D8-EF290C0889EF}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ClassLibrary", "src\ClassLibrary\ClassLibrary.vcxproj", "{2EA4389B-027B-4D0B-98BC-233607B540A6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|ARM64 = Debug|ARM64
@@ -58,6 +60,22 @@ Global
 		{E3AA150F-D6E7-44AB-B8D8-EF290C0889EF}.ReleasePackaged|x64.ActiveCfg = ReleasePackaged|x64
 		{E3AA150F-D6E7-44AB-B8D8-EF290C0889EF}.ReleasePackaged|x64.Build.0 = ReleasePackaged|x64
 		{E3AA150F-D6E7-44AB-B8D8-EF290C0889EF}.ReleasePackaged|x64.Deploy.0 = ReleasePackaged|x64
+		{2EA4389B-027B-4D0B-98BC-233607B540A6}.Debug|ARM64.ActiveCfg = Debug|ARM64
+		{2EA4389B-027B-4D0B-98BC-233607B540A6}.Debug|ARM64.Build.0 = Debug|ARM64
+		{2EA4389B-027B-4D0B-98BC-233607B540A6}.Debug|x64.ActiveCfg = Debug|x64
+		{2EA4389B-027B-4D0B-98BC-233607B540A6}.Debug|x64.Build.0 = Debug|x64
+		{2EA4389B-027B-4D0B-98BC-233607B540A6}.DebugPackaged|ARM64.ActiveCfg = Debug|ARM64
+		{2EA4389B-027B-4D0B-98BC-233607B540A6}.DebugPackaged|ARM64.Build.0 = Debug|ARM64
+		{2EA4389B-027B-4D0B-98BC-233607B540A6}.DebugPackaged|x64.ActiveCfg = DebugPackaged|x64
+		{2EA4389B-027B-4D0B-98BC-233607B540A6}.DebugPackaged|x64.Build.0 = DebugPackaged|x64
+		{2EA4389B-027B-4D0B-98BC-233607B540A6}.Release|ARM64.ActiveCfg = Release|ARM64
+		{2EA4389B-027B-4D0B-98BC-233607B540A6}.Release|ARM64.Build.0 = Release|ARM64
+		{2EA4389B-027B-4D0B-98BC-233607B540A6}.Release|x64.ActiveCfg = Release|x64
+		{2EA4389B-027B-4D0B-98BC-233607B540A6}.Release|x64.Build.0 = Release|x64
+		{2EA4389B-027B-4D0B-98BC-233607B540A6}.ReleasePackaged|ARM64.ActiveCfg = Release|ARM64
+		{2EA4389B-027B-4D0B-98BC-233607B540A6}.ReleasePackaged|ARM64.Build.0 = Release|ARM64
+		{2EA4389B-027B-4D0B-98BC-233607B540A6}.ReleasePackaged|x64.ActiveCfg = ReleasePackaged|x64
+		{2EA4389B-027B-4D0B-98BC-233607B540A6}.ReleasePackaged|x64.Build.0 = ReleasePackaged|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

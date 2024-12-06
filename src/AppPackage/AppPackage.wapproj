@@ -59,6 +59,8 @@
     <AppxAutoIncrementPackageRevision>false</AppxAutoIncrementPackageRevision>
     <GenerateTestArtifacts>false</GenerateTestArtifacts>
     <EntryPointProjectUniqueName>..\XamlIslandsCpp\XamlIslandsCpp.vcxproj</EntryPointProjectUniqueName>
+    <IsDebug>$(Configuration.StartsWith('Debug'))</IsDebug>
+    <IsPackaged>$(Configuration.EndsWith('Packaged'))</IsPackaged>
   </PropertyGroup>
   <PropertyGroup Condition="!Exists('AppPackage_TemporaryKey.pfx')">
     <AppxPackageSigningEnabled>false</AppxPackageSigningEnabled>
@@ -67,6 +69,7 @@
     <AppxPackageSigningEnabled>true</AppxPackageSigningEnabled>
     <PackageCertificateKeyFile>AppPackage_TemporaryKey.pfx</PackageCertificateKeyFile>
   </PropertyGroup>
+  <Import Project="..\WinUI.targets" />
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest">
       <SubType>Designer</SubType>
@@ -128,6 +131,7 @@ doc.Save(TargetPath);
     </Task>
   </UsingTask>
   <Target Name="GenerateResourcesNodeForAppxManifest" BeforeTargets="ResolveProjectReferences">
+    <MakeDir Directories="$(BaseIntermediateOutputPath)" />
     <GenerateResourcesNode ManifestPath="@(AppxManifest)" TargetPath="$(BaseIntermediateOutputPath)Package.appxmanifest" ResourcesDir="..\XamlIslandsCpp\" />
     <ItemGroup>
       <AppxManifest Remove="@(AppxManifest)" />
@@ -152,10 +156,10 @@ doc.Save(TargetPath);
       <AppxPackagePayload Remove="@(AppxPackagePayload)" Condition="'%(Extension)' == '.winmd' Or ('%(Filename)' != 'resources' And '%(Extension)' == '.pri')" />
     </ItemGroup>
   </Target>
-  <!-- 默认情况下会合并 WinUI 中一个很小的 pri，其中包含 Compact.xbf，对我们无用 -->
-  <Target Name="RemoveWinUIPriFromPackage" AfterTargets="_RemoveExtraPriFiles">
+  <!-- 直接使用 resources.pri，其他的 pri 都已经合并 -->
+  <Target Name="RemoveDupPris" AfterTargets="_RemoveExtraPriFiles">
     <ItemGroup>
-      <_PriFile Remove="@(_PriFile)" Condition="'%(Filename)%(Extension)' == 'Microsoft.UI.Xaml.pri'" />
+      <_PriFile Remove="@(_PriFile)" Condition="'%(Filename)' != 'resources'" />
     </ItemGroup>
   </Target>
   <Import Project="$(WapProjPath)\Microsoft.DesktopBridge.targets" />

@@ -2,7 +2,7 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Target Name="MakeWinMDReferencesNonPrivateAndRemoveWebView2" BeforeTargets="ResolveAssemblyReferences">
     <ItemGroup>
-      <!-- 从包中删除依赖项的 winmd 和 pri -->
+      <!-- 避免依赖项的 winmd 和 pri 被复制到输出文件夹 -->
       <_TemporaryReferences Include="@(Reference)" Condition="'%(Extension)' == '.winmd' And '%(Reference.Private)' == ''" />
       <Reference Remove="@(_TemporaryReferences)" />
       <Reference Include="@(_TemporaryReferences)">
@@ -23,7 +23,6 @@
       <WinUIWinmdPath Required="true" />
       <SolutionDir Required="true" />
       <Platform Required="true" />
-      <NeedFixWinUIReference ParameterType="System.Boolean" Output="true" />
       <WinUIDllPath Output="true" />
       <WinUIPriPath Output="true" />
     </ParameterGroup>
@@ -44,21 +43,15 @@ if (!WinUIWinmdPath.EndsWith(WinUIWinmdSuffix)) {
 string winuiPkgDir = WinUIWinmdPath.Substring(0, WinUIWinmdPath.Length - WinUIWinmdSuffix.Length);
 string winuiPkgId = winuiPkgDir.Substring(winuiPkgDir.LastIndexOf('\\') + 1);
 
+if (winuiPkgId.Contains("prerelease")) {
+    throw new Exception("不支持预发行版 WinUI");
+}
+
 string intDir = $"{SolutionDir}obj\\{Platform}\\WinUI\\";
 
 // 防止多个项目并行编译导致的竞争，为了减小粒度使用 intDir 计算名字
 using Mutex mutex = new(false, $"ExtractWinUIRuntime{intDir.GetHashCode()}");;
 mutex.WaitOne();
-
-// 预发行版本 WinUI 无需提取
-NeedFixWinUIReference = !winuiPkgId.Contains("prerelease");
-if (!NeedFixWinUIReference) {
-    if (Directory.Exists(intDir)) {
-        Directory.Delete(intDir, true);
-    }
-    
-    return true;
-}
 
 Directory.CreateDirectory(intDir);
 Directory.SetCurrentDirectory(intDir);
@@ -123,17 +116,17 @@ if (!File.Exists(makepriPath)) {
 }
 
 void RunProcess(string fileName, string arguments, string errorMsg) {
-	Process process = Process.Start(new ProcessStartInfo {
-		FileName = makepriPath,
-		Arguments = arguments,
-		WorkingDirectory = intDir,
-		UseShellExecute = false
-	});
-	process.WaitForExit();
+    Process process = Process.Start(new ProcessStartInfo {
+        FileName = makepriPath,
+        Arguments = arguments,
+        WorkingDirectory = intDir,
+        UseShellExecute = false
+    });
+    process.WaitForExit();
 
-	if (process.ExitCode != 0) {
-		throw new Exception(errorMsg);
-	}
+    if (process.ExitCode != 0) {
+        throw new Exception(errorMsg);
+    }
 }
 
 // 将 pri 转储为 xml
@@ -145,23 +138,23 @@ XDocument xmlDocument = XDocument.Load(dumpFileName);
 
 // 删除冗余资源
 foreach (var resourceNode in xmlDocument.Descendants("NamedResource")) {
-	string name = resourceNode.Attribute("name")?.Value;
-	if (name == null || !name.EndsWith(".xbf")) {
+    string name = resourceNode.Attribute("name")?.Value;
+    if (name == null || !name.EndsWith(".xbf")) {
         continue;
-	}
+    }
 
-	// 我们仅需 19h1 和 21h1 的资源，分别用于 Win10 和 Win11。
-	// 小写 compact 仅存在于预发行版 WinUI 的资源中。
-	foreach (var key in new[] { "compact", "Compact", "v1", "rs2", "rs3", "rs4", "rs5" }) {
-		if (name.Contains(key)) {
-			var base64Value = resourceNode.Descendants("Base64Value").FirstOrDefault();
-			if (base64Value != null) {
-				// 将文件内容替换为一个空格（Base64 为 "IA=="）
-				base64Value.Value = "IA==";
-			}
-			break;
-		}
-	}
+    // 我们仅需 19h1 和 21h1 的资源，分别用于 Win10 和 Win11。
+    // 小写 compact 仅存在于预发行版 WinUI 的资源中。
+    foreach (var key in new[] { "compact", "Compact", "v1", "rs2", "rs3", "rs4", "rs5" }) {
+        if (name.Contains(key)) {
+            var base64Value = resourceNode.Descendants("Base64Value").FirstOrDefault();
+            if (base64Value != null) {
+                // 将文件内容替换为一个空格（Base64 为 "IA=="）
+                base64Value.Value = "IA==";
+            }
+            break;
+        }
+    }
 }
 
 xmlDocument.Save(dumpFileName);
@@ -209,12 +202,11 @@ File.Delete(configFileName);
     </ItemGroup>
 
     <ExtractWinUIRuntime WinUIWinmdPath="@(_WinUIWinmdReference)" SolutionDir="$(SolutionDir)" Platform="$(Platform)">
-      <Output TaskParameter="NeedFixWinUIReference" PropertyName="NeedFixWinUIReference" />
       <Output TaskParameter="WinUIDllPath" PropertyName="WinUIDllPath" />
       <Output TaskParameter="WinUIPriPath" PropertyName="WinUIPriPath" />
     </ExtractWinUIRuntime>
-  
-    <ItemGroup Condition="$(NeedFixWinUIReference)">
+      
+    <ItemGroup>
       <!-- 为 winmd 添加 Implementation 为提取出的 dll -->
       <ReferencePath Remove="@(_WinUIWinmdReference)" />
       <ReferencePath Include="@(_WinUIWinmdReference)">
@@ -222,7 +214,7 @@ File.Delete(configFileName);
       </ReferencePath>
       <ReferenceCopyLocalPaths Include="$(WinUIDllPath)" />
       
-      <!-- 正式版包中 winmd 引用着错误的 pri，改为引用提取出的 pri -->
+      <!-- winmd 改为引用提取出的 pri -->
       <WinUIPriReference Include="@(_ReferenceRelatedPaths)" Condition="'%(Filename)%(Extension)' == 'Microsoft.UI.Xaml.pri'" />
       <_ReferenceRelatedPaths Remove="@(WinUIPriReference)" />
       <!-- 把元数据复制过来，我们只想改变 pri 路径 -->
@@ -244,5 +236,12 @@ File.Delete(configFileName);
     <ItemGroup>
       <_AllChildProjectItemsWithTargetPath Remove="@(_AllChildProjectItemsWithTargetPath)" Condition="$([System.String]::new('%(TargetPath)').StartsWith('Microsoft.UI.Xaml'))" />
     </ItemGroup>
+  </Target>
+  
+  <!-- 打包配置下会合并一个很小的 pri，它只包含 Compact.xbf，对我们无用 -->
+  <Target Name="RemovePackagedWinUIPri" Condition="$(IsPackaged)" AfterTargets="ComputeInputPriFiles">
+  	<ItemGroup>
+  	  <_PriFile Remove="@(_PriFile)" Condition="'%(Filename)' == 'Microsoft.UI.Xaml'" />
+  	</ItemGroup>
   </Target>
 </Project>

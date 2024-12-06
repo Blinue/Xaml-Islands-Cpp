@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\..\packages\Microsoft.Windows.CppWinRT.2.0.240405.15\build\native\Microsoft.Windows.CppWinRT.props" Condition="Exists('..\..\packages\Microsoft.Windows.CppWinRT.2.0.240405.15\build\native\Microsoft.Windows.CppWinRT.props')" />
   <Import Project="..\..\packages\Microsoft.UI.Xaml.2.8.6\build\native\Microsoft.UI.Xaml.props" Condition="Exists('..\..\packages\Microsoft.UI.Xaml.2.8.6\build\native\Microsoft.UI.Xaml.props')" />
+  <Import Project="..\..\packages\Microsoft.Windows.CppWinRT.2.0.240405.15\build\native\Microsoft.Windows.CppWinRT.props" Condition="Exists('..\..\packages\Microsoft.Windows.CppWinRT.2.0.240405.15\build\native\Microsoft.Windows.CppWinRT.props')" />
   <PropertyGroup Label="Globals">
+    <CppWinRTOptimized>true</CppWinRTOptimized>
+    <CppWinRTFastAbi>true</CppWinRTFastAbi>
+    <CppWinRTRootNamespaceAutoMerge>true</CppWinRTRootNamespaceAutoMerge>
     <CppWinRTGenerateWindowsMetadata>true</CppWinRTGenerateWindowsMetadata>
     <MinimalCoreWin>true</MinimalCoreWin>
     <ProjectGuid>{1239537c-e5b8-427a-9e7f-ea443d1f3529}</ProjectGuid>
@@ -23,9 +26,8 @@
     <!-- https://github.com/microsoft/terminal/blob/9eb191d5453fed890bad63952e425e1240aa8df5/src/cascadia/TerminalApp/TerminalAppLib.vcxproj#L17-L18 -->
     <DisableEmbeddedXbf>false</DisableEmbeddedXbf>
     <XamlComponentResourceLocation>nested</XamlComponentResourceLocation>
-    <!-- 防止 xbf 被复制到输出文件夹。不适用于 Debug 配置，会使 XAML 热重载失效。 -->
-    <!-- Solution.props 尚未导入，不要使用 $(IsDebug)。 -->
-	<GenerateLibraryLayout>!$(Configuration.StartsWith('Debug'))</GenerateLibraryLayout>
+    <!-- 防止 xbf 被复制到输出文件夹 -->
+    <GenerateLibraryLayout>true</GenerateLibraryLayout>
     <!-- 直接生成 resources.pri，使用 ComputeInputPriFiles 合并引用的 pri -->
     <ProjectPriFileName>resources.pri</ProjectPriFileName>
     <DesktopCompatible>true</DesktopCompatible>
@@ -193,11 +195,16 @@
   <ItemGroup>
     <Manifest Include="app.manifest" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ClassLibrary\ClassLibrary.vcxproj">
+      <Project>{2ea4389b-027b-4d0b-98bc-233607b540a6}</Project>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <!-- 导入 Microsoft.AppXPackage.Targets 以生成 pri，应在 Microsoft.Cpp.targets 之后 -->
   <Import Project="$(MsAppxPackageTargets)" />
   <!-- 编译为非打包应用时防止引用项目的 winmd 被复制到输出文件夹。 -->
-  <!-- 打包时不能执行，编译系统需要这些 winmd 来解析可激活类。 -->
+  <!-- 不适用于打包配置，编译系统需要这些 winmd 来解析可激活类。 -->
   <Target Name="RemoveReferenceWinMD" AfterTargets="ResolveAssemblyReferences" Condition="!$(IsPackaged)">
     <ItemGroup>
       <ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)" Condition="'%(Extension)' == '.winmd'" />
@@ -217,12 +224,12 @@
     </ItemGroup>
   </Target>
   <!-- 将引用的 pri 合并进 resources.pri -->
-  <Target Name="ComputeInputPriFiles" BeforeTargets="_GenerateProjectPriConfigurationFiles" Condition="!$(IsPackaged)">
+  <Target Name="ComputeInputPriFiles" BeforeTargets="_GenerateProjectPriConfigurationFiles">
     <ItemGroup>
-      <_PriFile Include="@(PackagingOutputs)" Condition="'%(Extension)' == '.pri' And '%(OutputGroup)' != 'ProjectPriFile'" />
+      <_PriFile Include="@(PackagingOutputs)" Condition="'%(Extension)' == '.pri' And '%(Filename)' != 'resources'" />
     </ItemGroup>
   </Target>
-  <PropertyGroup>
+  <PropertyGroup Condition="!$(IsPackaged)">
     <_ManifestsDir>$(IntDir)Manifests\</_ManifestsDir>
   </PropertyGroup>
   <!-- 编译为非打包应用时向清单文件添加运行时使用到的 WinRT 组件 -->
@@ -253,19 +260,19 @@
     </ItemGroup>
   </Target>
   <ImportGroup Label="ExtensionTargets">
-    <Import Project="..\..\packages\Microsoft.UI.Xaml.2.8.6\build\native\Microsoft.UI.Xaml.targets" Condition="Exists('..\..\packages\Microsoft.UI.Xaml.2.8.6\build\native\Microsoft.UI.Xaml.targets')" />
-    <Import Project="..\..\packages\Microsoft.Web.WebView2.1.0.2420.47\build\native\Microsoft.Web.WebView2.targets" Condition="Exists('..\..\packages\Microsoft.Web.WebView2.1.0.2420.47\build\native\Microsoft.Web.WebView2.targets')" />
     <Import Project="..\..\packages\Microsoft.Windows.CppWinRT.2.0.240405.15\build\native\Microsoft.Windows.CppWinRT.targets" Condition="Exists('..\..\packages\Microsoft.Windows.CppWinRT.2.0.240405.15\build\native\Microsoft.Windows.CppWinRT.targets')" />
+    <Import Project="..\..\packages\Microsoft.Web.WebView2.1.0.2903.40\build\native\Microsoft.Web.WebView2.targets" Condition="Exists('..\..\packages\Microsoft.Web.WebView2.1.0.2903.40\build\native\Microsoft.Web.WebView2.targets')" />
+    <Import Project="..\..\packages\Microsoft.UI.Xaml.2.8.6\build\native\Microsoft.UI.Xaml.targets" Condition="Exists('..\..\packages\Microsoft.UI.Xaml.2.8.6\build\native\Microsoft.UI.Xaml.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>这台计算机上缺少此项目引用的 NuGet 程序包。使用“NuGet 程序包还原”可下载这些程序包。有关更多信息，请参见 http://go.microsoft.com/fwlink/?LinkID=322105。缺少的文件是 {0}。</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('..\..\packages\Microsoft.UI.Xaml.2.8.6\build\native\Microsoft.UI.Xaml.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.UI.Xaml.2.8.6\build\native\Microsoft.UI.Xaml.props'))" />
-    <Error Condition="!Exists('..\..\packages\Microsoft.UI.Xaml.2.8.6\build\native\Microsoft.UI.Xaml.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.UI.Xaml.2.8.6\build\native\Microsoft.UI.Xaml.targets'))" />
-    <Error Condition="!Exists('..\..\packages\Microsoft.Web.WebView2.1.0.2420.47\build\native\Microsoft.Web.WebView2.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.Web.WebView2.1.0.2420.47\build\native\Microsoft.Web.WebView2.targets'))" />
     <Error Condition="!Exists('..\..\packages\Microsoft.Windows.CppWinRT.2.0.240405.15\build\native\Microsoft.Windows.CppWinRT.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.Windows.CppWinRT.2.0.240405.15\build\native\Microsoft.Windows.CppWinRT.props'))" />
     <Error Condition="!Exists('..\..\packages\Microsoft.Windows.CppWinRT.2.0.240405.15\build\native\Microsoft.Windows.CppWinRT.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.Windows.CppWinRT.2.0.240405.15\build\native\Microsoft.Windows.CppWinRT.targets'))" />
+    <Error Condition="!Exists('..\..\packages\Microsoft.Web.WebView2.1.0.2903.40\build\native\Microsoft.Web.WebView2.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.Web.WebView2.1.0.2903.40\build\native\Microsoft.Web.WebView2.targets'))" />
+    <Error Condition="!Exists('..\..\packages\Microsoft.UI.Xaml.2.8.6\build\native\Microsoft.UI.Xaml.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.UI.Xaml.2.8.6\build\native\Microsoft.UI.Xaml.props'))" />
+    <Error Condition="!Exists('..\..\packages\Microsoft.UI.Xaml.2.8.6\build\native\Microsoft.UI.Xaml.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.UI.Xaml.2.8.6\build\native\Microsoft.UI.Xaml.targets'))" />
   </Target>
   <!-- 防止生成的 winmd 被复制到输出文件夹 -->
   <PropertyGroup>

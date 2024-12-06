@@ -1,0 +1,9 @@
+namespace ClassLibrary
+{
+    [default_interface]
+    runtimeclass UserControl : Windows.UI.Xaml.Controls.UserControl
+    {
+        UserControl();
+        Int32 MyProperty;
+    }
+}
