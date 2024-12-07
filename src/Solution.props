@@ -1,16 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <PropertyGroup>
-    <DefaultLanguage>en-US</DefaultLanguage>
-    <CppWinRTFastAbi>true</CppWinRTFastAbi>
-    <CppWinRTOptimized>true</CppWinRTOptimized>
-    <CppWinRTRootNamespaceAutoMerge>true</CppWinRTRootNamespaceAutoMerge>
-    <CppWinRTVerbosity>low</CppWinRTVerbosity>
-    <GeneratedFilesDir>$(IntDir)Generated Files\</GeneratedFilesDir>
-    <IsDebug>$(Configuration.StartsWith('Debug'))</IsDebug>
-    <IsPackaged>$(Configuration.EndsWith('Packaged'))</IsPackaged>
-  </PropertyGroup>
-
   <PropertyGroup Condition="$(IsDebug)" Label="Configuration">
   	<UseDebugLibraries>true</UseDebugLibraries>
   	<LinkIncremental>true</LinkIncremental>

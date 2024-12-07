@@ -56,7 +56,7 @@ os.chdir(curDir)
 outDir = f"{curDir}\\publish\\{platform}{'-sideload' if isPackaged else ''}\\"
 
 p = subprocess.run(
-    f'"{msbuildPath}" src\\{"AppPackage" if isPackaged else "XamlIslandsCpp"} -restore -p:RestorePackagesConfig=true;Configuration=Release{"Packaged" if isPackaged else ""};Platform={platform};OutDir={outDir};SolutionDir={curDir}\\{(";AppInstallerUri=" + outDir) if isPackaged else ""}'
+    f'"{msbuildPath}" src\\{"AppPackage" if isPackaged else "XamlIslandsCpp"} -restore "-p:RestorePackagesConfig=true;Configuration=Release{"Packaged" if isPackaged else ""};Platform={platform};OutDir={outDir};SolutionDir={curDir}\\{(";AppInstallerUri=" + outDir) if isPackaged else ""}"'
 )
 if p.returncode != 0:
     raise Exception("编译失败")

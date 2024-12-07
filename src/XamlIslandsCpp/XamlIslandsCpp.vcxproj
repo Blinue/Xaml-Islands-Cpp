@@ -1,16 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\Common.Pre.props" />
   <Import Project="..\..\packages\Microsoft.UI.Xaml.2.8.6\build\native\Microsoft.UI.Xaml.props" Condition="Exists('..\..\packages\Microsoft.UI.Xaml.2.8.6\build\native\Microsoft.UI.Xaml.props')" />
   <Import Project="..\..\packages\Microsoft.Windows.CppWinRT.2.0.240405.15\build\native\Microsoft.Windows.CppWinRT.props" Condition="Exists('..\..\packages\Microsoft.Windows.CppWinRT.2.0.240405.15\build\native\Microsoft.Windows.CppWinRT.props')" />
   <PropertyGroup Label="Globals">
-    <CppWinRTOptimized>true</CppWinRTOptimized>
     <CppWinRTFastAbi>true</CppWinRTFastAbi>
+    <CppWinRTOptimized>true</CppWinRTOptimized>
     <CppWinRTRootNamespaceAutoMerge>true</CppWinRTRootNamespaceAutoMerge>
     <CppWinRTGenerateWindowsMetadata>true</CppWinRTGenerateWindowsMetadata>
+    <CppWinRTVerbosity>low</CppWinRTVerbosity>
     <MinimalCoreWin>true</MinimalCoreWin>
     <ProjectGuid>{1239537c-e5b8-427a-9e7f-ea443d1f3529}</ProjectGuid>
     <ProjectName>XamlIslandsCpp</ProjectName>
-    <RootNamespace>XamlIslandsCpp</RootNamespace>
+    <RootNamespace>$(ProjectName)</RootNamespace>
     <MinimumVisualStudioVersion>17.0</MinimumVisualStudioVersion>
     <!-- 为了编译为 exe，AppContainerApplication 必须为 false，否则虽然可以编译但无法在 VS 中调试。 -->
     <!-- 这会导致不会自动生成 pri，稍后我们手动导入 Microsoft.AppXPackage.Targets 来解决这个问题。 -->
@@ -21,7 +23,9 @@
     <WindowsTargetPlatformMinVersion>10.0.18362.0</WindowsTargetPlatformMinVersion>
     <IntDir>$(SolutionDir)obj\$(Platform)\$(Configuration)\$(MSBuildProjectName)\</IntDir>
     <OutDir>$(SolutionDir)bin\$(Platform)\$(Configuration)\</OutDir>
+    <GeneratedFilesDir>$(IntDir)Generated Files\</GeneratedFilesDir>
     <AppxBundlePlatforms>x64|arm64</AppxBundlePlatforms>
+    <DesktopCompatible>true</DesktopCompatible>
     <!-- 将 xbf 文件打包进 pri -->
     <!-- https://github.com/microsoft/terminal/blob/9eb191d5453fed890bad63952e425e1240aa8df5/src/cascadia/TerminalApp/TerminalAppLib.vcxproj#L17-L18 -->
     <DisableEmbeddedXbf>false</DisableEmbeddedXbf>
@@ -30,7 +34,6 @@
     <GenerateLibraryLayout>true</GenerateLibraryLayout>
     <!-- 直接生成 resources.pri，使用 ComputeInputPriFiles 合并引用的 pri -->
     <ProjectPriFileName>resources.pri</ProjectPriFileName>
-    <DesktopCompatible>true</DesktopCompatible>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <ItemGroup Label="ProjectConfigurations">
@@ -275,7 +278,7 @@
     <Error Condition="!Exists('..\..\packages\Microsoft.UI.Xaml.2.8.6\build\native\Microsoft.UI.Xaml.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.UI.Xaml.2.8.6\build\native\Microsoft.UI.Xaml.targets'))" />
   </Target>
   <!-- 防止生成的 winmd 被复制到输出文件夹 -->
-  <PropertyGroup>
+  <PropertyGroup Condition="!$(IsPackaged)">
     <CppWinRTProjectWinMD>$(CppWinRTMergedDir)$(RootNamespace).winmd</CppWinRTProjectWinMD>
   </PropertyGroup>
 </Project>

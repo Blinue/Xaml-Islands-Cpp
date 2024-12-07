@@ -7,6 +7,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "XamlIslandsCpp", "src\XamlI
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{00AB63C3-0CD3-4944-B8E6-58C86138618D}"
 	ProjectSection(SolutionItems) = preProject
+		src\Common.Pre.props = src\Common.Pre.props
 		src\HybridCRT.props = src\HybridCRT.props
 		src\Solution.props = src\Solution.props
 		src\WinUI.targets = src\WinUI.targets
