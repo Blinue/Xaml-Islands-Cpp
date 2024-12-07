@@ -261,14 +261,14 @@ LRESULT MainWindow::_MessageHandler(UINT msg, WPARAM wParam, LPARAM lParam) noex
 	}
 	case WM_GETTITLEBARINFOEX:
 	{
-		// 为了支持 Win11 的贴靠布局，我们需要返回最大化按钮的矩形
-		TITLEBARINFOEX* info = (TITLEBARINFOEX*)lParam;
-		if (info->cbSize >= sizeof(TITLEBARINFOEX)) {
-			base_type::_MessageHandler(msg, wParam, lParam);
-			RECT rcMaximizeButton;
-			GetWindowRect(_hwndMaximizeButton, &rcMaximizeButton);
-			info->rgrect[3] = rcMaximizeButton;
-			return TRUE;
+		if (_IsCustomTitleBarEnabled()) {
+			// 为了支持 Win11 的贴靠布局，我们需要返回最大化按钮的矩形
+			TITLEBARINFOEX* info = (TITLEBARINFOEX*)lParam;
+			if (info->cbSize >= sizeof(TITLEBARINFOEX)) {
+				base_type::_MessageHandler(msg, wParam, lParam);
+				GetWindowRect(_hwndMaximizeButton, &info->rgrect[3]);
+				return TRUE;
+			}
 		}
 		break;
 	}
