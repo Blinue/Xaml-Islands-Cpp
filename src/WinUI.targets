@@ -212,6 +212,7 @@ File.Delete(configFileName);
       <ReferencePath Include="@(_WinUIWinmdReference)">
         <Implementation>$(WinUIDllPath)</Implementation>
       </ReferencePath>
+      <ReferenceCopyLocalPaths Include="$(WinUIDllPath)" />
       
       <!-- winmd 改为引用提取出的 pri -->
       <WinUIPriReference Include="@(_ReferenceRelatedPaths)" Condition="'%(Filename)%(Extension)' == 'Microsoft.UI.Xaml.pri'" />
@@ -239,8 +240,8 @@ File.Delete(configFileName);
   
   <!-- 打包配置下会合并一个很小的 pri，它只包含 Compact.xbf，对我们无用 -->
   <Target Name="RemovePackagedWinUIPri" Condition="$(IsPackaged)" AfterTargets="ComputeInputPriFiles">
-  	<ItemGroup>
-  	  <_PriFile Remove="@(_PriFile)" Condition="'%(Filename)' == 'Microsoft.UI.Xaml'" />
-  	</ItemGroup>
+    <ItemGroup>
+      <_PriFile Remove="@(_PriFile)" Condition="'%(Filename)' == 'Microsoft.UI.Xaml'" />
+    </ItemGroup>
   </Target>
 </Project>

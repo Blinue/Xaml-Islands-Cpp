@@ -80,7 +80,7 @@
   </ImportGroup>
   <ImportGroup Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="..\Solution.props" />
+    <Import Project="..\Common.Post.props" />
     <Import Project="..\WinUI.targets" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets">
@@ -240,8 +240,8 @@
   <!-- 来自 https://github.com/microsoft/terminal/blob/a2bb3136bb52c253060aa281396dbd12316b33a6/build/rules/GenerateSxsManifestsFromWinmds.targets -->
   <Target Name="UnpackagedWin32MapWinmdsToManifestFiles" DependsOnTargets="ResolveAssemblyReferences" Condition="!$(IsPackaged)">
     <ItemGroup>
-      <!-- 为每一个引用的非系统 winmd 文件 (除了 Microsoft.Web.WebView2.Core) 生成清单文件 -->
-      <_UnpackagedWin32WinmdManifest Include="@(ReferencePath->'$(_ManifestsDir)%(FileName).manifest')" Condition="'%(ReferencePath.IsSystemReference)' != 'true' And '%(ReferencePath.WinMDFile)' == 'true' And '%(ReferencePath.ReferenceSourceTarget)' == 'ResolveAssemblyReference' And '%(ReferencePath.Implementation)' != '' And '%(FileName)' != 'Microsoft.Web.WebView2.Core'">
+      <!-- 为每一个引用的非系统 winmd 文件生成清单文件 -->
+      <_UnpackagedWin32WinmdManifest Include="@(ReferencePath->'$(_ManifestsDir)%(FileName).manifest')" Condition="'%(ReferencePath.IsSystemReference)' != 'true' And '%(ReferencePath.WinMDFile)' == 'true' And '%(ReferencePath.ReferenceSourceTarget)' == 'ResolveAssemblyReference' And '%(ReferencePath.Implementation)' != ''">
         <WinMDPath>%(ReferencePath.FullPath)</WinMDPath>
         <Implementation>$([System.IO.Path]::GetFileName('%(ReferencePath.Implementation)'))</Implementation>
       </_UnpackagedWin32WinmdManifest>
@@ -260,12 +260,6 @@
     <Exec Command="mt.exe -nologo -winmd:&quot;%(_UnpackagedWin32WinmdManifest.WinMDPath)&quot; -dll:%(_UnpackagedWin32WinmdManifest.Implementation) -out:&quot;%(_UnpackagedWin32WinmdManifest.Identity)&quot;" />
     <ItemGroup>
       <Manifest Include="@(_UnpackagedWin32WinmdManifest)" />
-    </ItemGroup>
-  </Target>
-  <!-- 将 Microsoft.UI.Xaml.dll 复制到输出目录。不要放到 WinUI.targets 里，多个项目复制相同的文件会使 up-to-date 检查失败 -->
-  <Target Name="CopyWinUIDll" Condition="!$(IsPackaged)" AfterTargets="FixWinUIReference">
-    <ItemGroup>
-      <ReferenceCopyLocalPaths Include="$(WinUIDllPath)" />
     </ItemGroup>
   </Target>
   <ImportGroup Label="ExtensionTargets">
