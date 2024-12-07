@@ -253,13 +253,19 @@
       </_UnpackagedWin32WinmdManifest>
     </ItemGroup>
   </Target>
-  <Target Name="UnpackagedWin32GenerateAdditionalWinmdManifests" Condition="!$(IsPackaged)" Inputs="@(UnpackagedWin32WinmdManifest.WinMDPath)" Outputs="@(_UnpackagedWin32WinmdManifest)" BeforeTargets="Link" DependsOnTargets="UnpackagedWin32MapWinmdsToManifestFiles">
+  <Target Name="UnpackagedWin32GenerateAdditionalWinmdManifests" Condition="!$(IsPackaged)" Inputs="%(_UnpackagedWin32WinmdManifest.WinMDPath)" Outputs="@(_UnpackagedWin32WinmdManifest)" BeforeTargets="Link" DependsOnTargets="UnpackagedWin32MapWinmdsToManifestFiles">
     <Message Text="Generating manifest for %(_UnpackagedWin32WinmdManifest.WinMDPath)" Importance="High" />
     <MakeDir Directories="$(_ManifestsDir)" />
     <!-- 并行处理 _UnpackagedWin32WinmdManifest 中的每一个元素 -->
     <Exec Command="mt.exe -nologo -winmd:&quot;%(_UnpackagedWin32WinmdManifest.WinMDPath)&quot; -dll:%(_UnpackagedWin32WinmdManifest.Implementation) -out:&quot;%(_UnpackagedWin32WinmdManifest.Identity)&quot;" />
     <ItemGroup>
       <Manifest Include="@(_UnpackagedWin32WinmdManifest)" />
+    </ItemGroup>
+  </Target>
+  <!-- 将 Microsoft.UI.Xaml.dll 复制到输出目录。不要放到 WinUI.targets 里，多个项目复制相同的文件会使 up-to-date 检查失败 -->
+  <Target Name="CopyWinUIDll" Condition="!$(IsPackaged)" AfterTargets="FixWinUIReference">
+    <ItemGroup>
+      <ReferenceCopyLocalPaths Include="$(WinUIDllPath)" />
     </ItemGroup>
   </Target>
   <ImportGroup Label="ExtensionTargets">

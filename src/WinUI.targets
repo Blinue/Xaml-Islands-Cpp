@@ -212,7 +212,6 @@ File.Delete(configFileName);
       <ReferencePath Include="@(_WinUIWinmdReference)">
         <Implementation>$(WinUIDllPath)</Implementation>
       </ReferencePath>
-      <ReferenceCopyLocalPaths Include="$(WinUIDllPath)" />
       
       <!-- winmd 改为引用提取出的 pri -->
       <WinUIPriReference Include="@(_ReferenceRelatedPaths)" Condition="'%(Filename)%(Extension)' == 'Microsoft.UI.Xaml.pri'" />
