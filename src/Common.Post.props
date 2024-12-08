@@ -53,4 +53,9 @@
   	  <FileWrites Remove="@(CopyUpToDateMarker)" Condition="'@(ReferencesCopiedInThisBuild)' == '' Or '$(WroteAtLeastOneFile)' != 'true'" />
   	</ItemGroup>
   </Target>
+  
+  <!-- _AppendToWriteTlogFile 不会删除原始内容，如果某个中间文件不再生成会导致 up-to-date 检查失败 -->
+  <Target Name="FixWriteLog" BeforeTargets="_AppendToWriteTlogFile">
+    <Delete Files="$(TLogLocation)$(ProjectName).write.1u.tlog" />
+  </Target>
 </Project>

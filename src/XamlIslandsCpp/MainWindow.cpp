@@ -103,7 +103,7 @@ bool MainWindow::Create(HINSTANCE hInstance, const WINDOWPLACEMENT* wp) noexcept
 	if (Win32Helper::GetOSVersion().IsWin11()) {
 		// 如果鼠标正位于一个按钮上，贴靠布局弹窗会出现在按钮下方。我们利用这个特性来修正贴靠布局弹窗的位置。
 		// Win11 23H2 的某一次更新后，Snap Layout 不再依赖 UI Automation，而是依靠 WM_GETTITLEBARINFOEX
-        // 消息来定位最大化按钮矩形。此行为破坏了许多程序的 Snap Layout 支持，好在Win11 24H2 中问题得到了
+        // 消息来定位最大化按钮矩形。此行为破坏了许多程序的 Snap Layout 支持，好在 Win11 24H2 中问题得到了
 		// 缓解。我们同时支持两种方案，以便在不同版本的 Win11 上都能正常工作。
 		_hwndMaximizeButton = CreateWindow(
 			L"BUTTON",
