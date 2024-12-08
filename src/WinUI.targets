@@ -1,17 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Target Name="MakeWinMDReferencesNonPrivateAndRemoveWebView2" BeforeTargets="ResolveAssemblyReferences">
+  <Target Name="RemoveWebView2" BeforeTargets="ResolveAssemblyReferences">
     <ItemGroup>
-      <!-- 避免依赖项的 winmd 和 pri 被复制到输出文件夹 -->
-      <_TemporaryReferences Include="@(Reference)" Condition="'%(Extension)' == '.winmd' And '%(Reference.Private)' == ''" />
-      <Reference Remove="@(_TemporaryReferences)" />
-      <Reference Include="@(_TemporaryReferences)">
-        <Private>false</Private>
-      </Reference>
       <!-- 从包中删除 WebView2 相关文件 -->
       <_WebView2Reference Include="@(Reference)" Condition="'%(Filename)' == 'Microsoft.Web.WebView2.Core'" />
       <Reference Remove="@(_WebView2Reference)" />
-      <Reference Include="@(_WebView2Reference)" RemoveMetadata="Implementation" />
+      <Reference Include="@(_WebView2Reference)" RemoveMetadata="Implementation">
+        <Private>false</Private>
+      </Reference>
       <ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)" Condition="'%(Filename)' == 'Microsoft.Web.WebView2.Core'" />
     </ItemGroup>
   </Target>
@@ -25,6 +21,7 @@
       <Platform Required="true" />
       <WinUIDllPath Output="true" />
       <WinUIPriPath Output="true" />
+      <IsWinUIPrerelease ParameterType="System.Boolean" Output="true" />
     </ParameterGroup>
     <Task>
       <Using Namespace="System" />
@@ -42,10 +39,7 @@ if (!WinUIWinmdPath.EndsWith(WinUIWinmdSuffix)) {
 
 string winuiPkgDir = WinUIWinmdPath.Substring(0, WinUIWinmdPath.Length - WinUIWinmdSuffix.Length);
 string winuiPkgId = winuiPkgDir.Substring(winuiPkgDir.LastIndexOf('\\') + 1);
-
-if (winuiPkgId.Contains("prerelease")) {
-    throw new Exception("不支持预发行版 WinUI");
-}
+IsWinUIPrerelease = winuiPkgId.Contains("prerelease");
 
 string intDir = $"{SolutionDir}obj\\{Platform}\\WinUI\\";
 
@@ -83,11 +77,17 @@ if (!needExtract()) {
     return true;
 }
 
-// 从 appx 中提取出 dll 和 pri
-string appxPath = Directory.GetFiles($"{winuiPkgDir}\\tools\\AppX\\{Platform}\\Release\\", "*.appx")[0];
-using (ZipArchive appx = ZipFile.OpenRead(appxPath)) {
-    appx.GetEntry("Microsoft.UI.Xaml.dll").ExtractToFile("Microsoft.UI.Xaml.dll", true);
-    appx.GetEntry("resources.pri").ExtractToFile("Microsoft.UI.Xaml.pri", true);
+if (IsWinUIPrerelease) {
+    // 预发行版直接复制 dll 和 pri
+    File.Copy($"{winuiPkgDir}\\runtimes\\win-x64\\native\\Microsoft.UI.Xaml.dll", WinUIDllPath, true);
+    File.Copy($"{winuiPkgDir}\\runtimes\\win-x64\\native\\Microsoft.UI.Xaml.pri", WinUIPriPath, true);
+} else {
+    // 从 appx 中提取出 dll 和 pri
+    string appxPath = Directory.GetFiles($"{winuiPkgDir}\\tools\\AppX\\{Platform}\\Release\\", "*.appx")[0];
+    using (ZipArchive appx = ZipFile.OpenRead(appxPath)) {
+        appx.GetEntry("Microsoft.UI.Xaml.dll").ExtractToFile("Microsoft.UI.Xaml.dll", true);
+        appx.GetEntry("resources.pri").ExtractToFile("Microsoft.UI.Xaml.pri", true);
+    }
 }
 
 using (StreamWriter writer = new("version.txt")) {
@@ -195,53 +195,58 @@ File.Delete(configFileName);
     </Task>
   </UsingTask>
 
-  <!-- 编译为非打包应用时修正正式版 WinUI 引用的 dll 和 pri -->
-  <Target Name="FixWinUIReference" Condition="!$(IsPackaged) And '$(DesignTimeBuild)' != 'true'" AfterTargets="ResolveAssemblyReferences">
+  <!-- 修正 WinUI 引用的 winmd、dll 和 pri -->
+  <Target Name="FixWinUIReference" Condition="'$(DesignTimeBuild)' != 'true'" AfterTargets="ResolveAssemblyReferences">
     <ItemGroup>
       <_WinUIWinmdReference Include="@(ReferencePath)" Condition="'%(Filename)%(Extension)' == 'Microsoft.UI.Xaml.winmd'" />
     </ItemGroup>
 
-    <ExtractWinUIRuntime WinUIWinmdPath="@(_WinUIWinmdReference)" SolutionDir="$(SolutionDir)" Platform="$(Platform)">
+    <ExtractWinUIRuntime Condition="'@(_WinUIWinmdReference)' != ''" WinUIWinmdPath="@(_WinUIWinmdReference)" SolutionDir="$(SolutionDir)" Platform="$(Platform)">
       <Output TaskParameter="WinUIDllPath" PropertyName="WinUIDllPath" />
       <Output TaskParameter="WinUIPriPath" PropertyName="WinUIPriPath" />
+      <Output TaskParameter="IsWinUIPrerelease" PropertyName="IsWinUIPrerelease" />
     </ExtractWinUIRuntime>
-      
-    <ItemGroup>
+
+    <ItemGroup Condition="$(IsPackaged)">
+      <!-- 删除 WinUI 引用的 xml -->
+      <ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)" Condition="'%(Filename)%(Extension)' == 'Microsoft.UI.Xaml.xml'" />
+      <_ReferenceRelatedPaths Remove="@(_ReferenceRelatedPaths)" Condition="'%(Filename)%(Extension)' == 'Microsoft.UI.Xaml.xml'" />
+    </ItemGroup>
+    
+    <ItemGroup Condition="'@(_WinUIWinmdReference)' != '' And (!$(IsPackaged) Or '$(IsWinUIPrerelease)' == 'true')">
       <!-- 为 winmd 添加 Implementation 为提取出的 dll -->
       <ReferencePath Remove="@(_WinUIWinmdReference)" />
       <ReferencePath Include="@(_WinUIWinmdReference)">
+        <!-- 打包配置下并且使用预发行版 WinUI 时应将 Microsoft.UI.Xaml.winmd 复制到输出文件夹，以便编译系统 -->
+        <!-- 将其中的可激活类记录到 AppxManifest.xml。非打包配置不要复制，否则会引起编译错误。 -->
+        <CopyLocal>$(IsPackaged)</CopyLocal>
         <Implementation>$(WinUIDllPath)</Implementation>
       </ReferencePath>
+      
+      <!-- 将 Microsoft.UI.Xaml.dll 复制到输出文件夹 -->
       <ReferenceCopyLocalPaths Include="$(WinUIDllPath)" />
       
-      <!-- winmd 改为引用提取出的 pri -->
-      <WinUIPriReference Include="@(_ReferenceRelatedPaths)" Condition="'%(Filename)%(Extension)' == 'Microsoft.UI.Xaml.pri'" />
-      <_ReferenceRelatedPaths Remove="@(WinUIPriReference)" />
-      <!-- 把元数据复制过来，我们只想改变 pri 路径 -->
+      <!-- 删除原始 pri 改为引用我们修改后的版本，无需复制到输出文件夹 -->
+      <ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)" Condition="'%(Filename)%(Extension)' == 'Microsoft.UI.Xaml.pri'" />
+      <_ReferenceRelatedPaths Remove="@(_ReferenceRelatedPaths)" Condition="'%(Filename)%(Extension)' == 'Microsoft.UI.Xaml.pri'" />
       <_ReferenceRelatedPaths Include="$(WinUIPriPath)">
-        <CopyLocal>%(WinUIPriReference.CopyLocal)</CopyLocal>
-        <CopyLocalSatelliteAssemblies>%(WinUIPriReference.CopyLocalSatelliteAssemblies)</CopyLocalSatelliteAssemblies>
-        <Implicit>%(WinUIPriReference.Implicit)</Implicit>
-        <OriginalItemSpec>%(WinUIPriReference.OriginalItemSpec)</OriginalItemSpec>
-        <Private>%(WinUIPriReference.Private)</Private>
-        <ReferenceOutputAssembly>%(WinUIPriReference.ReferenceOutputAssembly)</ReferenceOutputAssembly>
-        <ResolvedFrom>%(WinUIPriReference.ResolvedFrom)</ResolvedFrom>
-        <Version>%(WinUIPriReference.Version)</Version>
+        <CopyLocal>false</CopyLocal>
+        <Implicit>true</Implicit>
+        <Private>false</Private>
       </_ReferenceRelatedPaths>
     </ItemGroup>
   </Target>
   
   <!-- 从包中删除 WinUI 引入的噪音图片，这张图片用于 AcrylicBrush，可以安全删除 -->
-  <Target Name="RemoveWinUIAssets" Condition="!$(IsPackaged)" AfterTargets="AddPriPayloadFilesToCopyToOutputDirectoryItems">
+  <Target Name="RemoveWinUIAssets" AfterTargets="AddPriPayloadFilesToCopyToOutputDirectoryItems">
     <ItemGroup>
-      <_AllChildProjectItemsWithTargetPath Remove="@(_AllChildProjectItemsWithTargetPath)" Condition="$([System.String]::new('%(TargetPath)').StartsWith('Microsoft.UI.Xaml'))" />
+      <_AllChildProjectItemsWithTargetPath Remove="@(_AllChildProjectItemsWithTargetPath)" Condition="$([System.String]::new('%(TargetPath)').StartsWith('Microsoft.UI.Xaml\'))" />
     </ItemGroup>
   </Target>
-  
-  <!-- 打包配置下会合并一个很小的 pri，它只包含 Compact.xbf，对我们无用 -->
-  <Target Name="RemovePackagedWinUIPri" Condition="$(IsPackaged)" AfterTargets="ComputeInputPriFiles">
+  <!-- 打包配置下并且使用预发行版 WinUI 时删除噪音图片-->
+  <Target Name="RemoveWinUIAssetsFromPackage" Condition="$(IsPackaged)" AfterTargets="_ExpandPriFiles">
     <ItemGroup>
-      <_PriFile Remove="@(_PriFile)" Condition="'%(Filename)' == 'Microsoft.UI.Xaml'" />
+      <_ExpandedPriPayload Remove="@(_ExpandedPriPayload)" Condition="$([System.String]::new('%(TargetPath)').StartsWith('Microsoft.UI.Xaml\'))" />
     </ItemGroup>
   </Target>
 </Project>
