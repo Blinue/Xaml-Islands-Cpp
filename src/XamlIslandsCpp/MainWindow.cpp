@@ -368,11 +368,13 @@ LRESULT MainWindow::_TitleBarMessageHandler(UINT msg, WPARAM wParam, LPARAM lPar
 		// 控件的鼠标消息，标题栏按钮的状态由我们手动控制。
 		switch (wParam) {
 		case HTTOP:
+		case HTTOPLEFT:
+		case HTTOPRIGHT:
 		case HTCAPTION:
 		{
 			captionButtons.LeaveButtons();
 
-			// 将 HTTOP 传给主窗口才能通过上边框调整窗口高度
+			// 将这些消息传给主窗口才能移动窗口或者调整窗口大小
 			return SendMessage(Handle(), msg, wParam, lParam);
 		}
 		case HTMINBUTTON:
@@ -429,9 +431,11 @@ LRESULT MainWindow::_TitleBarMessageHandler(UINT msg, WPARAM wParam, LPARAM lPar
 		// 给主窗口。
 		switch (wParam) {
 		case HTTOP:
+		case HTTOPLEFT:
+		case HTTOPRIGHT:
 		case HTCAPTION:
 		{
-			// 将 HTTOP 传给主窗口才能通过上边框调整窗口高度
+			// 将这些消息传给主窗口才能移动窗口或者调整窗口大小
 			return SendMessage(Handle(), msg, wParam, lParam);
 		}
 		case HTMINBUTTON:
@@ -460,6 +464,8 @@ LRESULT MainWindow::_TitleBarMessageHandler(UINT msg, WPARAM wParam, LPARAM lPar
 		// 处理鼠标在标题栏上释放。如果位于标题栏按钮上，则传递给 CaptionButtons，不在则将消息传递给主窗口
 		switch (wParam) {
 		case HTTOP:
+		case HTTOPLEFT:
+		case HTTOPRIGHT:
 		case HTCAPTION:
 		{
 			// 在可拖拽区域或上边框释放左键，将此消息传递给主窗口
