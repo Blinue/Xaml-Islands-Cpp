@@ -3,6 +3,8 @@ name: build
 on:
   push:
     paths: [ '.github/workflows/build.yml', 'XamlIslandsCpp.sln', 'publish.py', 'src/**' ]
+  pull_request:
+    paths: [ '.github/workflows/build.yml', 'XamlIslandsCpp.sln', 'publish.py', 'src/**' ]
 
 jobs:
   build:
