@@ -12,9 +12,11 @@
 			<ResourceDictionary.ThemeDictionaries>
 				<ResourceDictionary x:Key="Light">
 					<Color x:Key="CardBackgroundColor">#60FFFFFF</Color>
+					<Color x:Key="DividerBackgroundColor">#60000000</Color>
 				</ResourceDictionary>
 				<ResourceDictionary x:Key="Dark">
 					<Color x:Key="CardBackgroundColor">#60000000</Color>
+					<Color x:Key="DividerBackgroundColor">#60FFFFFF</Color>
 				</ResourceDictionary>
 			</ResourceDictionary.ThemeDictionaries>
 		</ResourceDictionary>
@@ -24,7 +26,7 @@
 		                       Canvas.ZIndex="1"
 		                       Visibility="{x:Bind IsCustomTitleBarEnabled, Mode=OneWay}" />
 		<StackPanel Width="300"
-		            Padding="40"
+		            Padding="40,32"
 		            HorizontalAlignment="Center"
 		            VerticalAlignment="Center"
 		            Background="{ThemeResource CardBackgroundColor}"
@@ -68,7 +70,17 @@
 					<ComboBoxItem IsEnabled="{x:Bind local:RootPage.IsMicaAvailable}">Mica Alt</ComboBoxItem>
 				</ComboBox>
 			</Grid>
-			<cl:UserControl />
+			<Rectangle Height="1"
+			           Margin="-8,4,-8,4"
+			           HorizontalAlignment="Stretch"
+			           Fill="{ThemeResource DividerBackgroundColor}" />
+			<TextBlock x:Uid="LoadStringResTextBlock"
+			           VerticalAlignment="Center" />
+			<TextBlock x:Name="StringResTextBlock"
+			           HorizontalAlignment="Center" />
+			<TextBlock x:Uid="CustomControlTextBlock"
+			           VerticalAlignment="Center" />
+			<cl:UserControl HorizontalAlignment="Center" />
 		</StackPanel>
 	</Grid>
 </Page>

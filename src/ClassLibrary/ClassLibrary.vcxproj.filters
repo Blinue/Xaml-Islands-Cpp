@@ -14,4 +14,17 @@
   <ItemGroup>
     <Page Include="UserControl.xaml" />
   </ItemGroup>
+  <ItemGroup>
+    <PRIResource Include="Resources.language-en-US.resw">
+      <Filter>Strings</Filter>
+    </PRIResource>
+    <PRIResource Include="Resources.language-zh-CN.resw">
+      <Filter>Strings</Filter>
+    </PRIResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Strings">
+      <UniqueIdentifier>{f5d58a84-d9af-421e-b43a-8bc0823e7ced}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
 </Project>

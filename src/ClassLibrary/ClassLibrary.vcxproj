@@ -25,6 +25,7 @@
     <OutDir Condition="$(IsPackaged)">$(SolutionDir)bin\$(Platform)\$(Configuration)\$(MSBuildProjectName)\</OutDir>
     <OutDir Condition="!$(IsPackaged)">$(SolutionDir)bin\$(Platform)\$(Configuration)\</OutDir>
     <GeneratedFilesDir>$(IntDir)Generated Files\</GeneratedFilesDir>
+    <AppxBundlePlatforms>x64|arm64</AppxBundlePlatforms>
     <DesktopCompatible>true</DesktopCompatible>
     <DisableEmbeddedXbf>false</DisableEmbeddedXbf>
     <XamlComponentResourceLocation>nested</XamlComponentResourceLocation>
@@ -95,6 +96,10 @@
     <Page Include="UserControl.xaml">
       <SubType>Designer</SubType>
     </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <PRIResource Include="Resources.language-en-US.resw" />
+    <PRIResource Include="Resources.language-zh-CN.resw" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <!-- 导入 Microsoft.AppXPackage.Targets 以生成 pri，应在 Microsoft.Cpp.targets 之后 -->

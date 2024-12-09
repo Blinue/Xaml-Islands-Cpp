@@ -117,31 +117,10 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="BackgroundTextBlock.Text" xml:space="preserve">
-    <value>Background</value>
+  <data name="ClickMeButton.Content" xml:space="preserve">
+    <value>点我 😎</value>
   </data>
-  <data name="Background_Solid.Content" xml:space="preserve">
-    <value>Solid color</value>
-  </data>
-  <data name="CustomControlTextBlock.Text" xml:space="preserve">
-    <value>Custom control from ClassLibrary</value>
-  </data>
-  <data name="CustomTitlebarTextBlock.Text" xml:space="preserve">
-    <value>Custom titlebar</value>
-  </data>
-  <data name="Hello" xml:space="preserve">
-    <value>"Hello"</value>
-  </data>
-  <data name="LoadStringResTextBlock.Text" xml:space="preserve">
-    <value>Load string resources</value>
-  </data>
-  <data name="ThemeTextBlock.Text" xml:space="preserve">
-    <value>Theme</value>
-  </data>
-  <data name="Theme_Dark.Content" xml:space="preserve">
-    <value>Dark</value>
-  </data>
-  <data name="Theme_Light.Content" xml:space="preserve">
-    <value>Light</value>
+  <data name="ClickMeButton_ClickedContent" xml:space="preserve">
+    <value>被点了 😥</value>
   </data>
 </root>

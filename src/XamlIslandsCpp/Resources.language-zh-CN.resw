@@ -123,8 +123,17 @@
   <data name="Background_Solid.Content" xml:space="preserve">
     <value>纯色</value>
   </data>
+  <data name="CustomControlTextBlock.Text" xml:space="preserve">
+    <value>来自 ClassLibrary 的自定义控件</value>
+  </data>
   <data name="CustomTitlebarTextBlock.Text" xml:space="preserve">
     <value>自定义标题栏</value>
+  </data>
+  <data name="Hello" xml:space="preserve">
+    <value>“你好”</value>
+  </data>
+  <data name="LoadStringResTextBlock.Text" xml:space="preserve">
+    <value>读取字符串资源</value>
   </data>
   <data name="ThemeTextBlock.Text" xml:space="preserve">
     <value>主题</value>

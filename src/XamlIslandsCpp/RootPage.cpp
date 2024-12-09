@@ -13,9 +13,18 @@ using namespace XamlIslandsCpp;
 
 namespace winrt::XamlIslandsCpp::implementation {
 
+static constexpr const wchar_t* RESOURCE_MAP_ID = L"XamlIslandsCpp/Resources";
+
 void RootPage::InitializeComponent() {
+	// 设置 Language 属性可以帮助 XAML 选择合适的字体，比如繁体中文使用 Microsoft JhengHei UI，日语使用 Yu Gothic UI
+	// Language(L"en-us");
+
 	RootPageT::InitializeComponent();
+
 	_UpdateTheme();
+
+	ResourceLoader resourceLoader = ResourceLoader::GetForCurrentView(RESOURCE_MAP_ID);
+	StringResTextBlock().Text(resourceLoader.GetString(L"Hello"));
 }
 
 bool RootPage::IsCustomTitleBarEnabled() const noexcept {

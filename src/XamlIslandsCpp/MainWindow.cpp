@@ -199,7 +199,7 @@ LRESULT MainWindow::_MessageHandler(UINT msg, WPARAM wParam, LPARAM lParam) noex
 		const double dpiScale = _CurrentDpi() / double(USER_DEFAULT_SCREEN_DPI);
 		((MINMAXINFO*)lParam)->ptMinTrackSize = {
 			std::lround(500 * dpiScale),
-			std::lround(300 * dpiScale)
+			std::lround(420 * dpiScale)
 		};
 		return 0;
 	}

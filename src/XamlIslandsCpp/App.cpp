@@ -31,6 +31,9 @@ App::App() {
 			ShowWindow(hwndDWXS, SW_HIDE);
 		}
 	}
+
+	// 设置显示语言，不支持在运行时更改
+	// ResourceContext::SetGlobalQualifierValue(L"Language", L"en-us");
 }
 
 }
