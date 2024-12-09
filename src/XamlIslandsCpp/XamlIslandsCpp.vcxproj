@@ -240,7 +240,7 @@
   <!-- 来自 https://github.com/microsoft/terminal/blob/a2bb3136bb52c253060aa281396dbd12316b33a6/build/rules/GenerateSxsManifestsFromWinmds.targets -->
   <Target Name="UnpackagedWin32MapWinmdsToManifestFiles" DependsOnTargets="ResolveAssemblyReferences" Condition="!$(IsPackaged)">
     <ItemGroup>
-      <!-- 为每一个引用的非系统 winmd 文件生成清单文件 -->
+      <!-- 为每一个引用的存在 Implementation 属性的 winmd 生成清单文件 -->
       <_UnpackagedWin32WinmdManifest Include="@(ReferencePath->'$(_ManifestsDir)%(FileName).manifest')" Condition="'%(ReferencePath.IsSystemReference)' != 'true' And '%(ReferencePath.WinMDFile)' == 'true' And '%(ReferencePath.ReferenceSourceTarget)' == 'ResolveAssemblyReference' And '%(ReferencePath.Implementation)' != ''">
         <WinMDPath>%(ReferencePath.FullPath)</WinMDPath>
         <Implementation>$([System.IO.Path]::GetFileName('%(ReferencePath.Implementation)'))</Implementation>
