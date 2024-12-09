@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "winrt/Windows.UI.Xaml.h"
 #include "winrt/Windows.UI.Xaml.Markup.h"
 #include "winrt/Windows.UI.Xaml.Interop.h"
@@ -8,7 +8,7 @@
 namespace winrt::ClassLibrary::implementation {
 
 struct UserControl : UserControlT<UserControl> {
-    void ClickHandler(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args);
+	void ClickHandler(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args);
 };
 
 }
