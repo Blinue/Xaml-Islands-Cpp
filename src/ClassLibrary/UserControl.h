@@ -7,8 +7,16 @@
 
 namespace winrt::ClassLibrary::implementation {
 
-struct UserControl : UserControlT<UserControl> {
-	void ClickHandler(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args);
+class UserControl : public UserControlT<UserControl> {
+public:
+	void InitializeComponent();
+
+	void ClickMeButton_Click(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args);
+
+private:
+	void _UpdateClickMeButtonContent();
+
+	static uint32_t _count;
 };
 
 }

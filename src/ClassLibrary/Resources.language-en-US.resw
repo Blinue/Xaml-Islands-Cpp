@@ -118,9 +118,9 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="ClickMeButton.Content" xml:space="preserve">
-    <value>Click Me 😎</value>
+    <value>I'm a button</value>
   </data>
   <data name="ClickMeButton_ClickedContent" xml:space="preserve">
-    <value>Clicked 😥</value>
+    <value>I've been clicked {} times</value>
   </data>
 </root>

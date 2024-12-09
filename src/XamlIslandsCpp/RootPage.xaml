@@ -74,12 +74,10 @@
 			           Margin="-8,4,-8,4"
 			           HorizontalAlignment="Stretch"
 			           Fill="{ThemeResource DividerBackgroundColor}" />
-			<TextBlock x:Uid="LoadStringResTextBlock"
-			           VerticalAlignment="Center" />
+			<TextBlock x:Uid="LoadStringResTextBlock" />
 			<TextBlock x:Name="StringResTextBlock"
 			           HorizontalAlignment="Center" />
-			<TextBlock x:Uid="CustomControlTextBlock"
-			           VerticalAlignment="Center" />
+			<TextBlock x:Uid="CustomControlTextBlock" />
 			<cl:UserControl HorizontalAlignment="Center" />
 		</StackPanel>
 	</Grid>

@@ -7,7 +7,8 @@
              xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
              mc:Ignorable="d">
 	<StackPanel Orientation="Horizontal">
-		<Button x:Uid="ClickMeButton"
-		        Click="ClickHandler" />
+		<Button x:Name="ClickMeButton"
+		        x:Uid="ClickMeButton"
+		        Click="ClickMeButton_Click" />
 	</StackPanel>
 </UserControl>
