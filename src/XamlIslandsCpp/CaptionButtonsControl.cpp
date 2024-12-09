@@ -128,7 +128,7 @@ void CaptionButtonsControl::LeaveButtons() {
 	VisualStateManager::GoToState(CloseButton(), activeState, true);
 }
 
-void CaptionButtonsControl::IsWindowMaximized(bool value) {
+void CaptionButtonsControl::IsWindowMaximized(bool value, bool fromDispatcher) {
 	if (_isWindowMaximized == value) {
 		return;
 	}
@@ -136,6 +136,13 @@ void CaptionButtonsControl::IsWindowMaximized(bool value) {
 	if (VisualStateManager::GoToState(MaximizeButton(),
 		value ? L"WindowStateMaximized" : L"WindowStateNormal", false)) {
 		_isWindowMaximized = value;
+	} else if (!fromDispatcher) {
+		// 失败可能是因为标题栏尚未显示，稍后再试一次
+		Dispatcher().RunAsync(CoreDispatcherPriority::Low, [weakThis(get_weak()), value]() {
+			if (auto that = weakThis.get()) {
+				that->IsWindowMaximized(value, true);
+			}
+		});
 	}
 }
 

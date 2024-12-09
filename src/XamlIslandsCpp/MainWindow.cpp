@@ -189,8 +189,12 @@ LRESULT MainWindow::_MessageHandler(UINT msg, WPARAM wParam, LPARAM lParam) noex
 	case WM_SIZE:
 	{
 		LRESULT ret = base_type::_MessageHandler(WM_SIZE, wParam, lParam);
-		_ResizeTitleBarWindow();
-		Content()->TitleBar().CaptionButtons().IsWindowMaximized(_IsMaximized());
+
+		if (_IsCustomTitleBarEnabled()) {
+			_ResizeTitleBarWindow();
+			Content()->TitleBar().CaptionButtons().IsWindowMaximized(_IsMaximized());
+		}
+		
 		return ret;
 	}
 	case WM_GETMINMAXINFO:
@@ -247,7 +251,9 @@ LRESULT MainWindow::_MessageHandler(UINT msg, WPARAM wParam, LPARAM lParam) noex
 	}
 	case WM_ACTIVATE:
 	{
-		Content()->TitleBar().IsWindowActive(LOWORD(wParam) != WA_INACTIVE);
+		if (_IsCustomTitleBarEnabled()) {
+			Content()->TitleBar().IsWindowActive(LOWORD(wParam) != WA_INACTIVE);
+		}
 		break;
 	}
 	case WM_DESTROY:

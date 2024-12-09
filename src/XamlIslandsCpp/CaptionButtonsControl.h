@@ -16,7 +16,7 @@ struct CaptionButtonsControl : CaptionButtonsControlT<CaptionButtonsControl> {
 
 	void LeaveButtons();
 
-	void IsWindowMaximized(bool value);
+	void IsWindowMaximized(bool value, bool fromDispatcher = false);
 	void IsWindowActive(bool value);
 
 private:
