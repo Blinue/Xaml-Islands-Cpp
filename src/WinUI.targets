@@ -217,6 +217,9 @@ File.Delete(configFileName);
         <CopyLocal>$(IsPackaged)</CopyLocal>
         <Implementation>$(WinUIDllPath)</Implementation>
       </ReferencePath>
+
+      <!-- 非打包配置不要复制 winmd -->
+      <ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)" Condition="!$(IsPackaged) And '%(Filename)%(Extension)' == 'Microsoft.UI.Xaml.winmd'" />
       
       <!-- 将 Microsoft.UI.Xaml.dll 复制到输出文件夹 -->
       <ReferenceCopyLocalPaths Include="$(WinUIDllPath)" />

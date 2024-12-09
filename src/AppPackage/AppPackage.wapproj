@@ -53,10 +53,12 @@
   <ItemGroup>
     <ProjectReference Include="..\XamlIslandsCpp\XamlIslandsCpp.vcxproj" />
   </ItemGroup>
+
   <!-- 只支持 DebugPackaged 或 ReleasePackaged 配置打包 -->
   <Target Name="VerifyConfiguration" BeforeTargets="BeforeBuild">
     <Error Text="Unsupported configuration!" Condition="!$(Configuration.EndsWith('Packaged'))" />
   </Target>
+
   <!-- 由于 x-generate 不起作用，这个脚本用于检测支持的语言并填充 Resources 节点 -->
   <UsingTask TaskName="GenerateResourcesNode" TaskFactory="RoslynCodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
     <ParameterGroup>
@@ -97,14 +99,15 @@ doc.Save(TargetPath);
   </UsingTask>
   <Target Name="GenerateResourcesNodeForAppxManifest" BeforeTargets="ResolveProjectReferences">
     <MakeDir Directories="$(BaseIntermediateOutputPath)" />
-    <GenerateResourcesNode ManifestPath="@(AppxManifest)" TargetPath="$(BaseIntermediateOutputPath)Package.appxmanifest" ResourcesDir="..\XamlIslandsCpp\" />
+    <GenerateResourcesNode ManifestPath="@(AppxManifest)" TargetPath="$(BaseIntermediateOutputPath)Package.appxmanifest" ResourcesDir="%(ProjectReference.RelativeDir)" />
     <ItemGroup>
       <AppxManifest Remove="@(AppxManifest)" />
       <AppxManifest Include="$(BaseIntermediateOutputPath)Package.appxmanifest" />
     </ItemGroup>
   </Target>
+
   <!-- 将依赖项移到包的根目录 -->
-  <!-- https://github.com/microsoft/terminal/blob/a2bb3136bb52c253060aa281396dbd12316b33a6/src/cascadia/CascadiaPackage/CascadiaPackage.wapproj#L100 -->
+  <!-- 来自 https://github.com/microsoft/terminal/blob/a2bb3136bb52c253060aa281396dbd12316b33a6/src/cascadia/CascadiaPackage/CascadiaPackage.wapproj#L100 -->
   <Target Name="FlattenPackage" BeforeTargets="_ConvertItems">
     <ItemGroup>
       <_TemporaryFilteredWapProjOutput Include="@(_FilteredNonWapProjProjectOutput)" />
@@ -115,17 +118,39 @@ doc.Save(TargetPath);
       </_FilteredNonWapProjProjectOutput>
     </ItemGroup>
   </Target>
+
   <!-- 防止依赖项的 winmd 和 pri 被复制到包中。应尽可能晚的移除 winmd，我们需要编译系统将其中的可激活类记录到 AppxManifest.xml -->
   <Target Name="RemoveWinMDAndPri" BeforeTargets="_CalculateInputsForGenerateAppxPackageRecipe">
     <ItemGroup>
       <AppxPackagePayload Remove="@(AppxPackagePayload)" Condition="'%(Extension)' == '.winmd' Or ('%(Filename)' != 'resources' And '%(Extension)' == '.pri')" />
     </ItemGroup>
   </Target>
+
   <!-- 直接使用 resources.pri，其他的 pri 都已经合并 -->
   <Target Name="RemoveDupPris" AfterTargets="_RemoveExtraPriFiles">
     <ItemGroup>
       <_PriFile Remove="@(_PriFile)" Condition="'%(Filename)' != 'resources'" />
     </ItemGroup>
   </Target>
+    
+  <!-- 从 AppxManifest 中删除 VCLibs 依赖 -->
+  <!-- 来自 https://github.com/microsoft/terminal/blob/86a624517e25cbfedccb54541a756efd01bfb62d/src/cascadia/CascadiaPackage/CascadiaPackage.wapproj#L156 -->
+  <Target Name="StripAllDependenciesFromPackageFirstManifest" BeforeTargets="_GenerateCurrentProjectAppxManifest">
+    <ItemGroup>
+      <FrameworkSdkReference Remove="@(FrameworkSdkReference)" Condition="'%(FrameworkSdkReference.SimpleName)'=='Microsoft.VCLibs'" />
+      <FrameworkSdkPackage Remove="@(FrameworkSdkPackage)" Condition="'%(FrameworkSdkPackage.Name)'=='Microsoft.VCLibs.140.00' or '%(FrameworkSdkPackage.Name)'=='Microsoft.VCLibs.140.00.Debug'" />
+      <FrameworkSdkReference Remove="@(FrameworkSdkReference)" Condition="'%(FrameworkSdkReference.SimpleName)'=='Microsoft.VCLibs.Desktop'" />
+      <FrameworkSdkPackage Remove="@(FrameworkSdkPackage)" Condition="'%(FrameworkSdkPackage.Name)'=='Microsoft.VCLibs.140.00.UWPDesktop' or '%(FrameworkSdkPackage.Name)'=='Microsoft.VCLibs.140.00.Debug.UWPDesktop'" />
+    </ItemGroup>
+  </Target>
+  <Target Name="StripAllDependenciesFromPackageSecondManifest" BeforeTargets="_GenerateDesktopBridgeAppxManifest" DependsOnTargets="_ResolveVCLibDependencies">
+    <ItemGroup>
+      <FrameworkSdkReference Remove="@(FrameworkSdkReference)" Condition="'%(FrameworkSdkReference.SimpleName)'=='Microsoft.VCLibs'" />
+      <FrameworkSdkPackage Remove="@(FrameworkSdkPackage)" Condition="'%(FrameworkSdkPackage.Name)'=='Microsoft.VCLibs.140.00' or '%(FrameworkSdkPackage.Name)'=='Microsoft.VCLibs.140.00.Debug'" />
+      <FrameworkSdkReference Remove="@(FrameworkSdkReference)" Condition="'%(FrameworkSdkReference.SimpleName)'=='Microsoft.VCLibs.Desktop'" />
+      <FrameworkSdkPackage Remove="@(FrameworkSdkPackage)" Condition="'%(FrameworkSdkPackage.Name)'=='Microsoft.VCLibs.140.00.UWPDesktop' or '%(FrameworkSdkPackage.Name)'=='Microsoft.VCLibs.140.00.Debug.UWPDesktop'" />
+    </ItemGroup>
+  </Target>
+
   <Import Project="$(WapProjPath)\Microsoft.DesktopBridge.targets" />
 </Project>
