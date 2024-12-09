@@ -311,9 +311,18 @@ LRESULT MainWindow::_TitleBarMessageHandler(UINT msg, WPARAM wParam, LPARAM lPar
 			return HTNOWHERE;
 		}
 
-		if (!_IsMaximized() && cursorPos.y + (int)_GetTopBorderHeight() < _GetResizeHandleHeight()) {
-			// 鼠标位于上边框
-			return HTTOP;
+		if (!_IsMaximized()) {
+			const int resizeHandleHeight = _GetResizeHandleHeight();
+			if (cursorPos.y < resizeHandleHeight) {
+				// 鼠标位于上边框
+				if (cursorPos.x < resizeHandleHeight) {
+					return HTTOPLEFT;
+				} else if (cursorPos.x + resizeHandleHeight >= titleBarClientRect.right) {
+					return HTTOPRIGHT;
+				} else {
+					return HTTOP;
+				}
+			}
 		}
 
 		static const winrt::Size buttonSizeInDips = [this]() {
@@ -324,7 +333,7 @@ LRESULT MainWindow::_TitleBarMessageHandler(UINT msg, WPARAM wParam, LPARAM lPar
 		const double buttonWidthInPixels = buttonSizeInDips.Width * dpiScale;
 		const double buttonHeightInPixels = buttonSizeInDips.Height * dpiScale;
 
-		if (cursorPos.y >= buttonHeightInPixels) {
+		if (cursorPos.y >= _GetTopBorderHeight() + buttonHeightInPixels) {
 			// 鼠标位于标题按钮下方，如果标题栏很宽，这里也可以拖动
 			return HTCAPTION;
 		}
@@ -491,16 +500,18 @@ void MainWindow::_ResizeTitleBarWindow() noexcept {
 	rect = titleBar.TransformToVisual(*Content()).TransformBounds(rect);
 
 	const float dpiScale = _CurrentDpi() / float(USER_DEFAULT_SCREEN_DPI);
+	const uint32_t topBorderHeight = _GetTopBorderHeight();
 
-	// 将标题栏窗口置于 XAML Islands 窗口上方
-	const int titleBarWidth = (int)std::ceilf(rect.Width * dpiScale);
+	// 将标题栏窗口置于 XAML Islands 窗口上方，覆盖上边框和标题栏控件
+	RECT clientRect;
+	GetClientRect(Handle(), &clientRect);
 	SetWindowPos(
 		_hwndTitleBar,
 		HWND_TOP,
-		(int)std::floorf(rect.X * dpiScale),
-		(int)std::floorf(rect.Y * dpiScale) + _GetTopBorderHeight(),
-		titleBarWidth,
-		(int)std::floorf(rect.Height * dpiScale + 1),	// 不知为何，直接向上取整有时无法遮盖 TitleBarControl
+		0,
+		0,
+		clientRect.right,
+		topBorderHeight + (int)std::floorf(rect.Height * dpiScale + 1),	// 不知为何，直接向上取整有时无法遮盖 TitleBarControl
 		SWP_SHOWWINDOW
 	);
 
@@ -512,7 +523,7 @@ void MainWindow::_ResizeTitleBarWindow() noexcept {
 		const int captionButtonHeightInPixels = (int)std::ceilf(captionButtonHeightInDips * dpiScale);
 
 		// 确保原生按钮和标题栏按钮高度相同
-		MoveWindow(_hwndMaximizeButton, 0, 0, titleBarWidth, captionButtonHeightInPixels, FALSE);
+		MoveWindow(_hwndMaximizeButton, 0, topBorderHeight, clientRect.right, captionButtonHeightInPixels, FALSE);
 	}
 
 	// 设置标题栏窗口的最大化样式，这样才能展示正确的文字提示
