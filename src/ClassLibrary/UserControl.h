@@ -7,8 +7,7 @@
 
 namespace winrt::ClassLibrary::implementation {
 
-class UserControl : public UserControlT<UserControl> {
-public:
+struct UserControl : public UserControlT<UserControl> {
 	void InitializeComponent();
 
 	void ClickMeButton_Click(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args);
