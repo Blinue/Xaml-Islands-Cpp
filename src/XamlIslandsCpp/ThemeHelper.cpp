@@ -25,14 +25,13 @@ static fnAllowDarkModeForWindow AllowDarkModeForWindow = nullptr;
 static fnRefreshImmersiveColorPolicyState RefreshImmersiveColorPolicyState = nullptr;
 static fnFlushMenuThemes FlushMenuThemes = nullptr;
 
-static bool IsInitialized() {
+[[maybe_unused]]
+static bool IsInitialized() noexcept {
 	return SetPreferredAppMode;
 }
 
-static void InitApis() noexcept {
-	if (IsInitialized()) {
-		return;
-	}
+void ThemeHelper::Initialize() noexcept {
+	assert(!IsInitialized());
 
 	HMODULE hUxtheme = LoadLibraryEx(L"uxtheme.dll", NULL, LOAD_LIBRARY_SEARCH_SYSTEM32);
 	assert(hUxtheme);
@@ -41,10 +40,6 @@ static void InitApis() noexcept {
 	AllowDarkModeForWindow = (fnAllowDarkModeForWindow)GetProcAddress(hUxtheme, MAKEINTRESOURCEA(133));
 	RefreshImmersiveColorPolicyState = (fnRefreshImmersiveColorPolicyState)GetProcAddress(hUxtheme, MAKEINTRESOURCEA(104));
 	FlushMenuThemes = (fnFlushMenuThemes)GetProcAddress(hUxtheme, MAKEINTRESOURCEA(136));
-}
-
-void ThemeHelper::Initialize() noexcept {
-	InitApis();
 
 	SetPreferredAppMode(PreferredAppMode::AllowDark);
 	RefreshImmersiveColorPolicyState();

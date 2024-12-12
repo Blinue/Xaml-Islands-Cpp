@@ -364,8 +364,8 @@ LRESULT MainWindow::_TitleBarMessageHandler(UINT msg, WPARAM wParam, LPARAM lPar
 		POINT cursorPos{ GET_X_LPARAM(lParam),GET_Y_LPARAM(lParam) };
 		ClientToScreen(_hwndTitleBar, &cursorPos);
 		wParam = SendMessage(_hwndTitleBar, WM_NCHITTEST, 0, MAKELPARAM(cursorPos.x, cursorPos.y));
+		[[fallthrough]];
 	}
-	[[fallthrough]];
 	case WM_NCMOUSEMOVE:
 	{
 		auto captionButtons = Content()->TitleBar().CaptionButtons();
@@ -463,8 +463,8 @@ LRESULT MainWindow::_TitleBarMessageHandler(UINT msg, WPARAM wParam, LPARAM lPar
 		POINT cursorPos{ GET_X_LPARAM(lParam),GET_Y_LPARAM(lParam) };
 		ClientToScreen(_hwndTitleBar, &cursorPos);
 		wParam = SendMessage(_hwndTitleBar, WM_NCHITTEST, 0, MAKELPARAM(cursorPos.x, cursorPos.y));
+		[[fallthrough]];
 	}
-	[[fallthrough]];
 	case WM_NCLBUTTONUP:
 	{
 		// 处理鼠标在标题栏上释放。如果位于标题栏按钮上，则传递给 CaptionButtons，不在则将消息传递给主窗口

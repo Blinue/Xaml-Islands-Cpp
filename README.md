@@ -1,7 +1,5 @@
 # Xaml-Islands-Cpp
 
-![MainWindow.png](img/MainWindow.png)
-
  [XAML Islands](https://docs.microsoft.com/en-us/windows/apps/desktop/modernize/xaml-islands) (C++/WinRT) 应用示例。
 
 ## 功能
@@ -14,6 +12,10 @@
 * 支持打包为 MSIX
 * 支持 x64 和 ARM64 架构
 * 支持 XAML 热重载
+
+# 截图
+
+![MainWindow.png](img/MainWindow.png)
 
 ## 编译要求
 
