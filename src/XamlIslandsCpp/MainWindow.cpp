@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "MainWindow.h"
 #include "CommonSharedConstants.h"
+#include "CaptionButtonsControl.h"
+#include "TitleBarControl.h"
 
 using namespace winrt::XamlIslandsCpp::implementation;
 using namespace winrt;

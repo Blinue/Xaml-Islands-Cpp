@@ -8,6 +8,7 @@
 #include "XamlHelper.h"
 #include "AppSettings.h"
 #include "MainWindow.h"
+#include "TitleBarControl.h"
 
 using namespace XamlIslandsCpp;
 
@@ -68,6 +69,10 @@ void RootPage::Backdrop(int value) {
 	_UpdateTheme();
 
 	_propertyChangedEvent(*this, PropertyChangedEventArgs(L"Backdrop"));
+}
+
+TitleBarControl& RootPage::TitleBar() noexcept {
+	return *get_self<TitleBarControl>(RootPageT::TitleBar());
 }
 
 void RootPage::ComboBox_DropDownOpened(IInspectable const&, IInspectable const&) const {

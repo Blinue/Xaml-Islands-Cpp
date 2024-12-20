@@ -1,9 +1,10 @@
 #pragma once
 #include "pch.h"
 #include "RootPage.g.h"
-#include "TitleBarControl.h"
 
 namespace winrt::XamlIslandsCpp::implementation {
+
+struct TitleBarControl;
 
 struct RootPage : RootPageT<RootPage> {
 	void InitializeComponent();
@@ -27,9 +28,7 @@ struct RootPage : RootPageT<RootPage> {
 	int Backdrop() const noexcept;
 	void Backdrop(int value);
 
-	TitleBarControl& TitleBar() noexcept {
-		return *get_self<TitleBarControl>(RootPageT::TitleBar());
-	}
+	TitleBarControl& TitleBar() noexcept;
 
 	void ComboBox_DropDownOpened(IInspectable const&, IInspectable const&) const;
 
