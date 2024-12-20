@@ -3,6 +3,12 @@
 
 namespace winrt::XamlIslandsCpp::implementation {
 
+enum class CaptionButton {
+	Minimize = HTMINBUTTON,
+	Maximize = HTMAXBUTTON,
+	Close = HTCLOSE
+};
+
 struct CaptionButtonsControl : CaptionButtonsControlT<CaptionButtonsControl> {
 	Size CaptionButtonSize() const;
 

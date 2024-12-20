@@ -2,9 +2,8 @@
 #include "MainWindow.h"
 #include "CommonSharedConstants.h"
 
-namespace winrt {
-using namespace XamlIslandsCpp;
-}
+using namespace winrt::XamlIslandsCpp::implementation;
+using namespace winrt;
 
 namespace XamlIslandsCpp {
 
@@ -50,7 +49,7 @@ bool MainWindow::Create(HINSTANCE hInstance, const WINDOWPLACEMENT* wp) noexcept
 	);
 	assert(Handle());
 
-	_Content(winrt::make_self<winrt::XamlIslandsCpp::implementation::RootPage>());
+	_Content(make_self<RootPage>());
 
 	_SetTheme(theme, backdrop);
 
@@ -64,7 +63,7 @@ bool MainWindow::Create(HINSTANCE hInstance, const WINDOWPLACEMENT* wp) noexcept
 
 	// Xaml 控件加载完成后显示主窗口
 	if (wp) {
-		Content()->Loaded([this, wp(*wp)](winrt::IInspectable const&, winrt::RoutedEventArgs const&) {
+		Content()->Loaded([this, wp(*wp)](winrt::IInspectable const&, RoutedEventArgs const&) {
 			// 禁用显示窗口的动画
 			BOOL value = TRUE;
 			DwmSetWindowAttribute(Handle(), DWMWA_TRANSITIONS_FORCEDISABLED, &value, sizeof(value));
@@ -120,19 +119,19 @@ bool MainWindow::Create(HINSTANCE hInstance, const WINDOWPLACEMENT* wp) noexcept
 		ChangeWindowMessageFilterEx(Handle(), WM_GETTITLEBARINFOEX, MSGFLT_ALLOW, nullptr);
 	}
 
-	Content()->TitleBar().SizeChanged([this](winrt::IInspectable const&, winrt::SizeChangedEventArgs const&) {
+	Content()->TitleBar().SizeChanged([this](winrt::IInspectable const&, SizeChangedEventArgs const&) {
 		_ResizeTitleBarWindow();
 	});
 
 	_themeChangedRevoker = settings.ThemeChanged(
-		winrt::auto_revoke,
+		auto_revoke,
 		[&](AppTheme theme) {
 			_SetTheme(theme, AppSettings::Get().Backdrop());
 		}
 	);
 
 	_backdropChangedRevoker = settings.BackdropChanged(
-		winrt::auto_revoke,
+		auto_revoke,
 		[this, hInstance](WindowBackdrop backdrop) {
 			if (!_SetTheme(AppSettings::Get().Theme(), backdrop)) {
 				return;
@@ -148,9 +147,9 @@ bool MainWindow::Create(HINSTANCE hInstance, const WINDOWPLACEMENT* wp) noexcept
 			BOOL value = TRUE;
 			DwmSetWindowAttribute(Handle(), DWMWA_TRANSITIONS_FORCEDISABLED, &value, sizeof(value));
 
-			winrt::CoreDispatcher dispatcher = Content()->Dispatcher();
+			CoreDispatcher dispatcher = Content()->Dispatcher();
 			Destroy();
-			dispatcher.TryRunAsync(winrt::CoreDispatcherPriority::Normal, [this, wp, hInstance]() {
+			dispatcher.TryRunAsync(CoreDispatcherPriority::Normal, [this, wp, hInstance]() {
 				_closingForRecreate = false;
 				Create(hInstance, &wp);
 			});
@@ -158,7 +157,7 @@ bool MainWindow::Create(HINSTANCE hInstance, const WINDOWPLACEMENT* wp) noexcept
 	);
 
 	_isCustomTitleBarEnabledChangedRevoker = settings.IsCustomTitleBarEnabledChanged(
-		winrt::auto_revoke,
+		auto_revoke,
 		[&](bool enabled) {
 			if (_IsCustomTitleBarEnabled() == enabled) {
 				return;
@@ -170,9 +169,9 @@ bool MainWindow::Create(HINSTANCE hInstance, const WINDOWPLACEMENT* wp) noexcept
 				_SetCustomTitleBar(true);
 			} else {
 				// 优化动画
-				Content()->Dispatcher().TryRunAsync(winrt::CoreDispatcherPriority::Normal, [this]() -> winrt::fire_and_forget {
+				Content()->Dispatcher().TryRunAsync(CoreDispatcherPriority::Normal, [this]() -> fire_and_forget {
 					MainWindow* that = this;
-					winrt::CoreDispatcher dispatcher = Content()->Dispatcher();
+					CoreDispatcher dispatcher = Content()->Dispatcher();
 					co_await 10ms;
 					co_await dispatcher;
 					that->_SetCustomTitleBar(false);
@@ -251,20 +250,9 @@ LRESULT MainWindow::_MessageHandler(UINT msg, WPARAM wParam, LPARAM lParam) noex
 	}
 	case WM_ACTIVATE:
 	{
-		if (_IsCustomTitleBarEnabled()) {
+		if (_IsCustomTitleBarEnabled() && Content()) {
 			Content()->TitleBar().IsWindowActive(LOWORD(wParam) != WA_INACTIVE);
 		}
-		break;
-	}
-	case WM_DESTROY:
-	{
-		_hwndTitleBar = NULL;
-		_trackingMouse = false;
-
-		if (!_closingForRecreate) {
-			PostQuitMessage(0);
-		}
-
 		break;
 	}
 	case WM_GETTITLEBARINFOEX:
@@ -278,6 +266,20 @@ LRESULT MainWindow::_MessageHandler(UINT msg, WPARAM wParam, LPARAM lParam) noex
 				return TRUE;
 			}
 		}
+		break;
+	}
+	case WM_DESTROY:
+	{
+		_hwndTitleBar = NULL;
+		_trackingMouse = false;
+
+		if (!_closingForRecreate) {
+			LRESULT ret = base_type::_MessageHandler(msg, wParam, lParam);
+			// 由于基类会清空消息队列，PostQuitMessage 应在基类处理完毕后执行
+			PostQuitMessage(0);
+			return ret;
+		}
+
 		break;
 	}
 	}
@@ -331,7 +333,7 @@ LRESULT MainWindow::_TitleBarMessageHandler(UINT msg, WPARAM wParam, LPARAM lPar
 			}
 		}
 
-		static const winrt::Size buttonSizeInDips = [this]() {
+		static const Size buttonSizeInDips = [this]() {
 			return Content()->TitleBar().CaptionButtons().CaptionButtonSize();
 		}();
 
@@ -368,7 +370,7 @@ LRESULT MainWindow::_TitleBarMessageHandler(UINT msg, WPARAM wParam, LPARAM lPar
 	}
 	case WM_NCMOUSEMOVE:
 	{
-		auto captionButtons = Content()->TitleBar().CaptionButtons();
+		CaptionButtonsControl& captionButtons = Content()->TitleBar().CaptionButtons();
 
 		// 将 hover 状态通知 CaptionButtons。标题栏窗口拦截了 XAML Islands 中的标题栏
 		// 控件的鼠标消息，标题栏按钮的状态由我们手动控制。
@@ -386,7 +388,7 @@ LRESULT MainWindow::_TitleBarMessageHandler(UINT msg, WPARAM wParam, LPARAM lPar
 		case HTMINBUTTON:
 		case HTMAXBUTTON:
 		case HTCLOSE:
-			captionButtons.HoverButton((winrt::CaptionButton)wParam);
+			captionButtons.HoverButton((CaptionButton)wParam);
 
 			// 追踪鼠标以确保鼠标离开标题栏时我们能收到 WM_NCMOUSELEAVE 消息，否则无法
 			// 可靠的收到这个消息，尤其是在用户快速移动鼠标的时候。
@@ -433,8 +435,7 @@ LRESULT MainWindow::_TitleBarMessageHandler(UINT msg, WPARAM wParam, LPARAM lPar
 	case WM_NCLBUTTONDOWN:
 	case WM_NCLBUTTONDBLCLK:
 	{
-		// 手动处理标题栏上的点击。如果在标题栏按钮上，则通知 CaptionButtons，否则将消息传递
-		// 给主窗口。
+		// 手动处理标题栏上的点击。如果在标题栏按钮上，则通知 CaptionButtons，否则将消息传递给主窗口
 		switch (wParam) {
 		case HTTOP:
 		case HTTOPLEFT:
@@ -447,7 +448,7 @@ LRESULT MainWindow::_TitleBarMessageHandler(UINT msg, WPARAM wParam, LPARAM lPar
 		case HTMINBUTTON:
 		case HTMAXBUTTON:
 		case HTCLOSE:
-			Content()->TitleBar().CaptionButtons().PressButton((winrt::CaptionButton)wParam);
+			Content()->TitleBar().CaptionButtons().PressButton((CaptionButton)wParam);
 			// 在标题栏按钮上按下左键后我们便捕获光标，这样才能在释放时得到通知。注意捕获光标后
 			// 便不会再收到 NC 族消息，这就是为什么我们要处理 WM_MOUSEMOVE 和 WM_LBUTTONUP
 			SetCapture(_hwndTitleBar);
@@ -467,7 +468,7 @@ LRESULT MainWindow::_TitleBarMessageHandler(UINT msg, WPARAM wParam, LPARAM lPar
 	}
 	case WM_NCLBUTTONUP:
 	{
-		// 处理鼠标在标题栏上释放。如果位于标题栏按钮上，则传递给 CaptionButtons，不在则将消息传递给主窗口
+		// 处理鼠标在标题栏上释放。如果在标题栏按钮上，则通知 CaptionButtons，否则将消息传递给主窗口
 		switch (wParam) {
 		case HTTOP:
 		case HTTOPLEFT:
@@ -482,7 +483,7 @@ LRESULT MainWindow::_TitleBarMessageHandler(UINT msg, WPARAM wParam, LPARAM lPar
 		case HTMAXBUTTON:
 		case HTCLOSE:
 			// 在标题栏按钮上释放左键
-			Content()->TitleBar().CaptionButtons().ReleaseButton((winrt::CaptionButton)wParam);
+			Content()->TitleBar().CaptionButtons().ReleaseButton((CaptionButton)wParam);
 			break;
 		default:
 			Content()->TitleBar().CaptionButtons().ReleaseButtons();
@@ -505,10 +506,10 @@ void MainWindow::_ResizeTitleBarWindow() noexcept {
 		return;
 	}
 
-	auto titleBar = Content()->TitleBar();
+	TitleBarControl& titleBar = Content()->TitleBar();
 
 	// 获取标题栏的边框矩形
-	winrt::Rect rect{ 0.0f, 0.0f, (float)titleBar.ActualWidth(), (float)titleBar.ActualHeight() };
+	Rect rect{ 0.0f, 0.0f, (float)titleBar.ActualWidth(), (float)titleBar.ActualHeight() };
 	rect = titleBar.TransformToVisual(*Content()).TransformBounds(rect);
 
 	const float dpiScale = _CurrentDpi() / float(USER_DEFAULT_SCREEN_DPI);

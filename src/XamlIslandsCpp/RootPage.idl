@@ -1,9 +1,5 @@
 namespace XamlIslandsCpp {
 	runtimeclass RootPage : Windows.UI.Xaml.Controls.Page, Windows.UI.Xaml.Data.INotifyPropertyChanged {
-		RootPage();
-
-		TitleBarControl TitleBar { get; };
-
 		Boolean IsCustomTitleBarEnabled;
 		Int32 Theme;
 

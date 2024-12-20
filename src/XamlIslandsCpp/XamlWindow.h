@@ -15,12 +15,6 @@ namespace XamlIslandsCpp {
 template <typename T, typename C>
 class XamlWindowT {
 public:
-	virtual ~XamlWindowT() {
-		if (_hWnd) {
-			DestroyWindow(_hWnd);
-		}
-	}
-
 	int MessageLoop() {
 		MSG msg{};
 		while (GetMessage(&msg, nullptr, 0, 0)) {
@@ -59,10 +53,17 @@ public:
 	}
 
 	void Destroy() {
-		DestroyWindow(_hWnd);
+		if (_hWnd) {
+			DestroyWindow(_hWnd);
+		}
 	}
 
 protected:
+	// 确保无法通过基类指针删除这个对象
+	~XamlWindowT() {
+		Destroy();
+	}
+
 	using base_type = XamlWindowT<T, C>;
 
 	static LRESULT CALLBACK _WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept {
@@ -458,6 +459,12 @@ protected:
 			_isDarkTheme = false;
 
 			_content = nullptr;
+
+			// 关闭 DesktopWindowXamlSource 后应清空消息队列以确保 RootPage 析构
+			MSG msg1;
+			while (PeekMessage(&msg1, nullptr, 0, 0, PM_REMOVE)) {
+				DispatchMessage(&msg1);
+			}
 
 			return 0;
 		}

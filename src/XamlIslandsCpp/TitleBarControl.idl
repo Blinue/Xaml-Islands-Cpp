@@ -1,8 +1,6 @@
 namespace XamlIslandsCpp {
+    [default_interface]
     runtimeclass TitleBarControl : Windows.UI.Xaml.Controls.UserControl {
         TitleBarControl();
-
-        CaptionButtonsControl CaptionButtons { get; };
-        void IsWindowActive(Boolean value);
     }
 }
