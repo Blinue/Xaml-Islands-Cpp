@@ -12,11 +12,11 @@
 			<ResourceDictionary.ThemeDictionaries>
 				<ResourceDictionary x:Key="Light">
 					<Color x:Key="CardBackgroundColor">#60FFFFFF</Color>
-					<Color x:Key="DividerBackgroundColor">#60000000</Color>
+					<Color x:Key="DividerBackgroundColor">#40000000</Color>
 				</ResourceDictionary>
 				<ResourceDictionary x:Key="Dark">
 					<Color x:Key="CardBackgroundColor">#60000000</Color>
-					<Color x:Key="DividerBackgroundColor">#60FFFFFF</Color>
+					<Color x:Key="DividerBackgroundColor">#40FFFFFF</Color>
 				</ResourceDictionary>
 			</ResourceDictionary.ThemeDictionaries>
 		</ResourceDictionary>

@@ -41,10 +41,3 @@ private:
 };
 
 }
-
-namespace winrt::XamlIslandsCpp::factory_implementation {
-
-class App : public AppT<App, implementation::App> {
-};
-
-}
