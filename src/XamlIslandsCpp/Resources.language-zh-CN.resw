@@ -144,4 +144,7 @@
   <data name="Theme_Light.Content" xml:space="preserve">
     <value>亮</value>
   </data>
+  <data name="Theme_System.Content" xml:space="preserve">
+    <value>使用系统设置</value>
+  </data>
 </root>

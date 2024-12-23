@@ -1,9 +1,10 @@
 #pragma once
-#include "WinRTHelper.h"
+#include "Event.h"
 
 namespace XamlIslandsCpp {
 
 enum class AppTheme {
+	System,
 	Light,
 	Dark
 };
@@ -42,15 +43,15 @@ public:
 
 	void Backdrop(WindowBackdrop value);
 
-	WinRTHelper::Event<winrt::delegate<bool>> IsCustomTitleBarEnabledChanged;
-	WinRTHelper::Event<winrt::delegate<AppTheme>> ThemeChanged;
-	WinRTHelper::Event<winrt::delegate<WindowBackdrop>> BackdropChanged;
+	Event<bool> IsCustomTitleBarEnabledChanged;
+	Event<AppTheme> ThemeChanged;
+	Event<WindowBackdrop> BackdropChanged;
 	
 private:
 	AppSettings();
 
 	bool _isCustomTitleBarEnabled = true;
-	AppTheme _theme = AppTheme::Light;
+	AppTheme _theme = AppTheme::System;
 	WindowBackdrop _backdrop = WindowBackdrop::SolidColor;
 };
 

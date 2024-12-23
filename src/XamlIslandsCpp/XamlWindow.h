@@ -15,29 +15,28 @@ namespace XamlIslandsCpp {
 template <typename T, typename C>
 class XamlWindowT {
 public:
-	int MessageLoop() {
-		MSG msg{};
-		while (GetMessage(&msg, nullptr, 0, 0)) {
-			// XAML Islands 会吞掉 Alt+F4，需要特殊处理
-			// https://github.com/microsoft/microsoft-ui-xaml/issues/2408
-			if (msg.message == WM_SYSKEYDOWN && msg.wParam == VK_F4) [[unlikely]] {
-				SendMessage(GetAncestor(msg.hwnd, GA_ROOT), msg.message, msg.wParam, msg.lParam);
-				continue;
-			}
+	XamlWindowT() noexcept = default;
+	XamlWindowT(const XamlWindowT&) = delete;
+	XamlWindowT(XamlWindowT&&) noexcept = default;
 
-			if (_xamlSourceNative2) {
-				BOOL processed = FALSE;
-				HRESULT hr = _xamlSourceNative2->PreTranslateMessage(&msg, &processed);
-				if (SUCCEEDED(hr) && processed) {
-					continue;
-				}
-			}
-
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
+	void HandleMessage(const MSG& msg) {
+		// XAML Islands 会吞掉 Alt+F4，需要特殊处理
+		// https://github.com/microsoft/microsoft-ui-xaml/issues/2408
+		if (msg.message == WM_SYSKEYDOWN && msg.wParam == VK_F4) [[unlikely]] {
+			SendMessage(GetAncestor(msg.hwnd, GA_ROOT), msg.message, msg.wParam, msg.lParam);
+			return;
 		}
 
-		return (int)msg.wParam;
+		if (_xamlSourceNative2) {
+			BOOL processed = FALSE;
+			HRESULT hr = _xamlSourceNative2->PreTranslateMessage(&msg, &processed);
+			if (SUCCEEDED(hr) && processed) {
+				return;
+			}
+		}
+
+		TranslateMessage(&msg);
+		DispatchMessage(&msg);
 	}
 
 	HWND Handle() const noexcept {
@@ -63,8 +62,6 @@ protected:
 	~XamlWindowT() {
 		Destroy();
 	}
-
-	using base_type = XamlWindowT<T, C>;
 
 	static LRESULT CALLBACK _WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept {
 		if (msg == WM_NCCREATE) {
@@ -112,32 +109,29 @@ protected:
 	}
 
 	void _SetInitialTheme(
-		AppTheme theme,
+		bool isLightTheme,
 		WindowBackdrop backdrop,
 		bool isCustomTitleBarEnabled
 	) {
-		using namespace winrt::XamlIslandsCpp;
-		_isDarkTheme = theme == AppTheme::Dark;
+		_isLightTheme = isLightTheme;
 		_isBackgroundSolidColor = backdrop == WindowBackdrop::SolidColor;
 		_isCustomTitleBarEnabled = isCustomTitleBarEnabled;
 	}
 
 	// 需要重新创建窗口时返回 true
-	bool _SetTheme(AppTheme theme, WindowBackdrop backdrop) noexcept {
-		using namespace winrt::XamlIslandsCpp;
-
+	bool _SetTheme(bool isLightTheme, WindowBackdrop backdrop) noexcept {
 		if (Win32Helper::GetOSVersion().Is22H2OrNewer() &&
 			_isBackgroundSolidColor != (backdrop == WindowBackdrop::SolidColor)) {
 			return true;
 		}
 
-		_SetInitialTheme(theme, backdrop, _isCustomTitleBarEnabled);
+		_SetInitialTheme(isLightTheme, backdrop, _isCustomTitleBarEnabled);
 
 		// 在 Win10 中如果自定义标题栏，那么即使在亮色主题下我们也使用暗色边框，这也是 UWP 窗口的行为
 		ThemeHelper::SetWindowTheme(
 			_hWnd,
-			Win32Helper::GetOSVersion().IsWin11() || !_isCustomTitleBarEnabled ? _isDarkTheme : true,
-			_isDarkTheme
+			Win32Helper::GetOSVersion().IsWin11() || !_isCustomTitleBarEnabled ? !isLightTheme : true,
+			!isLightTheme
 		);
 
 		if (!Win32Helper::GetOSVersion().Is22H2OrNewer()) {
@@ -161,8 +155,8 @@ protected:
 			// Win10 中需要更新边框主题
 			ThemeHelper::SetWindowTheme(
 				_hWnd,
-				!_isCustomTitleBarEnabled ? _isDarkTheme : true,
-				_isDarkTheme
+				!_isCustomTitleBarEnabled ? !_isLightTheme : true,
+				!_isLightTheme
 			);
 		}
 
@@ -310,18 +304,18 @@ protected:
 				RECT rcRest = ps.rcPaint;
 				rcRest.top = topBorderHeight;
 
-				static bool isDarkBrush = _isDarkTheme;
-				static HBRUSH backgroundBrush = CreateSolidBrush(isDarkBrush ?
-					CommonSharedConstants::DARK_TINT_COLOR : CommonSharedConstants::LIGHT_TINT_COLOR);
+				static bool isLightBrush = _isLightTheme;
+				static HBRUSH backgroundBrush = CreateSolidBrush(isLightBrush ?
+					CommonSharedConstants::LIGHT_TINT_COLOR : CommonSharedConstants::DARK_TINT_COLOR);
 
-				if (isDarkBrush != _isDarkTheme) {
-					isDarkBrush = _isDarkTheme;
+				if (isLightBrush != _isLightTheme) {
+					isLightBrush = _isLightTheme;
 					DeleteBrush(backgroundBrush);
-					backgroundBrush = CreateSolidBrush(isDarkBrush ?
-						CommonSharedConstants::DARK_TINT_COLOR : CommonSharedConstants::LIGHT_TINT_COLOR);
+					backgroundBrush = CreateSolidBrush(isLightBrush ?
+						CommonSharedConstants::LIGHT_TINT_COLOR : CommonSharedConstants::DARK_TINT_COLOR);
 				}
 
-				if (isDarkBrush && !osVersion.IsWin11()) {
+				if (!isLightBrush && !osVersion.IsWin11()) {
 					// 这里我们想要黑色背景而不是原始边框
 					// 来自 https://github.com/microsoft/terminal/blob/0ee2c74cd432eda153f3f3e77588164cde95044f/src/cascadia/WindowsTerminal/NonClientIslandWindow.cpp#L1030-L1047
 					HDC opaqueDc;
@@ -456,12 +450,17 @@ protected:
 
 			_isMaximized = false;
 			_isWindowShown = false;
-			_isDarkTheme = false;
+			_isLightTheme = true;
 
 			_content = nullptr;
 
 			// 关闭 DesktopWindowXamlSource 后应清空消息队列以确保 RootPage 析构
 			MSG msg1;
+			while (PeekMessage(&msg1, nullptr, 0, 0, PM_REMOVE)) {
+				DispatchMessage(&msg1);
+			}
+			// 偶尔清空消息队列无用，需要再清空一次，不确定是否 100% 可靠。谢谢你，XAML Islands！
+			Sleep(0);
 			while (PeekMessage(&msg1, nullptr, 0, 0, PM_REMOVE)) {
 				DispatchMessage(&msg1);
 			}
@@ -575,7 +574,7 @@ private:
 	uint32_t _nativeTopBorderHeight = 1;
 
 	bool _isMaximized = false;
-	bool _isDarkTheme = false;
+	bool _isLightTheme = true;
 	bool _isWindowShown = false;
 	bool _isCustomTitleBarEnabled = false;
 	bool _isBackgroundSolidColor = false;

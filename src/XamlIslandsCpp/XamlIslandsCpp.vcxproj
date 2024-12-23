@@ -84,7 +84,7 @@
       <SubType>Code</SubType>
     </ClInclude>
     <ClInclude Include="Win32Helper.h" />
-    <ClInclude Include="WinRTHelper.h" />
+    <ClInclude Include="Event.h" />
     <ClInclude Include="XamlHelper.h" />
     <ClInclude Include="XamlWindow.h" />
   </ItemGroup>

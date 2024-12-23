@@ -47,11 +47,12 @@
 			<Grid HorizontalAlignment="Stretch">
 				<TextBlock x:Uid="ThemeTextBlock"
 				           VerticalAlignment="Center" />
-				<ComboBox MinWidth="120"
+				<ComboBox MinWidth="140"
 				          HorizontalAlignment="Right"
 				          VerticalAlignment="Center"
 				          DropDownOpened="ComboBox_DropDownOpened"
 				          SelectedIndex="{x:Bind Theme, Mode=TwoWay}">
+					<ComboBoxItem x:Uid="Theme_System" />
 					<ComboBoxItem x:Uid="Theme_Light" />
 					<ComboBoxItem x:Uid="Theme_Dark" />
 				</ComboBox>
@@ -59,7 +60,7 @@
 			<Grid HorizontalAlignment="Stretch">
 				<TextBlock x:Uid="BackgroundTextBlock"
 				           VerticalAlignment="Center" />
-				<ComboBox MinWidth="120"
+				<ComboBox MinWidth="140"
 				          HorizontalAlignment="Right"
 				          VerticalAlignment="Center"
 				          DropDownOpened="ComboBox_DropDownOpened"

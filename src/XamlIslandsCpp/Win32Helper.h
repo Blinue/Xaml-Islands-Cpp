@@ -1,5 +1,11 @@
 #pragma once
 
+// 来自 WIL
+// Retrieve the HINSTANCE for the current DLL or EXE using this symbol that
+// the linker provides for every module. This avoids the need for a global
+// HINSTANCE variable and provides access to this value for static libraries.
+EXTERN_C IMAGE_DOS_HEADER __ImageBase;
+
 namespace XamlIslandsCpp {
 
 struct Win32Helper {
@@ -30,6 +36,10 @@ struct Win32Helper {
 	};
 
 	static OSVersion GetOSVersion() noexcept;
+
+	static HINSTANCE GetModuleInstanceHandle() noexcept {
+		return reinterpret_cast<HINSTANCE>(&__ImageBase);
+	}
 };
 
 }

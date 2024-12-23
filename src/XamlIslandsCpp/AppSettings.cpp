@@ -9,15 +9,7 @@ using namespace Windows::UI::ViewManagement;
 
 namespace XamlIslandsCpp {
 
-// 来自 https://learn.microsoft.com/en-us/windows/apps/desktop/modernize/apply-windows-themes#know-when-dark-mode-is-enabled
-static bool IsColorLight(const Color& clr) noexcept {
-	return 5 * clr.G + 2 * clr.R + clr.B > 8 * 128;
-}
-
 AppSettings::AppSettings() {
-	Color foregroundColor = UISettings().GetColorValue(UIColorType::Foreground);
-	_theme = IsColorLight(foregroundColor) ? AppTheme::Dark : AppTheme::Light;
-
 	_backdrop = Win32Helper::GetOSVersion().Is22H2OrNewer() ?
 		WindowBackdrop::Mica : WindowBackdrop::SolidColor;
 }

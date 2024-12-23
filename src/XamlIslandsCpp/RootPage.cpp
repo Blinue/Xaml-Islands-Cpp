@@ -7,6 +7,7 @@
 #include "CommonSharedConstants.h"
 #include "XamlHelper.h"
 #include "AppSettings.h"
+#include "App.h"
 #include "MainWindow.h"
 #include "TitleBarControl.h"
 
@@ -22,6 +23,7 @@ void RootPage::InitializeComponent() {
 
 	RootPageT::InitializeComponent();
 
+	_appThemeChangedRevoker = App::Get().ThemeChanged(auto_revoke, [this](bool) { _UpdateTheme(); });
 	_UpdateTheme();
 
 	ResourceLoader resourceLoader = ResourceLoader::GetForCurrentView(RESOURCE_MAP_ID);
@@ -47,8 +49,6 @@ void RootPage::Theme(int value) {
 	}
 
 	AppSettings::Get().Theme((AppTheme)value);
-	_UpdateTheme();
-
 	_propertyChangedEvent(*this, PropertyChangedEventArgs(L"Theme"));
 }
 
@@ -86,11 +86,10 @@ static Color Win32ColorToWinRTColor(COLORREF color) noexcept {
 }
 
 void RootPage::_UpdateTheme() {
-	const AppSettings& settings = AppSettings::Get();
-	const bool isDarkTheme = settings.Theme() == AppTheme::Dark;
-	const WindowBackdrop backdrop = settings.Backdrop();
+	const bool isLightTheme = App::Get().IsLightTheme();
+	const WindowBackdrop backdrop = AppSettings::Get().Backdrop();
 
-	ElementTheme newTheme = isDarkTheme ? ElementTheme::Dark : ElementTheme::Light;
+	ElementTheme newTheme = isLightTheme ? ElementTheme::Light : ElementTheme::Dark;
 	RequestedTheme(newTheme);
 
 	if (Win32Helper::GetOSVersion().Is22H2OrNewer()) {
@@ -103,7 +102,7 @@ void RootPage::_UpdateTheme() {
 	}
 	
 	const Windows::UI::Color bkgColor = Win32ColorToWinRTColor(
-		isDarkTheme ? CommonSharedConstants::DARK_TINT_COLOR : CommonSharedConstants::LIGHT_TINT_COLOR);
+		isLightTheme ? CommonSharedConstants::LIGHT_TINT_COLOR : CommonSharedConstants::DARK_TINT_COLOR);
 
 	if (backdrop == WindowBackdrop::SolidColor) {
 		Background(SolidColorBrush(bkgColor));
@@ -113,14 +112,14 @@ void RootPage::_UpdateTheme() {
 		AcrylicBrush brush;
 		brush.BackgroundSource(AcrylicBackgroundSource::HostBackdrop);
 		// 来自 https://github.com/microsoft/microsoft-ui-xaml/blob/75f7666f5907aad29de1cb2e49405cc06d433fba/dev/Materials/Acrylic/AcrylicBrush_19h1_themeresources.xaml#L12
-		brush.TintColor(isDarkTheme ? Color{ 255,44,44,44 } : Color{ 255,252,252,252 });
-		brush.TintOpacity(isDarkTheme ? 0.15 : 0.0);
+		brush.TintColor(isLightTheme ? Color{ 255,252,252,252 } : Color{ 255,44,44,44 });
+		brush.TintOpacity(isLightTheme ? 0.0 : 0.15);
 		brush.FallbackColor(bkgColor);
 		Background(brush);
 
 		// 切换前台窗口以刷新背景
 		SetForegroundWindow(GetDesktopWindow());
-		SetForegroundWindow(MainWindow::Get().Handle());
+		SetForegroundWindow(App::Get().MainWindow().Handle());
 	}
 }
 

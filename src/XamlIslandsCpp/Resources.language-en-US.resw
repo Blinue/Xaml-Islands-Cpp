@@ -144,4 +144,7 @@
   <data name="Theme_Light.Content" xml:space="preserve">
     <value>Light</value>
   </data>
+  <data name="Theme_System.Content" xml:space="preserve">
+    <value>Use system setting</value>
+  </data>
 </root>

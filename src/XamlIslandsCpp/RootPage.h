@@ -1,6 +1,7 @@
 #pragma once
 #include "pch.h"
 #include "RootPage.g.h"
+#include "Event.h"
 
 namespace winrt::XamlIslandsCpp::implementation {
 
@@ -36,6 +37,8 @@ private:
 	void _UpdateTheme();
 
 	event<PropertyChangedEventHandler> _propertyChangedEvent;
+
+	::XamlIslandsCpp::EventRevoker _appThemeChangedRevoker;
 };
 
 }

@@ -3,14 +3,18 @@
 #include "CommonSharedConstants.h"
 #include "CaptionButtonsControl.h"
 #include "TitleBarControl.h"
+#include "Win32Helper.h"
+#include "App.h"
 
 using namespace winrt::XamlIslandsCpp::implementation;
 using namespace winrt;
 
 namespace XamlIslandsCpp {
 
-bool MainWindow::Create(HINSTANCE hInstance, const WINDOWPLACEMENT* wp) noexcept {
-	static const int _ = [](HINSTANCE hInstance) {
+bool MainWindow::Create(const WINDOWPLACEMENT* wp) noexcept {
+	static const int _ = []() {
+		const HINSTANCE hInstance = Win32Helper::GetModuleInstanceHandle();
+
 		WNDCLASSEXW wcex{
 			.cbSize = sizeof(WNDCLASSEX),
 			.lpfnWndProc = _WndProc,
@@ -27,16 +31,19 @@ bool MainWindow::Create(HINSTANCE hInstance, const WINDOWPLACEMENT* wp) noexcept
 		RegisterClassEx(&wcex);
 
 		return 0;
-	}(hInstance);
+	}();
+
+	const bool isLightTheme = App::Get().IsLightTheme();
 
 	AppSettings& settings = AppSettings::Get();
-	const AppTheme theme = settings.Theme();
 	const WindowBackdrop backdrop = settings.Backdrop();
 
-	_SetInitialTheme(theme, backdrop, settings.IsCustomTitleBarEnabled());
+	_SetInitialTheme(isLightTheme, backdrop, settings.IsCustomTitleBarEnabled());
 	if (wp && wp->showCmd == SW_SHOWMAXIMIZED) {
 		_SetInitialMaximized();
 	}
+
+	const HINSTANCE hInstance = Win32Helper::GetModuleInstanceHandle();
 
 	CreateWindowEx(
 		Win32Helper::GetOSVersion().Is22H2OrNewer() && backdrop != WindowBackdrop::SolidColor ? WS_EX_NOREDIRECTIONBITMAP : 0,
@@ -53,7 +60,9 @@ bool MainWindow::Create(HINSTANCE hInstance, const WINDOWPLACEMENT* wp) noexcept
 
 	_Content(make_self<RootPage>());
 
-	_SetTheme(theme, backdrop);
+	_appThemeChangedRevoker = App::Get().ThemeChanged(winrt::auto_revoke,
+		[this](bool isLightTheme) { _SetTheme(isLightTheme, AppSettings::Get().Backdrop()); });
+	_SetTheme(isLightTheme, backdrop);
 
 	// 隐藏原生标题栏上的图标
 	SetWindowThemeNonClientAttributes(Handle(), WTNCA_NODRAWICON | WTNCA_NOSYSMENU, WTNCA_VALIDBITS);
@@ -125,17 +134,10 @@ bool MainWindow::Create(HINSTANCE hInstance, const WINDOWPLACEMENT* wp) noexcept
 		_ResizeTitleBarWindow();
 	});
 
-	_themeChangedRevoker = settings.ThemeChanged(
-		auto_revoke,
-		[&](AppTheme theme) {
-			_SetTheme(theme, AppSettings::Get().Backdrop());
-		}
-	);
-
 	_backdropChangedRevoker = settings.BackdropChanged(
 		auto_revoke,
-		[this, hInstance](WindowBackdrop backdrop) {
-			if (!_SetTheme(AppSettings::Get().Theme(), backdrop)) {
+		[this](WindowBackdrop backdrop) {
+			if (!_SetTheme(App::Get().IsLightTheme(), backdrop)) {
 				return;
 			}
 
@@ -151,9 +153,9 @@ bool MainWindow::Create(HINSTANCE hInstance, const WINDOWPLACEMENT* wp) noexcept
 
 			CoreDispatcher dispatcher = Content()->Dispatcher();
 			Destroy();
-			dispatcher.TryRunAsync(CoreDispatcherPriority::Normal, [this, wp, hInstance]() {
+			dispatcher.TryRunAsync(CoreDispatcherPriority::Normal, [this, wp]() {
 				_closingForRecreate = false;
-				Create(hInstance, &wp);
+				Create(&wp);
 			});
 		}
 	);
@@ -272,6 +274,10 @@ LRESULT MainWindow::_MessageHandler(UINT msg, WPARAM wParam, LPARAM lParam) noex
 	}
 	case WM_DESTROY:
 	{
+		_appThemeChangedRevoker.Revoke();
+		_isCustomTitleBarEnabledChangedRevoker.Revoke();
+		_backdropChangedRevoker.Revoke();
+		
 		_hwndTitleBar = NULL;
 		_trackingMouse = false;
 
