@@ -3,7 +3,6 @@
 #if __has_include("UserControl.g.cpp")
 #include "UserControl.g.cpp"
 #endif
-#include <format>
 
 using namespace winrt;
 using namespace Windows::UI::Xaml;
@@ -31,7 +30,14 @@ void UserControl::ClickMeButton_Click(IInspectable const&, RoutedEventArgs const
 void UserControl::_UpdateClickMeButtonContent() {
 	ResourceLoader resourceLoader = ResourceLoader::GetForCurrentView(RESOURCE_MAP_ID);
 	hstring templateStr = resourceLoader.GetString(L"ClickMeButton_ClickedContent");
-	ClickMeButton().Content(box_value(std::vformat(templateStr, std::make_wformat_args(_count))));
+
+	// std::format 会使二进制文件增大近 200KB
+	std::wstring_view strView(templateStr);
+	size_t replacementPos = strView.find(L"{}");
+	std::wstring content(strView.substr(0, replacementPos));
+	content.append(std::to_wstring(_count));
+	content.append(strView.substr(replacementPos + 2));
+	ClickMeButton().Content(box_value(content));
 }
 
 }
