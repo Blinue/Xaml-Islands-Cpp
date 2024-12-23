@@ -58,7 +58,7 @@ private:
 	std::unique_ptr<::XamlIslandsCpp::MainWindow> _mainWindow;
 	CoreDispatcher _dispatcher{ nullptr };
 
-	::XamlIslandsCpp::EventRevoker _themeChangedRevoker;
+	::XamlIslandsCpp::Event<::XamlIslandsCpp::AppTheme>::EventRevoker _themeChangedRevoker;
 	Windows::UI::ViewManagement::UISettings _uiSettings;
 	Windows::UI::ViewManagement::UISettings::ColorValuesChanged_revoker _colorValuesChangedRevoker;
 	bool _isLightTheme = true;

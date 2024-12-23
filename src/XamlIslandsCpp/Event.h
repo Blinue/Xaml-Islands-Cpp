@@ -3,43 +3,6 @@
 
 namespace XamlIslandsCpp {
 
-class EventRevoker {
-public:
-	EventRevoker() noexcept = default;
-
-	EventRevoker(const EventRevoker&) noexcept = delete;
-	EventRevoker(EventRevoker&& other) noexcept = default;
-
-	EventRevoker& operator=(const EventRevoker& other) noexcept = delete;
-	EventRevoker& operator=(EventRevoker&& other) noexcept {
-		EventRevoker(std::move(other)).Swap(*this);
-		return *this;
-	}
-
-	template <typename T>
-	explicit EventRevoker(T&& revoker) noexcept : _revoker(std::forward<T>(revoker)) {}
-
-	~EventRevoker() noexcept {
-		if (_revoker) {
-			_revoker();
-		}
-	}
-
-	void Swap(EventRevoker& other) noexcept {
-		std::swap(_revoker, other._revoker);
-	}
-
-	void Revoke() {
-		if (_revoker) {
-			_revoker();
-			_revoker = {};
-		}
-	}
-
-private:
-	std::function<void()> _revoker;
-};
-
 struct EventToken {
 	uint32_t value = 0;
 
@@ -84,13 +47,50 @@ public:
 		_delegates.erase(it);
 	}
 
+	class EventRevoker {
+	public:
+		EventRevoker() noexcept = default;
+
+		EventRevoker(const EventRevoker&) noexcept = delete;
+		EventRevoker(EventRevoker&& other) noexcept {
+			_Swap(other);
+		}
+
+		EventRevoker& operator=(const EventRevoker&) noexcept = delete;
+		EventRevoker& operator=(EventRevoker&& other) noexcept {
+			EventRevoker(std::move(other))._Swap(*this);
+			return *this;
+		}
+
+		EventRevoker(Event* event, EventToken token) noexcept : _event(event), _token(token) {}
+
+		~EventRevoker() {
+			if (_event) {
+				_event->operator()(_token);
+			}
+		}
+
+		void Revoke() {
+			if (_event) {
+				_event->operator()(_token);
+				_event = nullptr;
+			}
+		}
+
+	private:
+		void _Swap(EventRevoker& other) noexcept {
+			std::swap(_event, other._event);
+			std::swap(_token, other._token);
+		}
+
+		Event* _event = nullptr;
+		EventToken _token;
+	};
+
+	// 调用者应确保 EventRevoker 在 Event 的生命周期内执行撤销
 	template <typename T>
 	EventRevoker operator()(winrt::auto_revoke_t, T&& handler) {
-		EventToken token = operator()(std::forward<T>(handler));
-		return EventRevoker([this, token]() {
-			// 调用者应确保此函数在 Event 的生命周期内执行
-			operator()(token);
-		});
+		return EventRevoker(this, operator()(std::forward<T>(handler)));
 	}
 
 	template <typename... TArgs1>

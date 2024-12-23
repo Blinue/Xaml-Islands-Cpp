@@ -38,7 +38,7 @@ private:
 
 	event<PropertyChangedEventHandler> _propertyChangedEvent;
 
-	::XamlIslandsCpp::EventRevoker _appThemeChangedRevoker;
+	::XamlIslandsCpp::Event<bool>::EventRevoker _appThemeChangedRevoker;
 };
 
 }
