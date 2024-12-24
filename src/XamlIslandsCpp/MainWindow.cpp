@@ -141,20 +141,20 @@ bool MainWindow::Create(const WINDOWPLACEMENT* wp) noexcept {
 				return;
 			}
 
-			// 由于无法更改 WS_EX_NOREDIRECTIONBITMAP 样式，必须重新创建主窗口
-			_closingForRecreate = true;
+			// 由于无法更改 WS_EX_NOREDIRECTIONBITMAP 样式，必须重新创建主窗口。
+			// 应延迟执行，让 UI 完成更新。
+			App::Get().Dispatcher().TryRunAsync(CoreDispatcherPriority::Normal, [this]() {
+				WINDOWPLACEMENT wp{ .length = sizeof(wp) };
+				GetWindowPlacement(Handle(), &wp);
 
-			WINDOWPLACEMENT wp{ .length = sizeof(wp) };
-			GetWindowPlacement(Handle(), &wp);
+				// 禁用关闭窗口的动画
+				BOOL value = TRUE;
+				DwmSetWindowAttribute(Handle(), DWMWA_TRANSITIONS_FORCEDISABLED, &value, sizeof(value));
 
-			// 禁用关闭窗口的动画
-			BOOL value = TRUE;
-			DwmSetWindowAttribute(Handle(), DWMWA_TRANSITIONS_FORCEDISABLED, &value, sizeof(value));
-
-			CoreDispatcher dispatcher = Content()->Dispatcher();
-			Destroy();
-			dispatcher.TryRunAsync(CoreDispatcherPriority::Normal, [this, wp]() {
+				_closingForRecreate = true;
+				Destroy();
 				_closingForRecreate = false;
+
 				Create(&wp);
 			});
 		}
