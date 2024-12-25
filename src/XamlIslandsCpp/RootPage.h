@@ -18,6 +18,8 @@ struct RootPage : RootPageT<RootPage> {
 		_propertyChangedEvent.remove(token);
 	}
 
+	void RootPage_Loaded(IInspectable const&, IInspectable const&);
+
 	bool IsCustomTitleBarEnabled() const noexcept;
 	void IsCustomTitleBarEnabled(bool value);
 

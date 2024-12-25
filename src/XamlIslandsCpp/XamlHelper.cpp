@@ -129,4 +129,32 @@ void XamlHelper::UpdateThemeOfTooltips(winrt::DependencyObject const& root, winr
 	} while (!elems.empty());
 }
 
+void XamlHelper::SkipAnimations(const winrt::DependencyObject& root) {
+	std::vector<winrt::DependencyObject> elems{ root };
+	do {
+		std::vector<winrt::DependencyObject> temp;
+
+		for (const winrt::DependencyObject& elem : elems) {
+			const int count = winrt::VisualTreeHelper::GetChildrenCount(elem);
+			for (int i = 0; i < count; ++i) {
+				auto current = winrt::VisualTreeHelper::GetChild(elem, i);
+
+				if (auto obj = current.try_as<winrt::FrameworkElement>()) {
+					for (auto group : winrt::VisualStateManager::GetVisualStateGroups(obj)) {
+						for (winrt::VisualState state : group.States()) {
+							if (auto storyboard = state.Storyboard()) {
+								storyboard.SkipToFill();
+							}
+						}
+					}
+				}
+
+				temp.emplace_back(std::move(current));
+			}
+		}
+
+		elems = std::move(temp);
+	} while (!elems.empty());
+}
+
 }

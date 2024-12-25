@@ -30,6 +30,11 @@ void RootPage::InitializeComponent() {
 	StringResTextBlock().Text(resourceLoader.GetString(L"Hello"));
 }
 
+void RootPage::RootPage_Loaded(IInspectable const&, IInspectable const&) {
+	// 启动时跳过所有动画，比如 ToggleSwitch 和 NavigationView 的动画
+	XamlHelper::SkipAnimations(*this);
+}
+
 bool RootPage::IsCustomTitleBarEnabled() const noexcept {
 	return AppSettings::Get().IsCustomTitleBarEnabled();
 }

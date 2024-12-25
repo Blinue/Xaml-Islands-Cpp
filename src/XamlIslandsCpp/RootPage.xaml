@@ -6,6 +6,7 @@
       xmlns:local="using:XamlIslandsCpp"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
+      Loaded="RootPage_Loaded"
       mc:Ignorable="d">
 	<Page.Resources>
 		<ResourceDictionary>
@@ -25,7 +26,7 @@
 		<local:TitleBarControl x:Name="TitleBar"
 		                       Canvas.ZIndex="1"
 		                       Visibility="{x:Bind IsCustomTitleBarEnabled, Mode=OneWay}" />
-		<StackPanel Width="300"
+		<StackPanel Width="320"
 		            Padding="40,32"
 		            HorizontalAlignment="Center"
 		            VerticalAlignment="Center"
