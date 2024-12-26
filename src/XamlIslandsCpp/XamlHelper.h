@@ -11,9 +11,6 @@ struct XamlHelper {
 	static void UpdateThemeOfXamlPopups(const winrt::XamlRoot& root, winrt::ElementTheme theme);
 
 	static void UpdateThemeOfTooltips(const winrt::DependencyObject& root, winrt::ElementTheme theme);
-
-	// 遍历 XAML 树跳过所有动画，如果 UI 复杂会相当慢（超过 100ms）
-	static void SkipAnimations(const winrt::DependencyObject& root);
 };
 
 }

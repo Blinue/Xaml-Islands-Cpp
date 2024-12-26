@@ -39,9 +39,6 @@ bool MainWindow::Create(const WINDOWPLACEMENT* wp) noexcept {
 	const WindowBackdrop backdrop = settings.Backdrop();
 
 	_SetInitialTheme(isLightTheme, backdrop, settings.IsCustomTitleBarEnabled());
-	if (wp && wp->showCmd == SW_SHOWMAXIMIZED) {
-		_SetInitialMaximized();
-	}
 
 	const HINSTANCE hInstance = Win32Helper::GetModuleInstanceHandle();
 

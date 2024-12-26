@@ -102,12 +102,6 @@ protected:
 		);
 	}
 
-	// 窗口尚未显示无法最大化，通过这个方法设置 _isMaximized 使 _UpdateIslandPosition 估计 XAML Islands 窗口尺寸。
-	// 否则在显示窗口时可能会看到 NavigationView 的导航栏的展开动画。
-	void _SetInitialMaximized() noexcept {
-		_isMaximized = true;
-	}
-
 	void _SetInitialTheme(
 		bool isLightTheme,
 		WindowBackdrop backdrop,
@@ -195,8 +189,6 @@ protected:
 		}
 		case WM_NCCALCSIZE:
 		{
-			_isWindowShown = IsWindowVisible(_hWnd);
-
 			if (!_isCustomTitleBarEnabled) {
 				_UpdateFrameMargins();
 				break;
@@ -225,7 +217,7 @@ protected:
 			clientRect.top = originalTop;
 
 			// WM_NCCALCSIZE 在 WM_SIZE 前
-			_UpdateMaximizedState();
+			_isMaximized = IsMaximized(_hWnd);
 
 			if (_isMaximized) {
 				// 最大化的窗口的实际尺寸比屏幕的工作区更大一点，这是为了将可调整窗口大小的区域隐藏在屏幕外面
@@ -415,7 +407,7 @@ protected:
 		}
 		case WM_SIZE:
 		{
-			_UpdateMaximizedState();
+			_isMaximized = IsMaximized(_hWnd);
 
 			if (wParam != SIZE_MINIMIZED) {
 				_UpdateIslandPosition(LOWORD(lParam), HIWORD(lParam));
@@ -449,7 +441,6 @@ protected:
 			_hwndXamlIsland = NULL;
 
 			_isMaximized = false;
-			_isWindowShown = false;
 			_isLightTheme = true;
 
 			_content = nullptr;
@@ -485,21 +476,6 @@ protected:
 	
 private:
 	void _UpdateIslandPosition(int width, int height) const noexcept {
-		if (!IsWindowVisible(_hWnd) && _isMaximized) {
-			// 初始化过程中此函数会被调用两次。如果窗口以最大化显示，则两次传入的尺寸不一致。第一次
-			// 调用此函数时主窗口尚未显示，因此无法最大化，我们必须估算最大化窗口的尺寸。不执行这个
-			// 操作可能导致窗口显示时展示 NavigationView 导航展开的动画。
-			if (HMONITOR hMon = MonitorFromWindow(_hWnd, MONITOR_DEFAULTTONEAREST)) {
-				MONITORINFO monInfo{};
-				monInfo.cbSize = sizeof(MONITORINFO);
-				GetMonitorInfo(hMon, &monInfo);
-
-				// 最大化窗口的尺寸为当前屏幕工作区的尺寸
-				width = monInfo.rcWork.right - monInfo.rcMonitor.left;
-				height = monInfo.rcWork.bottom - monInfo.rcMonitor.top;
-			}
-		}
-
 		// Win10 中上边框被涂黑来显示系统原始边框，Win11 中 DWM 绘制的上边框也位于客户区内，
 		// 很可能是为了和 Win10 兼容。XAML Islands 不应该和上边框重叠。
 		const int topBorderHeight = (int)_GetTopBorderHeight();
@@ -514,13 +490,6 @@ private:
 			height - topBorderHeight,
 			SWP_NOACTIVATE | SWP_NOZORDER | SWP_SHOWWINDOW
 		);
-	}
-
-	void _UpdateMaximizedState() noexcept {
-		// 如果窗口尚未显示，不碰 _isMaximized
-		if (_isWindowShown) {
-			_isMaximized = IsMaximized(_hWnd);
-		}
 	}
 
 	void _UpdateFrameMargins() const noexcept {
@@ -575,7 +544,6 @@ private:
 
 	bool _isMaximized = false;
 	bool _isLightTheme = true;
-	bool _isWindowShown = false;
 	bool _isCustomTitleBarEnabled = false;
 	bool _isBackgroundSolidColor = false;
 };

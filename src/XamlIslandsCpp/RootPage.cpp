@@ -11,7 +11,9 @@
 #include "MainWindow.h"
 #include "TitleBarControl.h"
 
-using namespace XamlIslandsCpp;
+using namespace ::XamlIslandsCpp;
+using namespace winrt;
+using namespace Windows::UI::Xaml::Media::Animation;
 
 namespace winrt::XamlIslandsCpp::implementation {
 
@@ -30,9 +32,39 @@ void RootPage::InitializeComponent() {
 	StringResTextBlock().Text(resourceLoader.GetString(L"Hello"));
 }
 
+static void SkipToggleSwitchAnimations(const DependencyObject& elem) {
+	FrameworkElement rootGrid = VisualTreeHelper::GetChild(elem, 0).try_as<FrameworkElement>();
+
+	for (VisualStateGroup group : VisualStateManager::GetVisualStateGroups(rootGrid)) {
+		for (VisualState state : group.States()) {
+			if (Storyboard storyboard = state.Storyboard()) {
+				storyboard.SkipToFill();
+			}
+		}
+	}
+}
+
 void RootPage::RootPage_Loaded(IInspectable const&, IInspectable const&) {
-	// 启动时跳过所有动画，比如 ToggleSwitch 和 NavigationView 的动画
-	XamlHelper::SkipAnimations(*this);
+	// 启动时跳过 ToggleSwitch 的动画
+	std::vector<DependencyObject> elems{ *this };
+	do {
+		std::vector<DependencyObject> temp;
+
+		for (const DependencyObject& elem : elems) {
+			const int count = VisualTreeHelper::GetChildrenCount(elem);
+			for (int i = 0; i < count; ++i) {
+				DependencyObject current = VisualTreeHelper::GetChild(elem, i);
+
+				if (get_class_name(current) == name_of<ToggleSwitch>()) {
+					SkipToggleSwitchAnimations(current);
+				} else {
+					temp.emplace_back(std::move(current));
+				}
+			}
+		}
+
+		elems = std::move(temp);
+	} while (!elems.empty());
 }
 
 bool RootPage::IsCustomTitleBarEnabled() const noexcept {

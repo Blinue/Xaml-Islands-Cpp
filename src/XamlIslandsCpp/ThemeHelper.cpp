@@ -16,9 +16,9 @@ enum class PreferredAppMode {
 };
 
 using fnSetPreferredAppMode = PreferredAppMode(WINAPI*)(PreferredAppMode appMode);
-using fnAllowDarkModeForWindow = bool (WINAPI*)(HWND hWnd, bool allow);
-using fnRefreshImmersiveColorPolicyState = void (WINAPI*)();
-using fnFlushMenuThemes = void (WINAPI*)();
+using fnAllowDarkModeForWindow = bool(WINAPI*)(HWND hWnd, bool allow);
+using fnRefreshImmersiveColorPolicyState = void(WINAPI*)();
+using fnFlushMenuThemes = void(WINAPI*)();
 
 static fnSetPreferredAppMode SetPreferredAppMode = nullptr;
 static fnAllowDarkModeForWindow AllowDarkModeForWindow = nullptr;

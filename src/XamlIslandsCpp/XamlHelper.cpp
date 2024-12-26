@@ -5,7 +5,6 @@
 
 using namespace winrt;
 using namespace Windows::UI::Xaml;
-using namespace Windows::UI::Xaml::Controls;
 using namespace Windows::UI::Xaml::Controls::Primitives;
 using namespace Windows::UI::Xaml::Media;
 
@@ -116,34 +115,6 @@ void XamlHelper::UpdateThemeOfTooltips(DependencyObject const& root, ElementThem
 						themedTooltip.Content(tooltipContent);
 						themedTooltip.RequestedTheme(theme);
 						ToolTipService::SetToolTip(current, themedTooltip);
-					}
-				}
-
-				temp.emplace_back(std::move(current));
-			}
-		}
-
-		elems = std::move(temp);
-	} while (!elems.empty());
-}
-
-void XamlHelper::SkipAnimations(const DependencyObject& root) {
-	std::vector<DependencyObject> elems{ root };
-	do {
-		std::vector<DependencyObject> temp;
-
-		for (const DependencyObject& elem : elems) {
-			const int count = VisualTreeHelper::GetChildrenCount(elem);
-			for (int i = 0; i < count; ++i) {
-				auto current = VisualTreeHelper::GetChild(elem, i);
-
-				if (auto obj = current.try_as<FrameworkElement>()) {
-					for (auto group : VisualStateManager::GetVisualStateGroups(obj)) {
-						for (VisualState state : group.States()) {
-							if (auto storyboard = state.Storyboard()) {
-								storyboard.SkipToFill();
-							}
-						}
 					}
 				}
 
