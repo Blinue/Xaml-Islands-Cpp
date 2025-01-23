@@ -275,6 +275,8 @@ LRESULT MainWindow::_MessageHandler(UINT msg, WPARAM wParam, LPARAM lParam) noex
 		_isCustomTitleBarEnabledChangedRevoker.Revoke();
 		_backdropChangedRevoker.Revoke();
 		
+		// 标题栏窗口经常使用 Content()，确保在关闭 DWXS 前销毁
+		DestroyWindow(_hwndTitleBar);
 		_hwndTitleBar = NULL;
 		_trackingMouse = false;
 

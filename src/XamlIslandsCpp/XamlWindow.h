@@ -431,7 +431,8 @@ protected:
 		}
 		case WM_DESTROY:
 		{
-			_hWnd = NULL;
+			// 确保关闭过程中 _content 已经为空
+			_content = nullptr;
 
 			_xamlSourceNative2 = nullptr;
 			// 必须手动重置 Content，否则会内存泄露，使 RootPage 无法析构
@@ -442,8 +443,6 @@ protected:
 
 			_isMaximized = false;
 			_isLightTheme = true;
-
-			_content = nullptr;
 
 			// 关闭 DesktopWindowXamlSource 后应清空消息队列以确保 RootPage 析构
 			MSG msg1;
@@ -456,6 +455,7 @@ protected:
 				DispatchMessage(&msg1);
 			}
 
+			_hWnd = NULL;
 			return 0;
 		}
 		}
