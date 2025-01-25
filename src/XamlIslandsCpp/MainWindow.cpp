@@ -372,7 +372,7 @@ LRESULT MainWindow::_TitleBarMessageHandler(UINT msg, WPARAM wParam, LPARAM lPar
 	{
 		POINT cursorPos{ GET_X_LPARAM(lParam),GET_Y_LPARAM(lParam) };
 		ClientToScreen(_hwndTitleBar, &cursorPos);
-		wParam = SendMessage(_hwndTitleBar, WM_NCHITTEST, 0, MAKELPARAM(cursorPos.x, cursorPos.y));
+		wParam = _TitleBarMessageHandler(WM_NCHITTEST, 0, MAKELPARAM(cursorPos.x, cursorPos.y));
 		[[fallthrough]];
 	}
 	case WM_NCMOUSEMOVE:
@@ -430,7 +430,7 @@ LRESULT MainWindow::_TitleBarMessageHandler(UINT msg, WPARAM wParam, LPARAM lPar
 			Content()->TitleBar().CaptionButtons().LeaveButtons();
 		} else {
 			// 然后检查鼠标在标题栏上的位置
-			LRESULT hit = SendMessage(_hwndTitleBar, WM_NCHITTEST, 0, MAKELPARAM(cursorPos.x, cursorPos.y));
+			LRESULT hit = _TitleBarMessageHandler(WM_NCHITTEST, 0, MAKELPARAM(cursorPos.x, cursorPos.y));
 			if (hit != HTMINBUTTON && hit != HTMAXBUTTON && hit != HTCLOSE) {
 				Content()->TitleBar().CaptionButtons().LeaveButtons();
 			}
@@ -470,7 +470,7 @@ LRESULT MainWindow::_TitleBarMessageHandler(UINT msg, WPARAM wParam, LPARAM lPar
 
 		POINT cursorPos{ GET_X_LPARAM(lParam),GET_Y_LPARAM(lParam) };
 		ClientToScreen(_hwndTitleBar, &cursorPos);
-		wParam = SendMessage(_hwndTitleBar, WM_NCHITTEST, 0, MAKELPARAM(cursorPos.x, cursorPos.y));
+		wParam = _TitleBarMessageHandler(WM_NCHITTEST, 0, MAKELPARAM(cursorPos.x, cursorPos.y));
 		[[fallthrough]];
 	}
 	case WM_NCLBUTTONUP:
