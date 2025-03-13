@@ -22,6 +22,9 @@
       <Filter>Helpers</Filter>
     </ClCompile>
     <ClCompile Include="AppSettings.cpp" />
+    <ClCompile Include="SmoothResizeHelper.cpp">
+      <Filter>Helpers</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -39,6 +42,9 @@
     </ClInclude>
     <ClInclude Include="AppSettings.h" />
     <ClInclude Include="Event.h" />
+    <ClInclude Include="SmoothResizeHelper.h">
+      <Filter>Helpers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

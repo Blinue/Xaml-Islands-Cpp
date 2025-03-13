@@ -409,22 +409,20 @@ protected:
 		{
 			_isMaximized = IsMaximized(_hWnd);
 
-			if (wParam != SIZE_MINIMIZED) {
+			if (wParam != SIZE_MINIMIZED && _hwndXamlIsland) {
 				_UpdateIslandPosition(LOWORD(lParam), HIWORD(lParam));
 
-				if (_hwndXamlIsland) {
-					// 使 ContentDialog 跟随窗口尺寸调整
-					// 来自 https://github.com/microsoft/microsoft-ui-xaml/issues/3577#issuecomment-1399250405
-					if (winrt::CoreWindow coreWindow = winrt::CoreWindow::GetForCurrentThread()) {
-						HWND hwndDWXS;
-						coreWindow.as<ICoreWindowInterop>()->get_WindowHandle(&hwndDWXS);
-						PostMessage(hwndDWXS, WM_SIZE, wParam, lParam);
-					}
-
-					_content->Dispatcher().RunAsync(winrt::CoreDispatcherPriority::Normal, [xamlRoot(_content->XamlRoot())]() {
-						XamlHelper::RepositionXamlPopups(xamlRoot, true);
-					});
+				// 使 ContentDialog 跟随窗口尺寸调整
+				// 来自 https://github.com/microsoft/microsoft-ui-xaml/issues/3577#issuecomment-1399250405
+				if (winrt::CoreWindow coreWindow = winrt::CoreWindow::GetForCurrentThread()) {
+					HWND hwndDWXS;
+					coreWindow.as<ICoreWindowInterop>()->get_WindowHandle(&hwndDWXS);
+					SendMessage(hwndDWXS, WM_SIZE, wParam, lParam);
 				}
+
+				_content->Dispatcher().RunAsync(winrt::CoreDispatcherPriority::Normal, [xamlRoot(_content->XamlRoot())]() {
+					XamlHelper::RepositionXamlPopups(xamlRoot, true);
+				});
 			}
 
 			return 0;

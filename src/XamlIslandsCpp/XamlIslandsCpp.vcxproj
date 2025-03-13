@@ -78,6 +78,7 @@
     <ClInclude Include="App.h">
       <DependentUpon>App.xaml</DependentUpon>
     </ClInclude>
+    <ClInclude Include="SmoothResizeHelper.h" />
     <ClInclude Include="ThemeHelper.h" />
     <ClInclude Include="TitleBarControl.h">
       <DependentUpon>TitleBarControl.xaml</DependentUpon>
@@ -112,6 +113,7 @@
       <DependentUpon>App.xaml</DependentUpon>
     </ClCompile>
     <ClCompile Include="$(GeneratedFilesDir)module.g.cpp" />
+    <ClCompile Include="SmoothResizeHelper.cpp" />
     <ClCompile Include="ThemeHelper.cpp" />
     <ClCompile Include="TitleBarControl.cpp">
       <DependentUpon>TitleBarControl.xaml</DependentUpon>

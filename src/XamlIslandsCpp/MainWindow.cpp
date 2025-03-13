@@ -5,6 +5,7 @@
 #include "TitleBarControl.h"
 #include "Win32Helper.h"
 #include "App.h"
+#include "SmoothResizeHelper.h"
 
 using namespace winrt::XamlIslandsCpp::implementation;
 using namespace winrt;
@@ -56,6 +57,7 @@ bool MainWindow::Create(const WINDOWPLACEMENT* wp) noexcept {
 	assert(Handle());
 
 	_Content(make_self<RootPage>());
+	SmoothResizeHelper::EnableResizeSync(Handle());
 
 	_appThemeChangedRevoker = App::Get().ThemeChanged(winrt::auto_revoke,
 		[this](bool isLightTheme) { _SetTheme(isLightTheme, AppSettings::Get().Backdrop()); });
@@ -189,6 +191,12 @@ LRESULT MainWindow::_MessageHandler(UINT msg, WPARAM wParam, LPARAM lParam) noex
 	switch (msg) {
 	case WM_SIZE:
 	{
+		if (wParam == SIZE_MINIMIZED || !Content()) {
+			break;
+		}
+
+		SmoothResizeHelper::SyncWindowSize(Handle(), App::Get());
+
 		LRESULT ret = base_type::_MessageHandler(WM_SIZE, wParam, lParam);
 
 		if (_IsCustomTitleBarEnabled()) {
