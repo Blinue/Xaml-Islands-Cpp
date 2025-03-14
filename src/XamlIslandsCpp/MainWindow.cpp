@@ -191,22 +191,20 @@ LRESULT MainWindow::_MessageHandler(UINT msg, WPARAM wParam, LPARAM lParam) noex
 	switch (msg) {
 	case WM_SIZE:
 	{
-		if (wParam == SIZE_MINIMIZED || !Content()) {
-			break;
-		}
+		base_type::_MessageHandler(WM_SIZE, wParam, lParam);
 
-		if (_smoothResizedEnabled) {
-			SmoothResizeHelper::SyncWindowSize(Handle(), App::Get());
-		}
+		if (wParam != SIZE_MINIMIZED && Content()) {
+			if (_smoothResizedEnabled) {
+				SmoothResizeHelper::SyncWindowSize(Handle(), App::Get());
+			}
 
-		LRESULT ret = base_type::_MessageHandler(WM_SIZE, wParam, lParam);
-
-		if (_IsCustomTitleBarEnabled()) {
-			_ResizeTitleBarWindow();
-			Content()->TitleBar().CaptionButtons().IsWindowMaximized(_IsMaximized());
+			if (_IsCustomTitleBarEnabled()) {
+				_ResizeTitleBarWindow();
+				Content()->TitleBar().CaptionButtons().IsWindowMaximized(_IsMaximized());
+			}
 		}
 		
-		return ret;
+		return 0;
 	}
 	case WM_GETMINMAXINFO:
 	{
