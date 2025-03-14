@@ -31,6 +31,7 @@ private:
 
 	// 防止重新创建主窗口时退出
 	bool _closingForRecreate = false;
+	bool _smoothResizedEnabled = false;
 };
 
 }

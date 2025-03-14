@@ -14,7 +14,9 @@ DECLARE_INTERFACE_IID_(IFrameworkApplicationPrivate, IInspectable, "B3AB45D8-6A4
 
 namespace XamlIslandsCpp {
 
-void SmoothResizeHelper::EnableResizeSync(HWND hWnd) noexcept {
+bool SmoothResizeHelper::EnableResizeSync(HWND hWnd, const winrt::Application& app) noexcept {
+	// UWP 使用这个未记录的接口实现平滑调整尺寸
+	// https://gist.github.com/apkipa/20cae438aef2a8633f99e10e0b90b11e
 	static auto enableResizeLayoutSynchronization = []() {
 		HMODULE hUser32 = GetModuleHandle(L"user32");
 		assert(hUser32);
@@ -22,18 +24,19 @@ void SmoothResizeHelper::EnableResizeSync(HWND hWnd) noexcept {
 		return (tEnableResizeLayoutSynchronization)GetProcAddress(hUser32, MAKEINTRESOURCEA(2615));
 	}();
 
-	if (enableResizeLayoutSynchronization) {
-		enableResizeLayoutSynchronization(hWnd, TRUE);
+	// 检查是否支持 IFrameworkApplicationPrivate 接口
+	if (!app.try_as<IFrameworkApplicationPrivate>() || !enableResizeLayoutSynchronization) {
+		return false;
 	}
+
+	enableResizeLayoutSynchronization(hWnd, TRUE);
+	return true;
 }
 
 void SmoothResizeHelper::SyncWindowSize(HWND hWnd, const winrt::Application& app) noexcept {
 	// @apkipa 发现在 WM_SIZE 中调用 IFrameworkApplicationPrivate::SetSynchronizationWindow 可以防止闪烁。
 	// 原理仍不清楚，似乎这个接口内部会调用 SynchronizedCommit，刚好实现了 UWP 调整大小的方法。
-	// https://github.com/bigfatbrowncat/noflicker_directx_window/issues/1#issuecomment-2611975203
-	if (auto appPrivate = app.try_as<IFrameworkApplicationPrivate>()) {
-		appPrivate->SetSynchronizationWindow(hWnd);
-	}
+	app.try_as<IFrameworkApplicationPrivate>()->SetSynchronizationWindow(hWnd);
 }
 
 }

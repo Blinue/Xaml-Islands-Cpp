@@ -57,7 +57,7 @@ bool MainWindow::Create(const WINDOWPLACEMENT* wp) noexcept {
 	assert(Handle());
 
 	_Content(make_self<RootPage>());
-	SmoothResizeHelper::EnableResizeSync(Handle());
+	_smoothResizedEnabled = SmoothResizeHelper::EnableResizeSync(Handle(), App::Get());
 
 	_appThemeChangedRevoker = App::Get().ThemeChanged(winrt::auto_revoke,
 		[this](bool isLightTheme) { _SetTheme(isLightTheme, AppSettings::Get().Backdrop()); });
@@ -195,7 +195,9 @@ LRESULT MainWindow::_MessageHandler(UINT msg, WPARAM wParam, LPARAM lParam) noex
 			break;
 		}
 
-		SmoothResizeHelper::SyncWindowSize(Handle(), App::Get());
+		if (_smoothResizedEnabled) {
+			SmoothResizeHelper::SyncWindowSize(Handle(), App::Get());
+		}
 
 		LRESULT ret = base_type::_MessageHandler(WM_SIZE, wParam, lParam);
 
