@@ -19,7 +19,7 @@
 
 ## 编译要求
 
-1. Windows SDK 22621
+1. Windows SDK 26100
 2. Visual Studio 2022，需安装 C++ 和 UWP 负载
 
 ## 运行要求
