@@ -88,7 +88,7 @@ using (StreamWriter writer = new("version.txt")) {
 // 参考自 https://github.com/microsoft/microsoft-ui-xaml/pull/4400
 //
 ///////////////////////////////////////////////////////////////////
-    
+
 // 获取最新的 Windows SDK 目录
 string programFilesX86Path = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86);
 string windowsSdkDir = Directory.GetDirectories(Path.Combine(programFilesX86Path, "Windows Kits\\10\\bin"))
