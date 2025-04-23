@@ -28,9 +28,7 @@
       <!-- /volatile:iso: 禁用 volatile 的语义扩展 -->
       <!-- /fp:contract: 生成浮点收缩指令。浮点收缩指令是将两个浮点操作合并为一个指令的机器指令，例如 Fused-Multiply-Add (FMA) -->
       <!-- fp:contract 可以和其他 fp 选项同时存在，因此每个项目可以分别指定自己的浮点模型 -->
-      <!-- /Gw: 链接时删除未使用和重复的数据，可以减小二进制文件体积 -->
-      <!-- /Zc:checkGwOdr: 防止 /Gw 导致某些 ODR 违规被忽略 -->
-      <AdditionalOptions>%(AdditionalOptions) /bigobj /utf-8 /await:strict /Zc:__cplusplus /volatile:iso /fp:contract /Gw /Zc:checkGwOdr</AdditionalOptions>
+      <AdditionalOptions>%(AdditionalOptions) /bigobj /utf-8 /await:strict /Zc:__cplusplus /volatile:iso /fp:contract</AdditionalOptions>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="$(IsDebug)">
@@ -44,6 +42,9 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <!-- /Gw: 链接时删除未使用和重复的数据，可以减小二进制文件体积 -->
+      <!-- /Zc:checkGwOdr: 防止 /Gw 导致某些 ODR 违规被忽略 -->
+      <AdditionalOptions>%(AdditionalOptions) /Gw /Zc:checkGwOdr</AdditionalOptions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
