@@ -24,7 +24,7 @@ jobs:
     
     - name: Build
       run: |
-        $packagedOption = "${{ matrix.packaged }}" -eq "packaged" ? "--packaged" : ""
+        $packagedOption = "${{ matrix.packaged }}" -eq "packaged" ? "--packaged" : $null
         python scripts/publish.py --compiler=${{ matrix.compiler }} --platform=${{ matrix.platform }} $packagedOption
 
     - name: Store build
