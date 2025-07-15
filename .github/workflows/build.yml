@@ -31,12 +31,12 @@ jobs:
       if: ${{ matrix.packaged == 'unpackaged' }}
       uses: actions/upload-artifact@v4
       with: 
-          name: XamlIslandsCpp-${{ matrix.platform }}
+          name: XamlIslandsCpp-${{ matrix.compiler }}-${{ matrix.platform }}
           path: ./publish/${{ matrix.platform }}
 
     - name: Store build
       if: ${{ matrix.packaged == 'packaged' }}
       uses: actions/upload-artifact@v4
       with: 
-          name: XamlIslandsCpp-${{ matrix.platform }}-sideload
+          name: XamlIslandsCpp-${{ matrix.compiler }}-${{ matrix.platform }}-sideload
           path: ./publish/${{ matrix.platform }}-sideload

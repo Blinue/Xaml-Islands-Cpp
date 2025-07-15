@@ -12,6 +12,7 @@
 * 支持打包为 MSIX
 * 支持 x64 和 ARM64 架构
 * 支持 XAML 热重载
+* 支持使用 clang-cl 编译
 
 # 截图
 
@@ -20,7 +21,7 @@
 ## 编译要求
 
 1. Windows SDK 26100
-2. Visual Studio 2022，需安装 C++ 和 UWP 负载
+2. Visual Studio 2022，需安装 C++ 和 UWP 负载，如果要使用 clang-cl 编译需额外安装 LLVM 组件
 
 ## 运行要求
 
