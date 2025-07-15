@@ -13,7 +13,7 @@ using namespace winrt;
 namespace XamlIslandsCpp {
 
 bool MainWindow::Create(const WINDOWPLACEMENT* wp) noexcept {
-	static const int _ = []() {
+	[[maybe_unused]] static const int _ = []() {
 		const HINSTANCE hInstance = Win32Helper::GetModuleInstanceHandle();
 
 		WNDCLASSEXW wcex{

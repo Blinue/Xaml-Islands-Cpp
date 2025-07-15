@@ -20,16 +20,17 @@
     <ApplicationTypeRevision>10.0</ApplicationTypeRevision>
     <WindowsTargetPlatformVersion Condition=" '$(WindowsTargetPlatformVersion)' == '' ">10.0.26100.0</WindowsTargetPlatformVersion>
     <WindowsTargetPlatformMinVersion>10.0.18362.0</WindowsTargetPlatformMinVersion>
-    <IntDir>$(SolutionDir)obj\$(Platform)\$(Configuration)\$(MSBuildProjectName)\</IntDir>
+    <IntDir>$(SolutionDir)\obj\$(Platform)\$(Configuration)\$(MSBuildProjectName)\</IntDir>
     <!-- 打包时应输出到子文件夹，否则其他项目的 winmd 会干扰 cppwinrt 生成 XamlTypeInfo.g.cpp -->
-    <OutDir Condition="$(IsPackaged)">$(SolutionDir)bin\$(Platform)\$(Configuration)\$(MSBuildProjectName)\</OutDir>
-    <OutDir Condition="!$(IsPackaged)">$(SolutionDir)bin\$(Platform)\$(Configuration)\</OutDir>
-    <GeneratedFilesDir>$(IntDir)Generated Files\</GeneratedFilesDir>
+    <OutDir Condition="$(IsPackaged)">$(SolutionDir)\bin\$(Platform)\$(Configuration)\$(MSBuildProjectName)\</OutDir>
+    <OutDir Condition="!$(IsPackaged)">$(SolutionDir)\bin\$(Platform)\$(Configuration)\</OutDir>
+    <GeneratedFilesDir>$(IntDir)\Generated Files\</GeneratedFilesDir>
     <AppxBundlePlatforms>x64|arm64</AppxBundlePlatforms>
     <DesktopCompatible>true</DesktopCompatible>
     <DisableEmbeddedXbf>false</DisableEmbeddedXbf>
     <XamlComponentResourceLocation>nested</XamlComponentResourceLocation>
     <GenerateLibraryLayout>true</GenerateLibraryLayout>
+    <GenerateBuildCompilePassWinMD>false</GenerateBuildCompilePassWinMD>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Label="Configuration">
@@ -65,6 +66,7 @@
       <ModuleDefinitionFile>ClassLibrary.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
+  <Import Project="..\UWPClangCL.props" Condition="$(UseClangCL)" />
   <ItemGroup>
     <ClInclude Include="pch.h" />
     <ClInclude Include="UserControl.h">
@@ -123,6 +125,6 @@
   </Target>
   <!-- 防止生成的 winmd 被复制到输出文件夹 -->
   <PropertyGroup Condition="!$(IsPackaged)">
-    <CppWinRTProjectWinMD>$(CppWinRTMergedDir)$(RootNamespace).winmd</CppWinRTProjectWinMD>
+    <CppWinRTProjectWinMD>$(CppWinRTMergedDir)\$(RootNamespace).winmd</CppWinRTProjectWinMD>
   </PropertyGroup>
 </Project>

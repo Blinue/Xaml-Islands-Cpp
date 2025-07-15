@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!-- 不要直接修改这些选项，应通过 BuildOptions.props.user 或命令行参数覆盖 -->
+  <PropertyGroup>
+    <!-- 使用 clang-cl 编译 -->
+    <UseClangCL>false</UseClangCL>
+    <!-- 针对当前硬件生成优化代码，只在使用 clang-cl 编译时有效 -->
+    <UseNativeMicroArch>false</UseNativeMicroArch>
+    <!-- 编译为打包应用 (暂不支持) -->
+    <IsPackaged>false</IsPackaged>
+  </PropertyGroup>
+  
+  <!-- 用户自定义编译选项 -->
+  <Import Project="$(MSBuildThisFileDirectory)\BuildOptions.props.user" Condition="Exists('$(MSBuildThisFileDirectory)\BuildOptions.props.user')" />
+</Project>

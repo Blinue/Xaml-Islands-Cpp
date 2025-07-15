@@ -3,7 +3,7 @@ import os
 import subprocess
 import shutil
 import glob
-from xml.etree import ElementTree
+import argparse
 
 try:
     # https://docs.github.com/en/actions/learn-github-actions/variables
@@ -14,15 +14,12 @@ try:
 except:
     pass
 
-platform = "x64"
-isPackaged = False
-if len(sys.argv) >= 2:
-    platform = sys.argv[1]
-    if not platform in ["x64", "ARM64"]:
-        raise Exception("非法参数")
-
-    if len(sys.argv) == 3:
-        isPackaged = sys.argv[2].lower() == "packaged"
+argParser = argparse.ArgumentParser()
+argParser.add_argument("--compiler", choices=["MSVC", "ClangCL"], default="MSVC")
+argParser.add_argument("--platform", choices=["x64", "ARM64"], default="x64")
+argParser.add_argument("--use-native-march", action="store_true")
+argParser.add_argument("--packaged", action="store_true")
+args = argParser.parse_args()
 
 #####################################################################
 #
@@ -50,13 +47,13 @@ if not os.access(msbuildPath, os.X_OK):
 #
 #####################################################################
 
-curDir = os.path.dirname(__file__)
+curDir = os.path.normpath(os.path.dirname(__file__) + "\\..\\")
 os.chdir(curDir)
 
-outDir = f"{curDir}\\publish\\{platform}{'-sideload' if isPackaged else ''}\\"
+outDir = f"{curDir}\\publish\\{args.platform}{'-sideload' if args.packaged else ''}\\"
 
 p = subprocess.run(
-    f'"{msbuildPath}" src\\{"AppPackage" if isPackaged else "XamlIslandsCpp"} -restore "-p:RestorePackagesConfig=true;Configuration=Release{"Packaged" if isPackaged else ""};Platform={platform};OutDir={outDir};SolutionDir={curDir}\\{(";AppInstallerUri=" + outDir) if isPackaged else ""}"'
+    f'"{msbuildPath}" src\\{"AppPackage" if args.packaged else "XamlIslandsCpp"} -m -t:Rebuild -restore "-p:RestorePackagesConfig=true;Configuration=Release;Platform={args.platform};UseClangCL={args.compiler == "ClangCL"};UseNativeMicroArch={args.use_native_march};IsPackaged={args.packaged};OutDir={outDir};SolutionDir={curDir}\\{(";AppInstallerUri=" + outDir) if args.packaged else ""}"'
 )
 if p.returncode != 0:
     raise Exception("编译失败")
@@ -77,10 +74,10 @@ def remove_file(file):
     except:
         pass
 
-if isPackaged:
+if args.packaged:
     msixPath = glob.glob("AppPackage\\AppPackages\\AppPackage_*\\AppPackage_*.msix")[0]
     cerPath = glob.glob("AppPackage\\AppPackages\\AppPackage_*\\AppPackage_*.cer")[0]
-    msixName = f"XamlIslandsCpp-{platform}.msix"
+    msixName = f"XamlIslandsCpp-{args.platform}.msix"
     cerName = "TemporaryKey.cer"
     remove_file(msixName)
     remove_file(cerName)

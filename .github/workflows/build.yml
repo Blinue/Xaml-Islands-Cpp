@@ -11,6 +11,7 @@ jobs:
     runs-on: windows-latest
     strategy:
       matrix:
+        compiler: ["MSVC", "ClangCL"]
         platform: ["x64", "ARM64"]
         packaged: ["unpackaged", "packaged"]
 
@@ -22,7 +23,9 @@ jobs:
         python-version: '3.11'
     
     - name: Build
-      run: python publish.py ${{ matrix.platform }} ${{ matrix.packaged}}
+      run: |
+        $packagedOption = "${{ matrix.packaged }}" -eq "packaged" ? "--packaged" : ""
+        python scripts/publish.py --compiler=${{ matrix.compiler }} --platform=${{ matrix.platform }} $packagedOption
 
     - name: Store build
       if: ${{ matrix.packaged == 'unpackaged' }}

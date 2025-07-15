@@ -5,8 +5,8 @@
     <VisualStudioVersion>17.0</VisualStudioVersion>
   </PropertyGroup>
   <PropertyGroup Label="Configuration">
-    <BaseIntermediateOutputPath>$(SolutionDir)obj\$(Platform)\$(Configuration)\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
-    <OutputPath>$(SolutionDir)bin\$(Platform)\$(Configuration)\</OutputPath>
+    <BaseIntermediateOutputPath>$(SolutionDir)\obj\$(Platform)\$(Configuration)\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
+    <OutputPath>$(SolutionDir)\bin\$(Platform)\$(Configuration)\</OutputPath>
   </PropertyGroup>
   <PropertyGroup>
     <WapProjPath Condition="'$(WapProjPath)'==''">$(MSBuildExtensionsPath)\Microsoft\DesktopBridge\</WapProjPath>
@@ -17,7 +17,6 @@
     <ProjectGuid>e3aa150f-d6e7-44ab-b8d8-ef290c0889ef</ProjectGuid>
     <TargetPlatformVersion>10.0.26100.0</TargetPlatformVersion>
     <TargetPlatformMinVersion>10.0.18362.0</TargetPlatformMinVersion>
-    <DefaultLanguage>en-US</DefaultLanguage>
     <DebuggerType>NativeOnly</DebuggerType>
     <GenerateAppInstallerFile>true</GenerateAppInstallerFile>
     <AppxPackageSigningTimestampDigestAlgorithm>SHA256</AppxPackageSigningTimestampDigestAlgorithm>
@@ -56,7 +55,7 @@
 
   <!-- 只支持 DebugPackaged 或 ReleasePackaged 配置打包 -->
   <Target Name="VerifyConfiguration" BeforeTargets="BeforeBuild">
-    <Error Text="Unsupported configuration!" Condition="!$(Configuration.EndsWith('Packaged'))" />
+    <Error Text="Not packaged!" Condition="!$(IsPackaged)" />
   </Target>
 
   <!-- 由于 x-generate 不起作用，这个脚本用于检测支持的语言并填充 Resources 节点 -->

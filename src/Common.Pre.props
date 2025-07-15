@@ -17,28 +17,18 @@
       <Configuration>Release</Configuration>
       <Platform>ARM64</Platform>
     </ProjectConfiguration>
-    <ProjectConfiguration Include="DebugPackaged|x64">
-      <Configuration>DebugPackaged</Configuration>
-      <Platform>x64</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="DebugPackaged|ARM64">
-      <Configuration>DebugPackaged</Configuration>
-      <Platform>ARM64</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="ReleasePackaged|x64">
-      <Configuration>ReleasePackaged</Configuration>
-      <Platform>x64</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="ReleasePackaged|ARM64">
-      <Configuration>ReleasePackaged</Configuration>
-      <Platform>ARM64</Platform>
-    </ProjectConfiguration>
   </ItemGroup>
 
+  <!-- 编译选项 -->
+  <Import Project="$(MSBuildThisFileDirectory)\BuildOptions.props" />
+
   <PropertyGroup>
-    <IsDebug>$(Configuration.StartsWith('Debug'))</IsDebug>
-    <IsPackaged>$(Configuration.EndsWith('Packaged'))</IsPackaged>
     <DefaultLanguage>en-US</DefaultLanguage>
-    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
+    <PreferredToolArchitecture Condition="'$(PreferredToolArchitecture)' == ''">x64</PreferredToolArchitecture>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Configuration">
+    <PlatformToolset Condition="$(UseClangCL)">ClangCL</PlatformToolset>
+    <PlatformToolset Condition="!$(UseClangCL)">v143</PlatformToolset>
   </PropertyGroup>
 </Project>

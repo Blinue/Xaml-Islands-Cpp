@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <PropertyGroup Condition="$(IsDebug)" Label="Configuration">
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'" Label="Configuration">
     <UseDebugLibraries>true</UseDebugLibraries>
     <LinkIncremental>true</LinkIncremental>
   </PropertyGroup>
-  <PropertyGroup Condition="!$(IsDebug)" Label="Configuration">
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'" Label="Configuration">
     <UseDebugLibraries>false</UseDebugLibraries>
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
@@ -13,7 +13,7 @@
     <ClCompile>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <PrecompiledHeaderOutputFile>$(IntDir)pch.pch</PrecompiledHeaderOutputFile>
+      <PrecompiledHeaderOutputFile>$(IntDir)\pch.pch</PrecompiledHeaderOutputFile>
       <PreprocessorDefinitions>_WINDOWS;WIN32_LEAN_AND_MEAN;WINRT_LEAN_AND_MEAN;WINRT_NO_MODULE_LOCK;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <WarningLevel>Level4</WarningLevel>
       <SDLCheck>true</SDLCheck>
@@ -23,28 +23,41 @@
       <!-- 禁用 RTTI ，因为它会导致二进制膨胀 -->
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <!-- /await:strict: 禁用协程的非标准语言扩展 -->
+      <!-- /utf-8: 源代码使用 UTF-8 格式 -->
       <!-- /Zc:__cplusplus: 更新 __cplusplus 宏 -->
       <!-- /volatile:iso: 禁用 volatile 的语义扩展 -->
-      <!-- /fp:contract: 生成浮点收缩指令。浮点收缩指令是将两个浮点操作合并为一个指令的机器指令，例如 Fused-Multiply-Add (FMA) -->
-      <!-- fp:contract 可以和其他 fp 选项同时存在，因此每个项目可以分别指定自己的浮点模型 -->
-      <AdditionalOptions>%(AdditionalOptions) /bigobj /utf-8 /await:strict /Zc:__cplusplus /volatile:iso /fp:contract</AdditionalOptions>
+      <AdditionalOptions>/bigobj /utf-8 /Zc:__cplusplus /volatile:iso %(AdditionalOptions)</AdditionalOptions>
+      <!-- /await:strict: 禁用协程的非标准语言扩展 -->
+      <AdditionalOptions Condition="!$(UseClangCL)">/await:strict %(AdditionalOptions)</AdditionalOptions>
+      <!-- -fstrict-vtable-pointers: 缓存虚表指针，这要求不能通过非法手段改变对象的动态类型 -->
+      <!-- -funsafe-math-optimizations: 以降低精度为代价提高浮点运算速度 -->
+      <!-- -fno-math-errno: 浮点操作不设置 errno，这使一些数学函数可以内联 -->
+      <AdditionalOptions Condition="$(UseClangCL)">/clang:-Wno-missing-designated-field-initializers /clang:-Wno-missing-field-initializers /clang:-fstrict-vtable-pointers /clang:-funsafe-math-optimizations /clang:-fno-math-errno %(AdditionalOptions)</AdditionalOptions>
+      <!-- -mcx16: 启用 CX16 指令，Windows 从 8.1 开始要求 CPU 支持它 -->
+      <AdditionalOptions Condition="$(UseClangCL) And '$(Platform)' == 'x64'">/clang:-mcx16 %(AdditionalOptions)</AdditionalOptions>
+      <!-- -march=native: 针对当前硬件生成优化代码 -->
+      <AdditionalOptions Condition="$(UseClangCL) And $(UseNativeMicroArch)">/clang:-march=native %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
   </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="$(IsDebug)">
+  <ItemDefinitionGroup Condition="'$(Configuration)' == 'Debug'">
     <ClCompile>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
   </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="!$(IsDebug)">
+  <ItemDefinitionGroup Condition="'$(Configuration)' == 'Release'">
     <ClCompile>
+      <!-- Release 下不允许编译警告 -->
+      <TreatWarningAsError>true</TreatWarningAsError>
       <WholeProgramOptimization>true</WholeProgramOptimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <!-- /Gw: 链接时删除未使用和重复的数据，可以减小二进制文件体积 -->
       <!-- /Zc:checkGwOdr: 防止 /Gw 导致某些 ODR 违规被忽略 -->
-      <AdditionalOptions>%(AdditionalOptions) /Gw /Zc:checkGwOdr</AdditionalOptions>
+      <AdditionalOptions>/Gw %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="!$(UseClangCL)">/Zc:checkGwOdr %(AdditionalOptions)</AdditionalOptions>
+      <!-- clang-cl 不支持 /LTCG，应使用 LTO -->
+      <AdditionalOptions Condition="$(UseClangCL)">/clang:-flto %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -54,7 +67,7 @@
   </ItemDefinitionGroup>
 
   <!-- HybridCRT -->
-  <Import Project="$(MSBuildThisFileDirectory)HybridCRT.props" />
+  <Import Project="$(MSBuildThisFileDirectory)\HybridCRT.props" />
 
   <!-- _CopyFilesMarkedCopyLocal 有一个 bug：即使没有复制任何文件也会更改 @(FileWrites)，经常导致 -->
   <!-- up-to-date 检查失败。这个任务用于在 _CopyFilesMarkedCopyLocal 执行后修正 @(FileWrites)。 -->

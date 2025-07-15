@@ -10,6 +10,7 @@ namespace XamlIslandsCpp {
 
 struct Win32Helper {
 	struct OSVersion {
+		constexpr OSVersion() {}
 		constexpr OSVersion(uint32_t build) : _build(build) {}
 
 		bool Is20H1OrNewer() const noexcept {
@@ -39,6 +40,27 @@ struct Win32Helper {
 
 	static HINSTANCE GetModuleInstanceHandle() noexcept {
 		return reinterpret_cast<HINSTANCE>(&__ImageBase);
+	}
+
+	template<typename T, std::enable_if_t<std::is_function_v<T>, int> = 0>
+	static T* LoadSystemFunction(const wchar_t* dllName, const char* funcName) noexcept {
+		assert(dllName && funcName);
+
+		HMODULE hMod = GetModuleHandle(dllName);
+		if (!hMod) {
+			hMod = LoadLibraryEx(dllName, NULL, LOAD_LIBRARY_SEARCH_SYSTEM32);
+			if (!hMod) {
+				return nullptr;
+			}
+		}
+
+		const FARPROC address = GetProcAddress(hMod, funcName);
+		if (!address) {
+			return nullptr;
+		}
+
+		// 先转成 void* 以避免警告
+		return reinterpret_cast<T*>(reinterpret_cast<void*>(address));
 	}
 };
 

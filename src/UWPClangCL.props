@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!-- 删除 clang-cl 不支持的选项 -->
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.ClangCl.Exclusion.props" />
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.LldLink.Exclusion.props" />
+  
+  <PropertyGroup>
+    <!-- 来自 $(VCTargetsPath)\Microsoft.Cpp.ClangCl.Common.props -->
+    <CLToolExe>clang-cl.exe</CLToolExe>
+    <LinkToolExe>lld-link.exe</LinkToolExe>
+    <LibToolExe>llvm-lib.exe</LibToolExe>
+    <LLVMInstallDir Condition="'$(PreferredToolArchitecture)' == 'x64'">$(VsInstallRoot)\VC\Tools\Llvm\x64\</LLVMInstallDir>
+    <LLVMInstallDir Condition="'$(PreferredToolArchitecture)' == 'arm64'">$(VsInstallRoot)\VC\Tools\Llvm\ARM64\</LLVMInstallDir>
+    <LLVMInstallDir Condition="'$(LLVMInstallDir)' == ''">$(VsInstallRoot)\VC\Tools\Llvm\</LLVMInstallDir>
+    <ExecutablePath>$(LLVMInstallDir)\bin;$(ExecutablePath)</ExecutablePath>
+    <!-- Add Clang include path for IntelliSense -->
+    <IncludePath>$(LLVMInstallDir)\lib\clang\$(LLVMIncludeVersion)\include;$(IncludePath)</IncludePath>
+    <ExcludePath>$(LLVMInstallDir)\lib\clang\$(LLVMIncludeVersion)\include;$(ExcludePath)</ExcludePath>
+    <!-- ClangCl is not compatible with MSVC analysis, use clang-tidy as default -->
+    <EnableMicrosoftCodeAnalysis>false</EnableMicrosoftCodeAnalysis>
+    <EnableClangTidyCodeAnalysis>true</EnableClangTidyCodeAnalysis>
+    <ClCompilerPath>$(ClangAnalysisToolsPath)\clang-cl.exe</ClCompilerPath>
+    <LlvmArchitectureSwitch Condition="'$(Platform)'=='x64'">--target=amd64-pc-windows-msvc</LlvmArchitectureSwitch>
+    <LlvmArchitectureSwitch Condition="'$(Platform)'=='ARM64'">--target=arm64-pc-windows-msvc</LlvmArchitectureSwitch>
+    <!-- clang-cl 不支持 /MP，设置 MultiProcCL 属性可以并行运行多个 clang-cl 进程 -->
+    <MultiProcCL>true</MultiProcCL>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <!-- 禁用 cppwinrt 生成的头文件中的编译警告 -->
+      <AdditionalOptions>/clang:-isystem /clang:"$(GeneratedFilesDir)\" $(LlvmArchitectureSwitch) %(AdditionalOptions)</AdditionalOptions>
+      <!-- clang-cl 不支持 /ZI，而且 /Zi 和 /Z7 效果相同。 -->
+      <!-- Microsoft.Cpp.ClangCl.Common.target 始终使用 OldStyle (/Z7)，我们和它保持一致。 -->
+      <DebugInformationFormat>OldStyle</DebugInformationFormat>
+      <!-- clang-cl 使用 MultiProcCL 属性实现并行编译 -->
+      <MultiProcessorCompilation>false</MultiProcessorCompilation>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  
+  <!-- 使用 clang-cl 编译 cppwinrt 生成的源文件时关闭警告-->
+  <Target Name="FixClangCLCppWinRT" BeforeTargets="ClCompile">
+    <ItemGroup>
+      <_XamlTypeInfoCpp Include="@(ClCompile)" Condition="'%(Extension)' == '.cpp' And ('%(Filename)' == 'XamlTypeInfo.Impl.g' Or '%(Filename)' == 'XamlTypeInfo.g')" />
+      <ClCompile Remove="@(_XamlTypeInfoCpp)" />
+      <ClCompile Include="@(_XamlTypeInfoCpp)">
+        <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      </ClCompile>
+    </ItemGroup>
+  </Target>
+  <!-- lld-link 不支持 /WINMD 和 /WINMDFILE -->
+  <Target Name="FixClangCLLink" BeforeTargets="Link">
+    <PropertyGroup>
+      <_GenerateWindowsMetadata />
+    </PropertyGroup>
+    <ItemGroup>
+      <_NoWinMD Include="@(Link)" />
+      <Link Remove="@(_NoWinMD)" />
+      <Link Include="@(_NoWinMD)">
+        <WindowsMetadataFile />
+      </Link>
+    </ItemGroup>
+  </Target>
+</Project>

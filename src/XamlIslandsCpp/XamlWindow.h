@@ -177,7 +177,7 @@ protected:
 
 			if (!Win32Helper::GetOSVersion().IsWin11()) {
 				// 初始化双缓冲绘图
-				static const int _ = []() {
+				[[maybe_unused]] static const int _ = []() {
 					BufferedPaintInit();
 					return 0;
 				}();
