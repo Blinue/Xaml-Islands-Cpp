@@ -5,7 +5,7 @@
 ## 功能
 
 * WinUI 集成
-* 自定义标题栏（几乎完美！）
+* 自定义标题栏
 * 明暗主题切换
 * 背景切换
 * 支持多语言
@@ -21,7 +21,7 @@
 ## 编译要求
 
 1. Windows SDK 26100
-2. Visual Studio 2022，需安装 C++ 和 UWP 负载，如果要使用 clang-cl 编译需额外安装 LLVM 组件
+2. Visual Studio 2022，需安装 C++ 和 UWP 负载。如果要使用 clang-cl 编译需额外安装 LLVM 组件
 
 ## 运行要求
 
