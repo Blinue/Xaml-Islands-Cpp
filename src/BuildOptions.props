@@ -6,7 +6,7 @@
     <UseClangCL>false</UseClangCL>
     <!-- 针对当前硬件生成优化代码，只在使用 clang-cl 编译时有效 -->
     <UseNativeMicroArch>false</UseNativeMicroArch>
-    <!-- 编译为打包应用 (暂不支持) -->
+    <!-- 编译为打包应用 -->
     <IsPackaged>false</IsPackaged>
   </PropertyGroup>
   

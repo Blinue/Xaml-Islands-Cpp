@@ -2,7 +2,6 @@
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="..\..\packages\Microsoft.Windows.CppWinRT.2.0.250303.1\build\native\Microsoft.Windows.CppWinRT.props" Condition="Exists('..\..\packages\Microsoft.Windows.CppWinRT.2.0.250303.1\build\native\Microsoft.Windows.CppWinRT.props')" />
   <Import Project="..\..\packages\Microsoft.UI.Xaml.2.8.7\build\native\Microsoft.UI.Xaml.props" Condition="Exists('..\..\packages\Microsoft.UI.Xaml.2.8.7\build\native\Microsoft.UI.Xaml.props')" />
-  <Import Project="..\Common.Pre.props" />
   <PropertyGroup Label="Globals">
     <CppWinRTFastAbi>true</CppWinRTFastAbi>
     <CppWinRTOptimized>true</CppWinRTOptimized>
@@ -21,9 +20,7 @@
     <WindowsTargetPlatformVersion Condition=" '$(WindowsTargetPlatformVersion)' == '' ">10.0.26100.0</WindowsTargetPlatformVersion>
     <WindowsTargetPlatformMinVersion>10.0.18362.0</WindowsTargetPlatformMinVersion>
     <IntDir>$(SolutionDir)\obj\$(Platform)\$(Configuration)\$(MSBuildProjectName)\</IntDir>
-    <!-- 打包时应输出到子文件夹，否则其他项目的 winmd 会干扰 cppwinrt 生成 XamlTypeInfo.g.cpp -->
-    <OutDir Condition="$(IsPackaged)">$(SolutionDir)\bin\$(Platform)\$(Configuration)\$(MSBuildProjectName)\</OutDir>
-    <OutDir Condition="!$(IsPackaged)">$(SolutionDir)\bin\$(Platform)\$(Configuration)\</OutDir>
+    <OutDir>$(SolutionDir)\bin\$(Platform)\$(Configuration)\</OutDir>
     <GeneratedFilesDir>$(IntDir)\Generated Files\</GeneratedFilesDir>
     <AppxBundlePlatforms>x64|arm64</AppxBundlePlatforms>
     <DesktopCompatible>true</DesktopCompatible>
@@ -33,6 +30,11 @@
     <GenerateBuildCompilePassWinMD>false</GenerateBuildCompilePassWinMD>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <Import Project="..\Common.Pre.props" />
+  <PropertyGroup Label="Globals">
+    <!-- 打包时应输出到子文件夹，否则其他项目的 winmd 会干扰 cppwinrt 生成 XamlTypeInfo.g.cpp -->
+    <OutDir Condition="$(IsPackaged)">$(SolutionDir)\bin\$(Platform)\$(Configuration)\$(MSBuildProjectName)\</OutDir>
+  </PropertyGroup>
   <PropertyGroup Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <PlatformToolset>v143</PlatformToolset>
