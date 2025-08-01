@@ -10,9 +10,7 @@
     <CppWinRTVerbosity>low</CppWinRTVerbosity>
     <MinimalCoreWin>true</MinimalCoreWin>
     <ProjectGuid>{2ea4389b-027b-4d0b-98bc-233607b540a6}</ProjectGuid>
-    <ProjectName>ClassLibrary</ProjectName>
-    <RootNamespace>$(ProjectName)</RootNamespace>
-    <DefaultLanguage>en-US</DefaultLanguage>
+    <RootNamespace>$(MSBuildProjectName)</RootNamespace>
     <MinimumVisualStudioVersion>14.0</MinimumVisualStudioVersion>
     <AppContainerApplication>false</AppContainerApplication>
     <ApplicationType>Windows Store</ApplicationType>
@@ -58,9 +56,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderOutputFile>$(IntDir)pch.pch</PrecompiledHeaderOutputFile>
-      <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>_WINRT_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalUsingDirectories>$(WindowsSDK_WindowsMetadata);$(AdditionalUsingDirectories)</AdditionalUsingDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
