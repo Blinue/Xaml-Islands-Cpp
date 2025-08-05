@@ -21,7 +21,7 @@
     <windowsSettings>
       <!-- 表示程序可以感知 DPI 缩放。PerMonitorV2 在 Win10 v1703 中引入 -->
       <dpiAwareness xmlns="http://schemas.microsoft.com/SMI/2016/WindowsSettings">PerMonitorV2</dpiAwareness>
-      <!-- 在 Win10 v2004 和更高版本中启用 Segment Heap，这可以有效减少内存占用，但会稍微降低性能 -->
+      <!-- 在 Win10 v2004 和更高版本中启用 Segment Heap -->
       <heapType xmlns="http://schemas.microsoft.com/SMI/2020/WindowsSettings">SegmentHeap</heapType>
     </windowsSettings>
   </application>
