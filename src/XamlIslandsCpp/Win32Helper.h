@@ -62,6 +62,8 @@ struct Win32Helper {
 		// 先转成 void* 以避免警告
 		return reinterpret_cast<T*>(reinterpret_cast<void*>(address));
 	}
+
+	static bool GetClientScreenRect(HWND hWnd, RECT& rect) noexcept;
 };
 
 }

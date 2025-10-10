@@ -20,4 +20,22 @@ Win32Helper::OSVersion Win32Helper::GetOSVersion() noexcept {
 	return version;
 }
 
+bool Win32Helper::GetClientScreenRect(HWND hWnd, RECT& rect) noexcept {
+	if (!GetClientRect(hWnd, &rect)) {
+		return false;
+	}
+
+	POINT p{};
+	if (!ClientToScreen(hWnd, &p)) {
+		return false;
+	}
+
+	rect.bottom += p.y;
+	rect.left += p.x;
+	rect.right += p.x;
+	rect.top += p.y;
+
+	return true;
+}
+
 }

@@ -280,16 +280,74 @@ LRESULT MainWindow::_MessageHandler(UINT msg, WPARAM wParam, LPARAM lParam) noex
 	}
 	case WM_NCHITTEST:
 	{
+		if (!_IsCustomTitleBarEnabled()) {
+			break;
+		}
+
 		// 为了和第三方程序兼容，确保主窗口本身可以正确响应 WM_NCHITTEST。
 		// 见 https://github.com/microsoft/terminal/issues/8795
-		if (_IsCustomTitleBarEnabled() && _hwndTitleBar) {
-			// 自行处理标题栏区域，剩下的交给 OS
-			LRESULT ht = _TitleBarMessageHandler(WM_NCHITTEST, 0, lParam);
-			if (ht != HTNOWHERE) {
-				return ht;
+		const POINT cursorPos{ GET_X_LPARAM(lParam),GET_Y_LPARAM(lParam) };
+
+		RECT clientRect;
+		Win32Helper::GetClientScreenRect(Handle(), clientRect);
+
+		// 如果光标不在客户区内则交给 OS 处理
+		if (!PtInRect(&clientRect, cursorPos)) {
+			break;
+		}
+
+		// 上边框和标题栏窗口之外为客户区
+		if (cursorPos.y >= clientRect.top + (LONG)_GetTopBorderThickness()) {
+			if (_hwndTitleBar) {
+				RECT titlebarWndRect{};
+				GetWindowRect(_hwndTitleBar, &titlebarWndRect);
+				if (!PtInRect(&titlebarWndRect, cursorPos)) {
+					return HTCLIENT;
+				}
+			} else {
+				return HTCLIENT;
 			}
 		}
-		break;
+
+		if (!_IsMaximized()) {
+			const int resizeHandleHeight = _GetResizeHandleHeight();
+			if (cursorPos.y < clientRect.top + resizeHandleHeight) {
+				// 光标位于上边框
+				if (cursorPos.x < clientRect.left + resizeHandleHeight) {
+					return HTTOPLEFT;
+				} else if (cursorPos.x >= clientRect.right - resizeHandleHeight) {
+					return HTTOPRIGHT;
+				} else {
+					return HTTOP;
+				}
+			}
+		}
+
+		static const Size buttonSizeInDips = [this]() {
+			return Content()->TitleBar().CaptionButtons().CaptionButtonSize();
+		}();
+
+		const float buttonWidthInPixels = buttonSizeInDips.Width * _CurrentDpi() / USER_DEFAULT_SCREEN_DPI;
+		const float buttonHeightInPixels = buttonSizeInDips.Height * _CurrentDpi() / USER_DEFAULT_SCREEN_DPI;
+
+		if (cursorPos.y >= clientRect.top + _GetTopBorderThickness() + buttonHeightInPixels) {
+			// 光标位于标题按钮下方，如果标题栏很宽，这里也可以拖动
+			return HTCAPTION;
+		}
+
+		// 从右向左检查光标是否位于某个标题栏按钮上
+		const LONG cursorToRight = clientRect.right - cursorPos.x;
+		if (cursorToRight < buttonWidthInPixels) {
+			return HTCLOSE;
+		} else if (cursorToRight < buttonWidthInPixels * 2) {
+			// 支持 Win11 的贴靠布局
+			return HTMAXBUTTON;
+		} else if (cursorToRight < buttonWidthInPixels * 3) {
+			return HTMINBUTTON;
+		} else {
+			// 不在任何标题栏按钮上则在可拖拽区域
+			return HTCAPTION;
+		}
 	}
 	case WM_DESTROY:
 	{
@@ -330,64 +388,10 @@ LRESULT MainWindow::_TitleBarWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM 
 
 LRESULT MainWindow::_TitleBarMessageHandler(UINT msg, WPARAM wParam, LPARAM lParam) noexcept {
 	switch (msg) {
-	case WM_CTLCOLORBTN:
-	{
-		// 使原生按钮控件透明，虽然整个标题栏窗口都是不可见的
-		return NULL;
-	}
 	case WM_NCHITTEST:
 	{
-		POINT cursorPos{ GET_X_LPARAM(lParam),GET_Y_LPARAM(lParam) };
-		ScreenToClient(_hwndTitleBar, &cursorPos);
-
-		RECT titleBarClientRect;
-		GetClientRect(_hwndTitleBar, &titleBarClientRect);
-		if (!PtInRect(&titleBarClientRect, cursorPos)) {
-			// 先检查鼠标是否在窗口内。在标题栏按钮上按下鼠标时我们会捕获光标，从而收到 WM_MOUSEMOVE 和 WM_LBUTTONUP 消息。
-			// 它们使用 WM_NCHITTEST 测试鼠标位于哪个区域
-			return HTNOWHERE;
-		}
-
-		if (!_IsMaximized()) {
-			const int resizeHandleHeight = _GetResizeHandleHeight();
-			if (cursorPos.y < resizeHandleHeight) {
-				// 鼠标位于上边框
-				if (cursorPos.x < resizeHandleHeight) {
-					return HTTOPLEFT;
-				} else if (cursorPos.x + resizeHandleHeight >= titleBarClientRect.right) {
-					return HTTOPRIGHT;
-				} else {
-					return HTTOP;
-				}
-			}
-		}
-
-		static const Size buttonSizeInDips = [this]() {
-			return Content()->TitleBar().CaptionButtons().CaptionButtonSize();
-		}();
-
-		const double dpiScale = _CurrentDpi() / double(USER_DEFAULT_SCREEN_DPI);
-		const double buttonWidthInPixels = buttonSizeInDips.Width * dpiScale;
-		const double buttonHeightInPixels = buttonSizeInDips.Height * dpiScale;
-
-		if (cursorPos.y >= _GetTopBorderThickness() + buttonHeightInPixels) {
-			// 鼠标位于标题按钮下方，如果标题栏很宽，这里也可以拖动
-			return HTCAPTION;
-		}
-
-		// 从右向左检查鼠标是否位于某个标题栏按钮上
-		const LONG cursorToRight = titleBarClientRect.right - cursorPos.x;
-		if (cursorToRight < buttonWidthInPixels) {
-			return HTCLOSE;
-		} else if (cursorToRight < buttonWidthInPixels * 2) {
-			// 支持 Win11 的贴靠布局
-			return HTMAXBUTTON;
-		} else if (cursorToRight < buttonWidthInPixels * 3) {
-			return HTMINBUTTON;
-		} else {
-			// 不在任何标题栏按钮上则在可拖拽区域
-			return HTCAPTION;
-		}
+		// 和主窗口一致
+		return _MessageHandler(WM_NCHITTEST, wParam, lParam);
 	}
 	// 在捕获光标时会收到
 	case WM_MOUSEMOVE:
