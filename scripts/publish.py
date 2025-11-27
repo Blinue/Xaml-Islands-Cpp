@@ -53,7 +53,7 @@ os.chdir(curDir)
 outDir = f"{curDir}\\publish\\{args.platform}{'-sideload' if args.packaged else ''}\\"
 
 p = subprocess.run(
-    f'"{msbuildPath}" src\\{"AppPackage" if args.packaged else "XamlIslandsCpp"} -m -t:Rebuild -restore "-p:RestorePackagesConfig=true;Configuration=Release;Platform={args.platform};UseClangCL={args.compiler == "ClangCL"};UseNativeMicroArch={args.use_native_march};IsPackaged={args.packaged};OutDir={outDir};SolutionDir={curDir}\\{(";AppInstallerUri=" + outDir) if args.packaged else ""}"'
+    f'"{msbuildPath}" src\\{"AppPackage" if args.packaged else "XamlIslandsCpp"} -m -t:Rebuild -restore "-p:RestorePackagesConfig=true;Configuration=Release;Platform={args.platform};DisablePDB=true;UseClangCL={args.compiler == "ClangCL"};UseNativeMicroArch={args.use_native_march};IsPackaged={args.packaged};OutDir={outDir};SolutionDir={curDir}\\{(";AppInstallerUri=" + outDir) if args.packaged else ""}"'
 )
 if p.returncode != 0:
     raise Exception("编译失败")
@@ -90,7 +90,7 @@ if args.packaged:
         if not file.endswith(".msix") and not file.endswith(".cer"):
             remove_file(file)
 else:
-    for pattern in ["*.pdb", "*.lib", "*.exp"]:
+    for pattern in ["*.lib", "*.exp"]:
         for file in glob.glob(pattern):
             remove_file(file)
     

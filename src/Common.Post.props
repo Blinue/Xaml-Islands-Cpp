@@ -28,9 +28,12 @@
       <AdditionalOptions Condition="$(UseClangCL) And '$(Platform)' == 'x64'">/clang:-mcx16 %(AdditionalOptions)</AdditionalOptions>
       <!-- -march=native: 针对当前硬件生成优化代码 -->
       <AdditionalOptions Condition="$(UseClangCL) And $(UseNativeMicroArch)">/clang:-march=native %(AdditionalOptions)</AdditionalOptions>
+      <!-- 使用 clang-cl 编译时禁用 cppwinrt 头文件中的编译警告 -->
+      <AdditionalOptions Condition="$(UseClangCL)">/clang:-isystem /clang:"$(GeneratedFilesDir)\" %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <GenerateDebugInformation Condition="$(DisablePDB) == 'true'">false</GenerateDebugInformation>
+      <GenerateDebugInformation Condition="$(DisablePDB) != 'true'">true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)' == 'Debug'">

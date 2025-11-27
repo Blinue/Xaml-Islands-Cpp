@@ -35,7 +35,7 @@ App& App::Get() {
 
 App::App() {
 #ifdef _DEBUG
-	UnhandledException([this](IInspectable const&, UnhandledExceptionEventArgs const& e) {
+	UnhandledException([](IInspectable const&, UnhandledExceptionEventArgs const& e) {
 		if (IsDebuggerPresent()) {
 			hstring errorMessage = e.Message();
 			__debugbreak();
