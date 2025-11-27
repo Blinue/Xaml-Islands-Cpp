@@ -21,7 +21,7 @@
 ## 编译要求
 
 1. Windows SDK 26100
-2. Visual Studio 2022，需安装 C++ 和 UWP 负载。如果要使用 clang-cl 编译需额外安装 LLVM 组件
+2. Visual Studio 2022 或 2026，需安装 C++ 和 UWP 负载。如果要使用 clang-cl 编译需额外安装 LLVM 组件
 
 ## 运行要求
 
