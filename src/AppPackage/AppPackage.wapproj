@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="..\Common.Pre.props" />
-  <PropertyGroup Condition="'$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '17.0'">
-    <VisualStudioVersion>17.0</VisualStudioVersion>
-  </PropertyGroup>
   <PropertyGroup Label="Configuration">
     <BaseIntermediateOutputPath>$(SolutionDir)\obj\$(Platform)\$(Configuration)\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
     <OutputPath>$(SolutionDir)\bin\$(Platform)\$(Configuration)\</OutputPath>

@@ -11,7 +11,6 @@
     <MinimalCoreWin>true</MinimalCoreWin>
     <ProjectGuid>{2ea4389b-027b-4d0b-98bc-233607b540a6}</ProjectGuid>
     <RootNamespace>$(MSBuildProjectName)</RootNamespace>
-    <MinimumVisualStudioVersion>14.0</MinimumVisualStudioVersion>
     <AppContainerApplication>false</AppContainerApplication>
     <ApplicationType>Windows Store</ApplicationType>
     <ApplicationTypeRevision>10.0</ApplicationTypeRevision>

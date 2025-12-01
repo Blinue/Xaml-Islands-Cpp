@@ -98,4 +98,4 @@ else:
         if file != "resources.pri":
             remove_file(file)
 
-    print("清理完毕", flush=True)
+print("清理完毕", flush=True)

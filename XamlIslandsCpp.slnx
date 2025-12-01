@@ -14,6 +14,6 @@
   <Project Path="src/AppPackage/AppPackage.wapproj" Type="c7167f0d-bc9f-4e6e-afe1-012c56b48db5">
     <Build Project="false" />
   </Project>
-  <Project Path="src/ClassLibrary/ClassLibrary.vcxproj" Id="2ea4389b-027b-4d0b-98bc-233607b540a6" DefaultStartup="true" />
-  <Project Path="src/XamlIslandsCpp/XamlIslandsCpp.vcxproj" Id="1239537c-e5b8-427a-9e7f-ea443d1f3529" />
+  <Project Path="src/ClassLibrary/ClassLibrary.vcxproj" Id="2ea4389b-027b-4d0b-98bc-233607b540a6" />
+  <Project Path="src/XamlIslandsCpp/XamlIslandsCpp.vcxproj" Id="1239537c-e5b8-427a-9e7f-ea443d1f3529" DefaultStartup="true" />
 </Solution>
