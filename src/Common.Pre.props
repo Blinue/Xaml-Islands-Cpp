@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Microsoft.Cpp.Default.props 之后导入 -->
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|x64">
@@ -7,7 +8,7 @@
     </ProjectConfiguration>
     <ProjectConfiguration Include="Debug|ARM64">
       <Configuration>Debug</Configuration>
-      <Platform>ARM64</Platform>
+    <Platform>ARM64</Platform>
     </ProjectConfiguration>
     <ProjectConfiguration Include="Release|x64">
       <Configuration>Release</Configuration>
@@ -22,20 +23,17 @@
   <!-- 编译选项 -->
   <Import Project="$(MSBuildThisFileDirectory)\BuildOptions.props" />
 
-  <PropertyGroup>
+  <PropertyGroup Label="Globals">
+    <MinimumVisualStudioVersion>18.0</MinimumVisualStudioVersion>
+    <VCProjectVersion>18.0</VCProjectVersion>
     <DefaultLanguage>en-US</DefaultLanguage>
     <PreferredToolArchitecture Condition="'$(PreferredToolArchitecture)' == ''">x64</PreferredToolArchitecture>
   </PropertyGroup>
 
   <PropertyGroup Label="Configuration">
     <PlatformToolset Condition="$(UseClangCL)">ClangCL</PlatformToolset>
-    <VS17 Condition="$([System.String]::new('$(MSBuildVersion)').StartsWith('17'))">true</VS17>
-    <VS17 Condition="'$(VS17)' != 'true'">false</VS17>
-    <MinimumVisualStudioVersion>17.0</MinimumVisualStudioVersion>
-    <VCProjectVersion Condition="$(VS17)">17.0</VCProjectVersion>
-    <VCProjectVersion Condition="!$(VS17)">18.0</VCProjectVersion>
-    <PlatformToolset Condition="!$(UseClangCL) And $(VS17)">v143</PlatformToolset>
-    <PlatformToolset Condition="!$(UseClangCL) And !$(VS17)">v145</PlatformToolset>
+    <PlatformToolset Condition="!$(UseClangCL)">v145</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
     <UseDebugLibraries Condition="'$(Configuration)' == 'Debug'">true</UseDebugLibraries>
     <WholeProgramOptimization Condition="'$(Configuration)' == 'Release'">true</WholeProgramOptimization>
   </PropertyGroup>
