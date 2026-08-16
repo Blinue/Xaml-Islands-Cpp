@@ -50,15 +50,17 @@ void App::Initialize() {
 	// 初始化 XAML 框架。退出时也不要关闭，如果正在播放动画会崩溃。文档中的清空消息队列的做法无用。
 	_windowsXamlManager = Hosting::WindowsXamlManager::InitializeForCurrentThread();
 
-	if (CoreWindow coreWindow = CoreWindow::GetForCurrentThread()) {
-		// Win10 中隐藏 DesktopWindowXamlSource 窗口
-		if (!Win32Helper::GetOSVersion().IsWin11()) {
+	// Win10 中 CoreDispatcher.RunAsync 存在内存泄露，因此我们始终使用 DispatcherQueue。
+	// 初始化 WindowsXamlManager 时已经创建 DispatcherQueue。
+	_dispatcher = winrt::DispatcherQueue::GetForCurrentThread();
+
+	// Win10 中隐藏 DesktopWindowXamlSource 窗口
+	if (Win32Helper::GetOSVersion().IsWin10()) {
+		if (CoreWindow coreWindow = CoreWindow::GetForCurrentThread()) {
 			HWND hwndDWXS;
-			coreWindow.as<ICoreWindowInterop>()->get_WindowHandle(&hwndDWXS);
+			coreWindow.try_as<ICoreWindowInterop>()->get_WindowHandle(&hwndDWXS);
 			ShowWindow(hwndDWXS, SW_HIDE);
 		}
-
-		_dispatcher = coreWindow.Dispatcher();
 	}
 
 	// 设置显示语言，不支持在运行时更改
@@ -110,9 +112,7 @@ void App::_UpdateColorValuesChangedRevoker() {
 		_colorValuesChangedRevoker = _uiSettings.ColorValuesChanged(
 			auto_revoke,
 			[this](const auto&, const auto&) {
-				_dispatcher.RunAsync(CoreDispatcherPriority::Normal, [this] {
-					_UpdateTheme();
-				});
+				_dispatcher.TryEnqueue([this] { _UpdateTheme(); });
 			}
 		);
 	} else {

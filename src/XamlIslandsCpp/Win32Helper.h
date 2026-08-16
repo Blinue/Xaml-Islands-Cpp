@@ -13,16 +13,20 @@ struct Win32Helper {
 		constexpr OSVersion() {}
 		constexpr OSVersion(uint32_t build) : _build(build) {}
 
+		bool IsWin10() const noexcept {
+			return !IsWin11();
+		}
+
+		bool IsWin11() const noexcept {
+			return Is21H2OrNewer();
+		}
+
 		bool Is20H1OrNewer() const noexcept {
 			return _build >= 19041;
 		}
 
 		// 下面为 Win11
 		// 不考虑代号相同的 Win10
-
-		bool IsWin11() const noexcept {
-			return Is21H2OrNewer();
-		}
 
 		bool Is21H2OrNewer() const noexcept {
 			return _build >= 22000;

@@ -26,7 +26,7 @@ public:
 
 	void Quit();
 
-	const CoreDispatcher& Dispatcher() const noexcept {
+	const DispatcherQueue& Dispatcher() const noexcept {
 		return _dispatcher;
 	}
 
@@ -56,7 +56,7 @@ private:
 	Hosting::WindowsXamlManager _windowsXamlManager{ nullptr };
 
 	std::unique_ptr<::XamlIslandsCpp::MainWindow> _mainWindow;
-	CoreDispatcher _dispatcher{ nullptr };
+	DispatcherQueue _dispatcher{ nullptr };
 
 	::XamlIslandsCpp::Event<::XamlIslandsCpp::AppTheme>::EventRevoker _themeChangedRevoker;
 	Windows::UI::ViewManagement::UISettings _uiSettings;

@@ -1,4 +1,4 @@
-﻿#include "pch.h"
+#include "pch.h"
 #include "CaptionButtonsControl.h"
 #if __has_include("CaptionButtonsControl.g.cpp")
 #include "CaptionButtonsControl.g.cpp"
@@ -139,7 +139,7 @@ void CaptionButtonsControl::IsWindowMaximized(bool value, bool fromDispatcher) {
 		_isWindowMaximized = value;
 	} else if (!fromDispatcher) {
 		// 失败可能是因为标题栏尚未显示，稍后再试一次
-		Dispatcher().RunAsync(CoreDispatcherPriority::Low, [weakThis(get_weak()), value]() {
+		App::Get().Dispatcher().TryEnqueue([weakThis(get_weak()), value]() {
 			if (auto that = weakThis.get()) {
 				that->IsWindowMaximized(value, true);
 			}

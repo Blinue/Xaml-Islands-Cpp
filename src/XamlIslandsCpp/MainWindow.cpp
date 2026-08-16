@@ -8,7 +8,6 @@
 #include "SmoothResizeHelper.h"
 
 using namespace winrt::XamlIslandsCpp::implementation;
-using namespace winrt;
 
 namespace XamlIslandsCpp {
 
@@ -56,7 +55,7 @@ bool MainWindow::Create(const WINDOWPLACEMENT* wp) noexcept {
 	);
 	assert(Handle());
 
-	_Content(make_self<RootPage>());
+	_Content(winrt::make_self<RootPage>());
 	_smoothResizedEnabled = SmoothResizeHelper::EnableResizeSync(Handle(), App::Get());
 
 	_appThemeChangedRevoker = App::Get().ThemeChanged(winrt::auto_revoke,
@@ -73,7 +72,7 @@ bool MainWindow::Create(const WINDOWPLACEMENT* wp) noexcept {
 
 	// Xaml 控件加载完成后显示主窗口
 	if (wp) {
-		Content()->Loaded([this, wp(*wp)](winrt::IInspectable const&, RoutedEventArgs const&) {
+		Content()->Loaded([this, wp(*wp)](winrt::IInspectable const&, winrt::RoutedEventArgs const&) {
 			// 禁用显示窗口的动画
 			BOOL value = TRUE;
 			DwmSetWindowAttribute(Handle(), DWMWA_TRANSITIONS_FORCEDISABLED, &value, sizeof(value));
@@ -130,12 +129,12 @@ bool MainWindow::Create(const WINDOWPLACEMENT* wp) noexcept {
 		ChangeWindowMessageFilterEx(Handle(), WM_GETTITLEBARINFOEX, MSGFLT_ALLOW, nullptr);
 	}
 
-	Content()->TitleBar().SizeChanged([this](winrt::IInspectable const&, SizeChangedEventArgs const&) {
+	Content()->TitleBar().SizeChanged([this](winrt::IInspectable const&, winrt::SizeChangedEventArgs const&) {
 		_ResizeTitleBarWindow();
 	});
 
 	_backdropChangedRevoker = settings.BackdropChanged(
-		auto_revoke,
+		winrt::auto_revoke,
 		[this](WindowBackdrop backdrop) {
 			if (!_SetTheme(App::Get().IsLightTheme(), backdrop)) {
 				return;
@@ -143,7 +142,7 @@ bool MainWindow::Create(const WINDOWPLACEMENT* wp) noexcept {
 
 			// 由于无法更改 WS_EX_NOREDIRECTIONBITMAP 样式，必须重新创建主窗口。
 			// 应延迟执行，让 UI 完成更新。
-			App::Get().Dispatcher().TryRunAsync(CoreDispatcherPriority::Normal, [this]() {
+			App::Get().Dispatcher().TryEnqueue([this]() {
 				WINDOWPLACEMENT wp{ .length = sizeof(wp) };
 				GetWindowPlacement(Handle(), &wp);
 
@@ -161,7 +160,7 @@ bool MainWindow::Create(const WINDOWPLACEMENT* wp) noexcept {
 	);
 
 	_isCustomTitleBarEnabledChangedRevoker = settings.IsCustomTitleBarEnabledChanged(
-		auto_revoke,
+		winrt::auto_revoke,
 		[&](bool enabled) {
 			if (_IsCustomTitleBarEnabled() == enabled) {
 				return;
@@ -173,9 +172,9 @@ bool MainWindow::Create(const WINDOWPLACEMENT* wp) noexcept {
 				_SetCustomTitleBar(true);
 			} else {
 				// 优化动画
-				Content()->Dispatcher().TryRunAsync(CoreDispatcherPriority::Normal, [this]() -> fire_and_forget {
+				App::Get().Dispatcher().TryEnqueue([this]() -> winrt::fire_and_forget {
 					MainWindow* that = this;
-					CoreDispatcher dispatcher = Content()->Dispatcher();
+					winrt::DispatcherQueue dispatcher = App::Get().Dispatcher();
 					co_await 10ms;
 					co_await dispatcher;
 					that->_SetCustomTitleBar(false);
@@ -323,7 +322,7 @@ LRESULT MainWindow::_MessageHandler(UINT msg, WPARAM wParam, LPARAM lParam) noex
 			}
 		}
 
-		static const Size buttonSizeInDips = [this]() {
+		static const winrt::Size buttonSizeInDips = [this]() {
 			return Content()->TitleBar().CaptionButtons().CaptionButtonSize();
 		}();
 
@@ -542,7 +541,7 @@ void MainWindow::_ResizeTitleBarWindow() noexcept {
 	TitleBarControl& titleBar = Content()->TitleBar();
 
 	// 获取标题栏的边框矩形
-	Rect rect{ 0.0f, 0.0f, (float)titleBar.ActualWidth(), (float)titleBar.ActualHeight() };
+	winrt::Rect rect{ 0.0f, 0.0f, (float)titleBar.ActualWidth(), (float)titleBar.ActualHeight() };
 	rect = titleBar.TransformToVisual(*Content()).TransformBounds(rect);
 
 	const float dpiScale = _CurrentDpi() / float(USER_DEFAULT_SCREEN_DPI);
