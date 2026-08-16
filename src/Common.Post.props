@@ -44,6 +44,14 @@
     <ClCompile>
       <!-- Release 下不允许编译警告 -->
       <TreatWarningAsError>true</TreatWarningAsError>
+      <!-- 存在同名全局属性，但表现很奇怪。首先，在导入 Microsoft.Cpp.Default.props 之前和之后定义 -->
+      <!-- 效果不同，似乎在导入前定义才能起作用；其次，全局 WholeProgramOptimization 属性起作用时由 -->
+      <!-- Microsoft.Cpp.targets 而不是 Microsoft.Cpp.props 更改编译选项，将用户设置覆盖；最后，该 -->
+      <!-- 属性起作用时会将 LinkTimeCodeGeneration 改为 UseFastLinkTimeCodeGeneration，而我们想要 -->
+      <!-- UseLinkTimeCodeGeneration。为了精确控制编译参数，我们不使用全局 -->
+      <!-- WholeProgramOptimization，而是自己定义编译选项。全局 WholeProgramOptimization 影响的属 -->
+      <!-- 性见 $(VCTargetsPath)\Microsoft.Cpp.WholeProgramOptimization.props。 -->
+      <WholeProgramOptimization>true</WholeProgramOptimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -55,14 +63,20 @@
       <AdditionalOptions Condition="$(UseClangCL)">/clang:-flto %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
+      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
     </Link>
+    <Lib>
+      <LinkTimeCodeGeneration>true</LinkTimeCodeGeneration>
+    </Lib>
   </ItemDefinitionGroup>
 
   <!-- HybridCRT -->
   <Import Project="$(MSBuildThisFileDirectory)\HybridCRT.props" />
+
+  <!-- 为 UWP 项目导入 WinUI 包 -->
+  <Import Condition="'$(ApplicationType)' == 'Windows Store'" Project=".\WinUI.targets" />
 
   <!-- _CopyFilesMarkedCopyLocal 有一个 bug：即使没有复制任何文件也会更改 @(FileWrites)，经常导致 -->
   <!-- up-to-date 检查失败。这个任务用于在 _CopyFilesMarkedCopyLocal 执行后修正 @(FileWrites)。 -->
