@@ -12,7 +12,7 @@
 
 // 来自 https://learn.microsoft.com/en-us/windows/apps/api-reference/interface-members/ixamlsourcetransparency-isbackgroundtransparent
 DECLARE_INTERFACE_IID_(IXamlSourceTransparency, IInspectable, "06636C29-5A17-458D-8EA2-2422D997A922") {
-	STDMETHOD(get_IsBackgroundTransparent)(boolean * value) PURE;
+	STDMETHOD(get_IsBackgroundTransparent)(boolean* value) PURE;
 	STDMETHOD(put_IsBackgroundTransparent)(boolean value) PURE;
 };
 
@@ -111,8 +111,8 @@ protected:
 		// XAML Islands 默认存在背景色，下面的调用使该背景透明，从而显露出 DWM 绘制的背景。实际上
 		// 从 Win11 22H2 开始 DWM 才开始支持绘制 Mica 等背景，不过 XAML Islands 的背景色本来就
 		// 不符合直觉，去掉没坏处。这也是 WinUI 3 的做法。
-		if (auto transparency = winrt::Window::Current().try_as<IXamlSourceTransparency>()) {
-			transparency->put_IsBackgroundTransparent(true);
+		if (auto xst = winrt::Window::Current().try_as<IXamlSourceTransparency>()) {
+			xst->put_IsBackgroundTransparent(true);
 		}
 	}
 

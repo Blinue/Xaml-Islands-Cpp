@@ -1,11 +1,6 @@
 #include "pch.h"
 #include "AppSettings.h"
 #include "Win32Helper.h"
-#include <winrt/Windows.UI.ViewManagement.h>
-
-using namespace winrt;
-using namespace Windows::UI;
-using namespace Windows::UI::ViewManagement;
 
 namespace XamlIslandsCpp {
 
