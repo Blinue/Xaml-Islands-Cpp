@@ -10,6 +10,12 @@
 #include <dwmapi.h>
 #include "AppSettings.h"
 
+// 来自 https://learn.microsoft.com/en-us/windows/apps/api-reference/interface-members/ixamlsourcetransparency-isbackgroundtransparent
+DECLARE_INTERFACE_IID_(IXamlSourceTransparency, IInspectable, "06636C29-5A17-458D-8EA2-2422D997A922") {
+	STDMETHOD(get_IsBackgroundTransparent)(boolean* value) PURE;
+	STDMETHOD(put_IsBackgroundTransparent)(boolean value) PURE;
+};
+
 namespace XamlIslandsCpp {
 
 template <typename T, typename C>
@@ -101,6 +107,13 @@ protected:
 				}
 			}
 		);
+
+		// XAML Islands 默认存在背景色，下面的调用使该背景透明，从而显露出 DWM 绘制的背景。实际上
+		// 从 Win11 22H2 开始 DWM 才开始支持绘制 Mica 等背景，不过 XAML Islands 的背景色本来就
+		// 不符合直觉，去掉没坏处。这也是 WinUI 3 的做法。
+		if (auto xst = winrt::Window::Current().try_as<IXamlSourceTransparency>()) {
+			xst->put_IsBackgroundTransparent(true);
+		}
 	}
 
 	void _SetInitialTheme(
@@ -122,23 +135,21 @@ protected:
 
 		_SetInitialTheme(isLightTheme, backdrop, _isCustomTitleBarEnabled);
 
-		// 在 Win10 中如果自定义标题栏，那么即使在亮色主题下我们也使用暗色边框，这也是 UWP 窗口的行为
+		// 在 Win10 中如果自定义标题栏，那么即使在亮色主题下也应使用暗色边框，这也是 UWP 窗口的行为
 		ThemeHelper::SetWindowTheme(
 			_hWnd,
 			Win32Helper::GetOSVersion().IsWin11() || !_isCustomTitleBarEnabled ? !isLightTheme : true,
 			!isLightTheme
 		);
 
-		if (!Win32Helper::GetOSVersion().Is22H2OrNewer()) {
-			return false;
+		// 从 Win11 22H2 开始纯色以外的背景由 DWM 绘制
+		if (Win32Helper::GetOSVersion().Is22H2OrNewer()) {
+			static const DWM_SYSTEMBACKDROP_TYPE BACKDROP_MAP[] = {
+				DWMSBT_AUTO, DWMSBT_TRANSIENTWINDOW, DWMSBT_MAINWINDOW, DWMSBT_TABBEDWINDOW
+			};
+			DWM_SYSTEMBACKDROP_TYPE value = BACKDROP_MAP[(int)backdrop];
+			DwmSetWindowAttribute(_hWnd, DWMWA_SYSTEMBACKDROP_TYPE, &value, sizeof(value));
 		}
-
-		// 设置背景
-		static const DWM_SYSTEMBACKDROP_TYPE BACKDROP_MAP[] = {
-			DWMSBT_AUTO, DWMSBT_TRANSIENTWINDOW, DWMSBT_MAINWINDOW, DWMSBT_TABBEDWINDOW
-		};
-		DWM_SYSTEMBACKDROP_TYPE value = BACKDROP_MAP[(int)backdrop];
-		DwmSetWindowAttribute(_hWnd, DWMWA_SYSTEMBACKDROP_TYPE, &value, sizeof(value));
 
 		return false;
 	}

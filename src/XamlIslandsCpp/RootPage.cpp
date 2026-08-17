@@ -129,13 +129,19 @@ void RootPage::_UpdateTheme() {
 	ElementTheme newTheme = isLightTheme ? ElementTheme::Light : ElementTheme::Dark;
 	RequestedTheme(newTheme);
 
-	if (Win32Helper::GetOSVersion().Is22H2OrNewer()) {
-		if (backdrop != WindowBackdrop::SolidColor) {
-			MUXC::BackdropMaterial::SetApplyToRootOrPageBackground(*this, true);
-			return;
-		}
-			
-		MUXC::BackdropMaterial::SetApplyToRootOrPageBackground(*this, false);
+	// Win11 22H2 前
+	// * 纯色: 背景刷子
+	// * Acrylic: 背景刷子
+	// * Mica(Alt): 不支持
+	// 
+	// Win11 22H2+
+	// * 纯色: 背景刷子
+	// * Acrylic: DWM
+	// * Mica(Alt): DWM
+
+	// 从 Win11 22H2 开始纯色以外的背景由 DWM 绘制
+	if (Win32Helper::GetOSVersion().Is22H2OrNewer() && backdrop != WindowBackdrop::SolidColor) {
+		return;
 	}
 	
 	const Windows::UI::Color bkgColor = Win32ColorToWinRTColor(
@@ -144,7 +150,7 @@ void RootPage::_UpdateTheme() {
 	if (backdrop == WindowBackdrop::SolidColor) {
 		Background(SolidColorBrush(bkgColor));
 	} else {
-		// 22H2 之前的系统使用背景刷子实现 Acrylic
+		// Win11 22H2 之前的系统使用背景刷子实现 Acrylic
 		assert(backdrop == WindowBackdrop::Acrylic);
 		AcrylicBrush brush;
 		brush.BackgroundSource(AcrylicBackgroundSource::HostBackdrop);
