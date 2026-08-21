@@ -67,11 +67,15 @@ public:
 		~EventRevoker() {
 			if (_event) {
 				_event->operator()(_token);
+#ifdef _DEBUG
+				_token.value = std::numeric_limits<uint32_t>::max();
+#endif
 			}
 		}
 
 		void Revoke() {
 			if (_event) {
+				assert(_token.value != std::numeric_limits<uint32_t>::max());
 				_event->operator()(_token);
 				_event = nullptr;
 			}

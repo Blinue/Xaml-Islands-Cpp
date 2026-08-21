@@ -1,9 +1,11 @@
 namespace XamlIslandsCpp {
 	runtimeclass RootPage : Windows.UI.Xaml.Controls.Page, Windows.UI.Xaml.Data.INotifyPropertyChanged {
+		RootPage();
+
 		Boolean IsCustomTitleBarEnabled;
 		Int32 Theme;
+		Int32 Backdrop;
 
 		static Boolean IsMicaAvailable { get; };
-		Int32 Backdrop;
 	}
 }

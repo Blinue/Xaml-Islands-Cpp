@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Microsoft.Cpp.Default.props 之后导入 -->
+<!-- 尽可能早的导入 -->
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|x64">
@@ -28,12 +28,13 @@
     <VCProjectVersion>18.0</VCProjectVersion>
     <DefaultLanguage>en-US</DefaultLanguage>
     <PreferredToolArchitecture Condition="'$(PreferredToolArchitecture)' == ''">x64</PreferredToolArchitecture>
+    <IntDir>$(SolutionDir)\obj\$(Platform)\$(Configuration)\$(MSBuildProjectName)\</IntDir>
+    <OutBaseDir Condition="'$(OutBaseDir)' == ''">$(SolutionDir)\bin\$(Platform)\$(Configuration)\</OutBaseDir>
   </PropertyGroup>
 
   <PropertyGroup Label="Configuration">
-    <!-- UWP 不支持直接使用 ClangCL，将在 UWPClangCL.props 中更改编译器 -->
-    <PlatformToolset Condition="!$(UseClangCL) Or '$(ApplicationType)' == 'Windows Store'">v145</PlatformToolset>
-    <PlatformToolset Condition="$(UseClangCL) And '$(ApplicationType)' != 'Windows Store'">ClangCL</PlatformToolset>
+    <PlatformToolset Condition="$(UseClangCL)">ClangCL</PlatformToolset>
+    <PlatformToolset Condition="!$(UseClangCL)">v145</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
     <UseDebugLibraries Condition="'$(Configuration)' == 'Debug'">true</UseDebugLibraries>
   </PropertyGroup>

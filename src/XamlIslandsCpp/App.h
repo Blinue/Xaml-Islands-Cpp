@@ -1,8 +1,8 @@
 #pragma once
 #include "App.g.h"
-#include <winrt/Windows.UI.Xaml.Hosting.h>
-#include "Event.h"
 #include "AppSettings.h"
+#include "Event.h"
+#include <winrt/Windows.UI.Xaml.Hosting.h>
 
 namespace XamlIslandsCpp {
 class MainWindow;
@@ -29,8 +29,6 @@ public:
 	const DispatcherQueue& Dispatcher() const noexcept {
 		return _dispatcher;
 	}
-
-	const com_ptr<RootPage>& RootPage() const noexcept;
 
 	const ::XamlIslandsCpp::MainWindow& MainWindow() const noexcept {
 		return *_mainWindow;
@@ -82,14 +80,14 @@ public:
 	}
 
 private:
-	const com_ptr<implementation::XamlMetaDataProvider>& _AppProvider() {
+	const com_ptr<XamlMetaDataProvider>& _AppProvider() {
 		if (!_appProvider) {
-			_appProvider = make_self<implementation::XamlMetaDataProvider>();
+			_appProvider = make_self<XamlMetaDataProvider>();
 		}
 		return _appProvider;
 	}
 
-	com_ptr<implementation::XamlMetaDataProvider> _appProvider;
+	com_ptr<XamlMetaDataProvider> _appProvider;
 };
 
 }

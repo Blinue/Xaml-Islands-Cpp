@@ -6,16 +6,33 @@
 #include "Win32Helper.h"
 #include "App.h"
 #include "SmoothResizeHelper.h"
+#include "ThemeHelper.h"
+#include "XamlHelper.h"
+#include <windows.ui.xaml.hosting.desktopwindowxamlsource.h>
+#include <CoreWindow.h>
 
 using namespace winrt::XamlIslandsCpp::implementation;
+namespace winrt {
+using namespace Windows::UI::Xaml::Hosting;
+}
+
+// 来自 https://learn.microsoft.com/en-us/windows/apps/api-reference/interface-members/ixamlsourcetransparency-isbackgroundtransparent
+DECLARE_INTERFACE_IID_(IXamlSourceTransparency, ::IInspectable, "06636C29-5A17-458D-8EA2-2422D997A922") {
+	STDMETHOD(get_IsBackgroundTransparent)(boolean* value) PURE;
+	STDMETHOD(put_IsBackgroundTransparent)(boolean value) PURE;
+};
 
 namespace XamlIslandsCpp {
+
+MainWindow::~MainWindow() noexcept {
+	Destroy();
+}
 
 bool MainWindow::Create(const WINDOWPLACEMENT* wp) noexcept {
 	[[maybe_unused]] static const int _ = []() {
 		const HINSTANCE hInstance = Win32Helper::GetModuleInstanceHandle();
 
-		WNDCLASSEXW wcex{
+		WNDCLASSEXW wcex = {
 			.cbSize = sizeof(WNDCLASSEX),
 			.lpfnWndProc = _WndProc,
 			.hInstance = hInstance,
@@ -33,17 +50,15 @@ bool MainWindow::Create(const WINDOWPLACEMENT* wp) noexcept {
 		return 0;
 	}();
 
-	const bool isLightTheme = App::Get().IsLightTheme();
-
 	AppSettings& settings = AppSettings::Get();
-	const WindowBackdrop backdrop = settings.Backdrop();
 
-	_SetInitialTheme(isLightTheme, backdrop, settings.IsCustomTitleBarEnabled());
+	// 创建窗口前设置能避免不必要的开销
+	_SetCustomTitleBar(settings.IsCustomTitleBarEnabled());
 
 	const HINSTANCE hInstance = Win32Helper::GetModuleInstanceHandle();
-
 	CreateWindowEx(
-		Win32Helper::GetOSVersion().Is22H2OrNewer() && backdrop != WindowBackdrop::SolidColor ? WS_EX_NOREDIRECTIONBITMAP : 0,
+		(Win32Helper::GetOSVersion().Is22H2OrNewer() &&
+			settings.Backdrop() != WindowBackdrop::SolidColor) ? WS_EX_NOREDIRECTIONBITMAP : 0,
 		CommonSharedConstants::MAIN_WINDOW_CLASS_NAME,
 		L"XamlIslandsCpp",
 		WS_OVERLAPPEDWINDOW,
@@ -55,12 +70,37 @@ bool MainWindow::Create(const WINDOWPLACEMENT* wp) noexcept {
 	);
 	assert(Handle());
 
-	_Content(winrt::make_self<RootPage>());
-	_smoothResizedEnabled = SmoothResizeHelper::EnableResizeSync(Handle(), App::Get());
+	// 首次设置窗口主题应强制更新
+	_SetTheme(App::Get().IsLightTheme(), true);
+	// 无视返回值，因为 WS_EX_NOREDIRECTIONBITMAP 样式是正确的
+	_SetBackdrop(settings.Backdrop(), true);
 
-	_appThemeChangedRevoker = App::Get().ThemeChanged(winrt::auto_revoke,
-		[this](bool isLightTheme) { _SetTheme(isLightTheme, AppSettings::Get().Backdrop()); });
-	_SetTheme(isLightTheme, backdrop);
+	_rootPage = winrt::make_self<RootPage>();
+
+	// 初始化 XAML Islands
+	_xamlSource = winrt::DesktopWindowXamlSource();
+	_xamlSourceNative2 = _xamlSource.as<IDesktopWindowXamlSourceNative2>();
+
+	_xamlSourceNative2->AttachToWindow(Handle());
+	_xamlSourceNative2->get_WindowHandle(&_hwndXamlIsland);
+	_xamlSource.Content(*_rootPage);
+
+	// 焦点始终位于 _hwndXamlIsland 中
+	_xamlSource.TakeFocusRequested(
+		[](winrt::DesktopWindowXamlSource const& sender,
+		winrt::DesktopWindowXamlSourceTakeFocusRequestedEventArgs const& args
+	) {
+		sender.NavigateFocus(args.Request());
+	});
+
+	// XAML Islands 默认存在背景色，下面的调用使该背景透明，从而显露出 DWM 绘制的背景。虽然从
+	// Win11 22H2 开始 DWM 才开始支持绘制 Mica 等背景，但 XAML Islands 的背景色本来就不符合
+	// 直觉，去掉没坏处。
+	if (auto xst = winrt::Window::Current().try_as<IXamlSourceTransparency>()) {
+		xst->put_IsBackgroundTransparent(true);
+	}
+
+	_isSmoothResizeEnabled = SmoothResizeHelper::EnableResizeSync(Handle(), App::Get());
 
 	// 隐藏原生标题栏上的图标
 	SetWindowThemeNonClientAttributes(Handle(), WTNCA_NODRAWICON | WTNCA_NOSYSMENU, WTNCA_VALIDBITS);
@@ -72,7 +112,7 @@ bool MainWindow::Create(const WINDOWPLACEMENT* wp) noexcept {
 
 	// Xaml 控件加载完成后显示主窗口
 	if (wp) {
-		Content()->Loaded([this, wp(*wp)](winrt::IInspectable const&, winrt::RoutedEventArgs const&) {
+		_rootPage->Loaded([this, wp(*wp)](winrt::IInspectable const&, winrt::RoutedEventArgs const&) {
 			// 禁用显示窗口的动画
 			BOOL value = TRUE;
 			DwmSetWindowAttribute(Handle(), DWMWA_TRANSITIONS_FORCEDISABLED, &value, sizeof(value));
@@ -83,7 +123,7 @@ bool MainWindow::Create(const WINDOWPLACEMENT* wp) noexcept {
 			DwmSetWindowAttribute(Handle(), DWMWA_TRANSITIONS_FORCEDISABLED, &value, sizeof(value));
 		});
 	} else {
-		Content()->Loaded([this](winrt::IInspectable const&, winrt::RoutedEventArgs const&) {
+		_rootPage->Loaded([this](winrt::IInspectable const&, winrt::RoutedEventArgs const&) {
 			ShowWindow(Handle(), SW_SHOWNORMAL);
 		});
 	}
@@ -129,14 +169,17 @@ bool MainWindow::Create(const WINDOWPLACEMENT* wp) noexcept {
 		ChangeWindowMessageFilterEx(Handle(), WM_GETTITLEBARINFOEX, MSGFLT_ALLOW, nullptr);
 	}
 
-	Content()->TitleBar().SizeChanged([this](winrt::IInspectable const&, winrt::SizeChangedEventArgs const&) {
+	_rootPage->TitleBar().SizeChanged([this](winrt::IInspectable const&, winrt::SizeChangedEventArgs const&) {
 		_ResizeTitleBarWindow();
 	});
+
+	_appThemeChangedRevoker = App::Get().ThemeChanged(
+		winrt::auto_revoke, [this](bool isLightTheme) { _SetTheme(isLightTheme); });
 
 	_backdropChangedRevoker = settings.BackdropChanged(
 		winrt::auto_revoke,
 		[this](WindowBackdrop backdrop) {
-			if (!_SetTheme(App::Get().IsLightTheme(), backdrop)) {
+			if (!_SetBackdrop(backdrop)) {
 				return;
 			}
 
@@ -150,9 +193,10 @@ bool MainWindow::Create(const WINDOWPLACEMENT* wp) noexcept {
 				BOOL value = TRUE;
 				DwmSetWindowAttribute(Handle(), DWMWA_TRANSITIONS_FORCEDISABLED, &value, sizeof(value));
 
-				_closingForRecreate = true;
-				Destroy();
-				_closingForRecreate = false;
+				// 重新构造 MainWindow
+				_isClosingForRecreate = true;
+				std::destroy_at(this);
+				std::construct_at(this);
 
 				Create(&wp);
 			});
@@ -162,7 +206,7 @@ bool MainWindow::Create(const WINDOWPLACEMENT* wp) noexcept {
 	_isCustomTitleBarEnabledChangedRevoker = settings.IsCustomTitleBarEnabledChanged(
 		winrt::auto_revoke,
 		[&](bool enabled) {
-			if (_IsCustomTitleBarEnabled() == enabled) {
+			if (_IsBorderless() == enabled) {
 				return;
 			}
 
@@ -186,23 +230,82 @@ bool MainWindow::Create(const WINDOWPLACEMENT* wp) noexcept {
 	return true;
 }
 
+void MainWindow::HandleMessage(const MSG& msg) {
+	// XAML Islands 会吞掉 Alt+F4，需要特殊处理
+	// https://github.com/microsoft/microsoft-ui-xaml/issues/2408
+	if (msg.message == WM_SYSKEYDOWN && msg.wParam == VK_F4) [[unlikely]] {
+		SendMessage(GetAncestor(msg.hwnd, GA_ROOT), msg.message, msg.wParam, msg.lParam);
+		return;
+	}
+
+	if (_xamlSourceNative2) {
+		BOOL processed = FALSE;
+		HRESULT hr = _xamlSourceNative2->PreTranslateMessage(&msg, &processed);
+		if (SUCCEEDED(hr) && processed) {
+			return;
+		}
+	}
+
+	TranslateMessage(&msg);
+	DispatchMessage(&msg);
+}
+
 LRESULT MainWindow::_MessageHandler(UINT msg, WPARAM wParam, LPARAM lParam) noexcept {
 	switch (msg) {
 	case WM_SIZE:
 	{
-		base_type::_MessageHandler(WM_SIZE, wParam, lParam);
+		base_type::_MessageHandler(msg, wParam, lParam);
 
-		if (wParam != SIZE_MINIMIZED && Content()) {
-			if (_smoothResizedEnabled) {
+		if (wParam != SIZE_MINIMIZED && _rootPage) {
+			if (_isSmoothResizeEnabled) {
 				SmoothResizeHelper::SyncWindowSize(Handle(), App::Get());
 			}
 
-			if (_IsCustomTitleBarEnabled()) {
-				_ResizeTitleBarWindow();
-				Content()->TitleBar().CaptionButtons().IsWindowMaximized(_IsMaximized());
+			// 调整 XAML Islands 窗口尺寸
+			{
+				int clientWidth = LOWORD(lParam);
+				int clientHeight = HIWORD(lParam);
+				// XAML Islands 窗口在上边框下方。Win10 和 Win11 中上边框都在客户区内。
+				int topBorderThickness = (int)_GetTopBorderThickness();
+
+				// SWP_NOZORDER 确保 XAML Islands 窗口始终在标题栏窗口下方，否则主窗口在调整大小时会闪烁
+				SetWindowPos(
+					_hwndXamlIsland,
+					NULL,
+					0,
+					topBorderThickness,
+					clientWidth,
+					clientHeight - topBorderThickness,
+					SWP_NOACTIVATE | SWP_NOZORDER | SWP_SHOWWINDOW
+				);
 			}
+
+			if (_IsBorderless()) {
+				_ResizeTitleBarWindow();
+				_rootPage->TitleBar().CaptionButtons().IsWindowMaximized(_IsMaximized());
+			}
+
+			// 使 ContentDialog 跟随窗口尺寸调整，来自
+			// https://github.com/microsoft/microsoft-ui-xaml/issues/3577#issuecomment-1399250405
+			if (winrt::CoreWindow coreWindow = winrt::CoreWindow::GetForCurrentThread()) {
+				HWND hwndDWXS;
+				coreWindow.as<ICoreWindowInterop>()->get_WindowHandle(&hwndDWXS);
+				SendMessage(hwndDWXS, WM_SIZE, wParam, lParam);
+			}
+
+			App::Get().Dispatcher().TryEnqueue([xamlRoot(_rootPage->XamlRoot())]() {
+				XamlHelper::RepositionXamlPopups(xamlRoot, true);
+			});
 		}
-		
+
+		return 0;
+	}
+	case WM_MOVING:
+	{
+		if (_hwndXamlIsland) {
+			XamlHelper::RepositionXamlPopups(_rootPage->XamlRoot(), false);
+		}
+
 		return 0;
 	}
 	case WM_GETMINMAXINFO:
@@ -217,7 +320,7 @@ LRESULT MainWindow::_MessageHandler(UINT msg, WPARAM wParam, LPARAM lParam) noex
 	}
 	case WM_NCRBUTTONUP:
 	{
-		if (_IsCustomTitleBarEnabled() && wParam == HTCAPTION) {
+		if (_IsBorderless() && wParam == HTCAPTION) {
 			// 我们自己处理标题栏右键，不知为何 DefWindowProc 没有作用
 			const POINT cursorPt{ GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
 
@@ -232,7 +335,7 @@ LRESULT MainWindow::_MessageHandler(UINT msg, WPARAM wParam, LPARAM lParam) noex
 
 			// 根据窗口状态更新选项
 			auto setState = [&](UINT item, bool enabled) {
-				MENUITEMINFO mii{
+				MENUITEMINFO mii = {
 					.cbSize = sizeof(MENUITEMINFO),
 					.fMask = MIIM_STATE,
 					.fType = MFT_STRING,
@@ -259,15 +362,22 @@ LRESULT MainWindow::_MessageHandler(UINT msg, WPARAM wParam, LPARAM lParam) noex
 	}
 	case WM_ACTIVATE:
 	{
-		if (_IsCustomTitleBarEnabled() && Content()) {
-			Content()->TitleBar().IsWindowActive(LOWORD(wParam) != WA_INACTIVE);
+		if (_rootPage) {
+			if (_IsBorderless()) {
+				_rootPage->TitleBar().IsWindowActive(LOWORD(wParam) != WA_INACTIVE);
+			}
+
+			if (LOWORD(wParam) == WA_INACTIVE) {
+				XamlHelper::CloseComboBoxPopup(_rootPage->XamlRoot());
+			}
 		}
+		
 		break;
 	}
 	case WM_GETTITLEBARINFOEX:
 	{
-		if (_IsCustomTitleBarEnabled()) {
-			// 为了支持 Win11 的贴靠布局，我们需要返回最大化按钮的矩形
+		if (_IsBorderless()) {
+			// 为了支持 Win11 的贴靠布局，需要返回最大化按钮的边界矩形
 			TITLEBARINFOEX* info = (TITLEBARINFOEX*)lParam;
 			if (info->cbSize >= sizeof(TITLEBARINFOEX)) {
 				base_type::_MessageHandler(msg, wParam, lParam);
@@ -275,59 +385,42 @@ LRESULT MainWindow::_MessageHandler(UINT msg, WPARAM wParam, LPARAM lParam) noex
 				return TRUE;
 			}
 		}
+
 		break;
 	}
 	case WM_NCHITTEST:
 	{
-		if (!_IsCustomTitleBarEnabled()) {
+		// 为了和第三方程序兼容，应确保主窗口本身可以正确响应 WM_NCHITTEST。
+		// 见 https://github.com/microsoft/terminal/issues/8795
+
+		if (!_IsBorderless()) {
 			break;
 		}
 
-		// 为了和第三方程序兼容，确保主窗口本身可以正确响应 WM_NCHITTEST。
-		// 见 https://github.com/microsoft/terminal/issues/8795
+		// 基类处理非客户区
+		LRESULT ht = base_type::_MessageHandler(msg, wParam, lParam);
+		if (ht != HTCLIENT || !_hwndTitleBar) {
+			return ht;
+		}
+
 		const POINT cursorPos{ GET_X_LPARAM(lParam),GET_Y_LPARAM(lParam) };
 
 		RECT clientRect;
 		Win32Helper::GetClientScreenRect(Handle(), clientRect);
 
-		// 如果光标不在客户区内则交给 OS 处理
-		if (!PtInRect(&clientRect, cursorPos)) {
-			break;
-		}
-
-		// 上边框和标题栏窗口之外为客户区
-		if (cursorPos.y >= clientRect.top + (LONG)_GetTopBorderThickness()) {
-			if (_hwndTitleBar) {
-				RECT titlebarWndRect{};
-				GetWindowRect(_hwndTitleBar, &titlebarWndRect);
-				if (!PtInRect(&titlebarWndRect, cursorPos)) {
-					return HTCLIENT;
-				}
-			} else {
-				return HTCLIENT;
-			}
-		}
-
-		if (!_IsMaximized()) {
-			const int resizeHandleHeight = _GetResizeHandleHeight();
-			if (cursorPos.y < clientRect.top + resizeHandleHeight) {
-				// 光标位于上边框
-				if (cursorPos.x < clientRect.left + resizeHandleHeight) {
-					return HTTOPLEFT;
-				} else if (cursorPos.x >= clientRect.right - resizeHandleHeight) {
-					return HTTOPRIGHT;
-				} else {
-					return HTTOP;
-				}
-			}
+		// _hwndTitleBar 为标题栏区域，下方是客户区
+		RECT titlebarWndRect{};
+		GetWindowRect(_hwndTitleBar, &titlebarWndRect);
+		if (!PtInRect(&titlebarWndRect, cursorPos)) {
+			return HTCLIENT;
 		}
 
 		static const winrt::Size buttonSizeInDips = [this]() {
-			return Content()->TitleBar().CaptionButtons().CaptionButtonSize();
+			return _rootPage->TitleBar().CaptionButtons().CaptionButtonSize();
 		}();
 
-		const float buttonWidthInPixels = buttonSizeInDips.Width * _CurrentDpi() / USER_DEFAULT_SCREEN_DPI;
-		const float buttonHeightInPixels = buttonSizeInDips.Height * _CurrentDpi() / USER_DEFAULT_SCREEN_DPI;
+		float buttonWidthInPixels = buttonSizeInDips.Width * _CurrentDpi() / USER_DEFAULT_SCREEN_DPI;
+		float buttonHeightInPixels = buttonSizeInDips.Height * _CurrentDpi() / USER_DEFAULT_SCREEN_DPI;
 
 		if (cursorPos.y >= clientRect.top + _GetTopBorderThickness() + buttonHeightInPixels) {
 			// 光标位于标题按钮下方，如果标题栏很宽，这里也可以拖动
@@ -335,7 +428,7 @@ LRESULT MainWindow::_MessageHandler(UINT msg, WPARAM wParam, LPARAM lParam) noex
 		}
 
 		// 从右向左检查光标是否位于某个标题栏按钮上
-		const LONG cursorToRight = clientRect.right - cursorPos.x;
+		LONG cursorToRight = clientRect.right - cursorPos.x;
 		if (cursorToRight < buttonWidthInPixels) {
 			return HTCLOSE;
 		} else if (cursorToRight < buttonWidthInPixels * 2) {
@@ -348,28 +441,112 @@ LRESULT MainWindow::_MessageHandler(UINT msg, WPARAM wParam, LPARAM lParam) noex
 			return HTCAPTION;
 		}
 	}
+	case WM_KEYDOWN:
+	{
+		if (wParam == VK_TAB) {
+			// 处理焦点
+			if (_xamlSource) {
+				winrt::XamlSourceFocusNavigationReason reason = (GetKeyState(VK_SHIFT) & 0x80) ?
+					winrt::XamlSourceFocusNavigationReason::Last : winrt::XamlSourceFocusNavigationReason::First;
+				_xamlSource.NavigateFocus(winrt::XamlSourceFocusNavigationRequest(reason));
+			}
+			return 0;
+		}
+		break;
+	}
+	case WM_SYSCOMMAND:
+	{
+		// 根据文档，wParam 的低四位供系统内部使用
+		switch (wParam & 0xFFF0) {
+		case SC_MINIMIZE:
+		{
+			// 最小化前关闭 ComboBox。不能在 WM_SIZE 中处理，该消息发送于最小化之后，会导致 ComboBox 无法交互
+			if (_rootPage) {
+				XamlHelper::CloseComboBoxPopup(_rootPage->XamlRoot());
+			}
+			break;
+		}
+		case SC_KEYMENU:
+		{
+			// 禁用按 Alt 键会激活窗口菜单的行为，它使用户界面无法交互
+			if (lParam == 0) {
+				return 0;
+			}
+			break;
+		}
+		}
+
+		break;
+	}
 	case WM_DESTROY:
 	{
 		_appThemeChangedRevoker.Revoke();
 		_isCustomTitleBarEnabledChangedRevoker.Revoke();
 		_backdropChangedRevoker.Revoke();
 		
-		// 标题栏窗口经常使用 Content()，确保在关闭 DWXS 前销毁
+		// 标题栏窗口经常使用 _rootPage，确保在关闭 DWXS 前销毁
 		DestroyWindow(_hwndTitleBar);
-		_hwndTitleBar = NULL;
-		_trackingMouse = false;
 
-		if (!_closingForRecreate) {
-			LRESULT ret = base_type::_MessageHandler(msg, wParam, lParam);
-			// 由于基类会清空消息队列，PostQuitMessage 应在基类处理完毕后执行
+		// 确保关闭过程中 _rootPage 已经为空
+		_rootPage = nullptr;
+
+		_xamlSourceNative2 = nullptr;
+		// 必须手动重置 Content，否则会内存泄露，使 RootPage 无法析构
+		_xamlSource.Content(nullptr);
+		_xamlSource.Close();
+		_xamlSource = nullptr;
+
+		// 关闭 DesktopWindowXamlSource 后应清空消息队列以确保 RootPage 析构
+		MSG msg1;
+		while (PeekMessage(&msg1, nullptr, 0, 0, PM_REMOVE)) {
+			DispatchMessage(&msg1);
+		}
+		// 偶尔清空消息队列无用，需要再清空一次，不确定是否 100% 可靠。谢谢你，XAML Islands！
+		Sleep(0);
+		while (PeekMessage(&msg1, nullptr, 0, 0, PM_REMOVE)) {
+			DispatchMessage(&msg1);
+		}
+		
+		if (!_isClosingForRecreate) {
 			PostQuitMessage(0);
-			return ret;
 		}
 
 		break;
 	}
 	}
-	return base_type::_MessageHandler(msg, wParam, lParam);
+
+	return BorderlessWindowT::_MessageHandler(msg, wParam, lParam);
+}
+
+void MainWindow::_DrawBackground(HDC hdc, const RECT& bkgRect) const noexcept {
+	static bool isLightBrush = _isLightTheme;
+	static HBRUSH backgroundBrush = CreateSolidBrush(isLightBrush ?
+		CommonSharedConstants::LIGHT_TINT_COLOR : CommonSharedConstants::DARK_TINT_COLOR);
+
+	if (isLightBrush != _isLightTheme) {
+		isLightBrush = _isLightTheme;
+		DeleteBrush(backgroundBrush);
+		backgroundBrush = CreateSolidBrush(isLightBrush ?
+			CommonSharedConstants::LIGHT_TINT_COLOR : CommonSharedConstants::DARK_TINT_COLOR);
+	}
+
+	// 绘制深色背景时需要注意调使用 DwmExtendFrameIntoClientArea 后深色背景会被视为透明。解决方案来自
+	// https://github.com/microsoft/terminal/blob/0ee2c74cd432eda153f3f3e77588164cde95044f/src/cascadia/WindowsTerminal/NonClientIslandWindow.cpp#L1030-L1047
+	if (!isLightBrush && Win32Helper::GetOSVersion().IsWin10()) {
+		HDC opaqueDc;
+		BP_PAINTPARAMS params = {
+			.cbSize = sizeof(params),
+			.dwFlags = BPPF_NOCLIP | BPPF_ERASE
+		};
+		HPAINTBUFFER buf = BeginBufferedPaint(hdc, &bkgRect, BPBF_TOPDOWNDIB, &params, &opaqueDc);
+		if (buf && opaqueDc) {
+			FillRect(opaqueDc, &bkgRect, backgroundBrush);
+			BufferedPaintSetAlpha(buf, nullptr, 255);
+			EndBufferedPaint(buf, TRUE);
+		}
+	} else {
+		FillRect(hdc, &bkgRect, backgroundBrush);
+	}
 }
 
 LRESULT MainWindow::_TitleBarWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept {
@@ -402,7 +579,7 @@ LRESULT MainWindow::_TitleBarMessageHandler(UINT msg, WPARAM wParam, LPARAM lPar
 	}
 	case WM_NCMOUSEMOVE:
 	{
-		CaptionButtonsControl& captionButtons = Content()->TitleBar().CaptionButtons();
+		CaptionButtonsControl& captionButtons = _rootPage->TitleBar().CaptionButtons();
 
 		// 将 hover 状态通知 CaptionButtons。标题栏窗口拦截了 XAML Islands 中的标题栏
 		// 控件的鼠标消息，标题栏按钮的状态由我们手动控制。
@@ -424,15 +601,15 @@ LRESULT MainWindow::_TitleBarMessageHandler(UINT msg, WPARAM wParam, LPARAM lPar
 
 			// 追踪鼠标以确保鼠标离开标题栏时我们能收到 WM_NCMOUSELEAVE 消息，否则无法
 			// 可靠的收到这个消息，尤其是在用户快速移动鼠标的时候。
-			if (!_trackingMouse && msg == WM_NCMOUSEMOVE) {
-				TRACKMOUSEEVENT ev{
+			if (!_isTrackingMouse && msg == WM_NCMOUSEMOVE) {
+				TRACKMOUSEEVENT ev = {
 					.cbSize = sizeof(TRACKMOUSEEVENT),
 					.dwFlags = TME_LEAVE | TME_NONCLIENT,
 					.hwndTrack = _hwndTitleBar,
 					.dwHoverTime = HOVER_DEFAULT // 不关心 HOVER 消息
 				};
 				TrackMouseEvent(&ev);
-				_trackingMouse = true;
+				_isTrackingMouse = true;
 			}
 
 			break;
@@ -452,16 +629,16 @@ LRESULT MainWindow::_TitleBarMessageHandler(UINT msg, WPARAM wParam, LPARAM lPar
 		// 先检查鼠标是否在主窗口上，如果正在显示文字提示，会返回 _hwndTitleBar
 		HWND hwndUnderCursor = WindowFromPoint(cursorPos);
 		if (hwndUnderCursor != Handle() && hwndUnderCursor != _hwndTitleBar) {
-			Content()->TitleBar().CaptionButtons().LeaveButtons();
+			_rootPage->TitleBar().CaptionButtons().LeaveButtons();
 		} else {
 			// 然后检查鼠标在标题栏上的位置
 			LRESULT hit = _TitleBarMessageHandler(WM_NCHITTEST, 0, MAKELPARAM(cursorPos.x, cursorPos.y));
 			if (hit != HTMINBUTTON && hit != HTMAXBUTTON && hit != HTCLOSE) {
-				Content()->TitleBar().CaptionButtons().LeaveButtons();
+				_rootPage->TitleBar().CaptionButtons().LeaveButtons();
 			}
 		}
 
-		_trackingMouse = false;
+		_isTrackingMouse = false;
 		break;
 	}
 	case WM_NCLBUTTONDOWN:
@@ -480,7 +657,7 @@ LRESULT MainWindow::_TitleBarMessageHandler(UINT msg, WPARAM wParam, LPARAM lPar
 		case HTMINBUTTON:
 		case HTMAXBUTTON:
 		case HTCLOSE:
-			Content()->TitleBar().CaptionButtons().PressButton((CaptionButton)wParam);
+			_rootPage->TitleBar().CaptionButtons().PressButton((CaptionButton)wParam);
 			// 在标题栏按钮上按下左键后我们便捕获光标，这样才能在释放时得到通知。注意捕获光标后
 			// 便不会再收到 NC 族消息，这就是为什么我们要处理 WM_MOUSEMOVE 和 WM_LBUTTONUP
 			SetCapture(_hwndTitleBar);
@@ -508,17 +685,17 @@ LRESULT MainWindow::_TitleBarMessageHandler(UINT msg, WPARAM wParam, LPARAM lPar
 		case HTCAPTION:
 		{
 			// 在可拖拽区域或上边框释放左键，将此消息传递给主窗口
-			Content()->TitleBar().CaptionButtons().ReleaseButtons();
+			_rootPage->TitleBar().CaptionButtons().ReleaseButtons();
 			return _MessageHandler(msg, wParam, lParam);
 		}
 		case HTMINBUTTON:
 		case HTMAXBUTTON:
 		case HTCLOSE:
 			// 在标题栏按钮上释放左键
-			Content()->TitleBar().CaptionButtons().ReleaseButton((CaptionButton)wParam);
+			_rootPage->TitleBar().CaptionButtons().ReleaseButton((CaptionButton)wParam);
 			break;
 		default:
-			Content()->TitleBar().CaptionButtons().ReleaseButtons();
+			_rootPage->TitleBar().CaptionButtons().ReleaseButtons();
 		}
 
 		return 0;
@@ -534,15 +711,15 @@ LRESULT MainWindow::_TitleBarMessageHandler(UINT msg, WPARAM wParam, LPARAM lPar
 }
 
 void MainWindow::_ResizeTitleBarWindow() noexcept {
-	if (!_IsCustomTitleBarEnabled() || !_hwndTitleBar) {
+	if (!_IsBorderless() || !_hwndTitleBar) {
 		return;
 	}
 
-	TitleBarControl& titleBar = Content()->TitleBar();
+	TitleBarControl& titleBar = _rootPage->TitleBar();
 
 	// 获取标题栏的边框矩形
 	winrt::Rect rect{ 0.0f, 0.0f, (float)titleBar.ActualWidth(), (float)titleBar.ActualHeight() };
-	rect = titleBar.TransformToVisual(*Content()).TransformBounds(rect);
+	rect = titleBar.TransformToVisual(*_rootPage).TransformBounds(rect);
 
 	const float dpiScale = _CurrentDpi() / float(USER_DEFAULT_SCREEN_DPI);
 	const uint32_t topBorderThickness = _GetTopBorderThickness();
@@ -575,6 +752,65 @@ void MainWindow::_ResizeTitleBarWindow() noexcept {
 	LONG_PTR style = GetWindowLongPtr(_hwndTitleBar, GWL_STYLE);
 	SetWindowLongPtr(_hwndTitleBar, GWL_STYLE,
 		_IsMaximized() ? style | WS_MAXIMIZE : style & ~WS_MAXIMIZE);
+}
+
+void MainWindow::_SetTheme(bool isLightTheme, bool force) noexcept {
+	assert(Handle());
+
+	if (std::exchange(_isLightTheme, isLightTheme) == isLightTheme && !force) {
+		return;
+	}
+
+	// 在 Win10 中如果自定义标题栏，那么即使在亮色主题下也应使用暗色边框，这也是 UWP 窗口的行为
+	ThemeHelper::SetWindowTheme(
+		Handle(),
+		Win32Helper::GetOSVersion().IsWin11() || !_IsBorderless() ? !isLightTheme : true,
+		!isLightTheme
+	);
+}
+
+bool MainWindow::_SetBackdrop(WindowBackdrop value, bool force) noexcept {
+	assert(Handle());
+
+	if (!Win32Helper::GetOSVersion().Is22H2OrNewer() || _backdrop == value) {
+		return false;
+	}
+
+	if (!force) {
+		if (_backdrop == value) {
+			return false;
+		}
+
+		// 在纯色和其他背景间切换需要重新创建窗口，因为需要更改 WS_EX_NOREDIRECTIONBITMAP 样式
+		bool wasSolidColor = _backdrop == WindowBackdrop::SolidColor;
+		bool isSolidColor = value == WindowBackdrop::SolidColor;
+		if (wasSolidColor != isSolidColor) {
+			return true;
+		}
+	}
+
+	_backdrop = value;
+
+	static const DWM_SYSTEMBACKDROP_TYPE BACKDROP_MAP[] = {
+		DWMSBT_AUTO, DWMSBT_TRANSIENTWINDOW, DWMSBT_MAINWINDOW, DWMSBT_TABBEDWINDOW
+	};
+	DWM_SYSTEMBACKDROP_TYPE attrValue = BACKDROP_MAP[(int)value];
+	DwmSetWindowAttribute(Handle(), DWMWA_SYSTEMBACKDROP_TYPE, &attrValue, sizeof(attrValue));
+	
+	return false;
+}
+
+void MainWindow::_SetCustomTitleBar(bool enabled) noexcept {
+	if (_IsBorderless() == enabled) {
+		return;
+	}
+
+	_SetBorderless(enabled);
+
+	// Win10 中需要更新边框主题
+	if (Win32Helper::GetOSVersion().IsWin10() && Handle()) {
+		_SetTheme(_isLightTheme, true);
+	}
 }
 
 }

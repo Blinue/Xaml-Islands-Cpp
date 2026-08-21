@@ -93,13 +93,7 @@ int App::Run() {
 }
 
 void App::Quit() {
-	_mainWindow->Destroy();
-	PostQuitMessage(0);
-}
-
-const com_ptr<RootPage>& App::RootPage() const noexcept {
-	assert(_mainWindow && *_mainWindow);
-	return _mainWindow->Content();
+	_mainWindow.reset();
 }
 
 void App::_AppSettings_ThemeChanged(AppTheme) {
