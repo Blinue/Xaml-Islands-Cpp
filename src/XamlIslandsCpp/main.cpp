@@ -9,11 +9,12 @@ int APIENTRY wWinMain(
 	_In_ LPWSTR /*lpCmdLine*/,
 	_In_ int /*nCmdShow*/
 ) {
-	// 程序结束时也不应调用 uninit_apartment
-	// 见 https://kennykerr.ca/2018/03/24/cppwinrt-hosting-the-windows-runtime/
 	winrt::init_apartment(winrt::apartment_type::single_threaded);
 
 	App& app = App::Get();
-	app.Initialize();
+	if (!app.Initialize()) {
+		return 0;
+	}
+
 	return app.Run();
 }

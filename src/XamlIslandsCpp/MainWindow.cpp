@@ -1,15 +1,15 @@
 #include "pch.h"
-#include "MainWindow.h"
-#include "CommonSharedConstants.h"
-#include "CaptionButtonsControl.h"
-#include "TitleBarControl.h"
-#include "Win32Helper.h"
 #include "App.h"
+#include "CaptionButtonsControl.h"
+#include "CommonSharedConstants.h"
+#include "MainWindow.h"
 #include "SmoothResizeHelper.h"
 #include "ThemeHelper.h"
+#include "TitleBarControl.h"
+#include "Win32Helper.h"
 #include "XamlHelper.h"
-#include <windows.ui.xaml.hosting.desktopwindowxamlsource.h>
 #include <CoreWindow.h>
+#include <windows.ui.xaml.hosting.desktopwindowxamlsource.h>
 
 using namespace winrt::XamlIslandsCpp::implementation;
 namespace winrt {

@@ -3,10 +3,10 @@
 #if __has_include("App.g.cpp")
 #include "App.g.cpp"
 #endif
-#include <CoreWindow.h>
-#include "Win32Helper.h"
 #include "MainWindow.h"
 #include "ThemeHelper.h"
+#include "Win32Helper.h"
+#include <CoreWindow.h>
 
 using namespace ::XamlIslandsCpp;
 using namespace winrt;
@@ -14,22 +14,8 @@ using namespace Windows::UI::ViewManagement;
 
 namespace winrt::XamlIslandsCpp::implementation {
 
-// 提前加载 twinapi.appcore.dll 和 threadpoolwinrt.dll 以避免退出时崩溃。应在 Windows.UI.Xaml.dll
-// 被加载前调用，注意避免初始化全局变量时意外加载这个 dll，尤其是为了注册 DependencyProperty。
-// 来自 https://github.com/CommunityToolkit/Microsoft.Toolkit.Win32/blob/6fb2c3e00803ea563af20f6bc9363091b685d81f/Microsoft.Toolkit.Win32.UI.XamlApplication/XamlApplication.cpp#L140
-// 参见 https://github.com/microsoft/microsoft-ui-xaml/issues/7260#issuecomment-1231314776
-static void FixThreadPoolCrash() noexcept {
-	assert(!GetModuleHandle(L"Windows.UI.Xaml.dll"));
-	LoadLibraryEx(L"twinapi.appcore.dll", nullptr, LOAD_LIBRARY_SEARCH_SYSTEM32);
-	LoadLibraryEx(L"threadpoolwinrt.dll", nullptr, LOAD_LIBRARY_SEARCH_SYSTEM32);
-}
-
 App& App::Get() {
-	static com_ptr<App> instance = [] {
-		FixThreadPoolCrash();
-		return make_self<App>();
-	}();
-
+	static com_ptr<App> instance = make_self<App>();
 	return *instance;
 }
 
@@ -42,9 +28,15 @@ App::App() {
 		}
 	});
 #endif
+
+	// !!! HACK !!!
+	// 将 Application 泄露以避免退出时崩溃。XAML Islands 在关闭时存在大量 bug，而且不同的系统版
+	// 本会在不同的地方崩溃，我们索性主动泄露来一劳永逸地解决问题。也可以通过调用 TerminateProcess
+	// 来避免崩溃，不过这样全局变量和静态变量无法触发析构。
+	AddRef();
 }
 
-void App::Initialize() {
+bool App::Initialize() {
 	_mainWindow = std::make_unique<class MainWindow>();
 
 	// 初始化 XAML 框架。退出时也不要关闭，如果正在播放动画会崩溃。文档中的清空消息队列的做法无用。
@@ -73,8 +65,10 @@ void App::Initialize() {
 	_AppSettings_ThemeChanged(AppSettings::Get().Theme());
 
 	if (!_mainWindow->Create()) {
-		Quit();
+		return false;
 	}
+
+	return true;
 }
 
 int App::Run() {
@@ -86,7 +80,7 @@ int App::Run() {
 	_colorValuesChangedRevoker.revoke();
 	_themeChangedRevoker.Revoke();
 
-	// 确保退出时所有事件回调都已撤销，既保持整洁又能防止析构全局变量时崩溃
+	// 确保退出时所有事件回调都已撤销
 	assert(_DEBUG_DELEGATE_COUNT == 0);
 
 	return (int)msg.wParam;

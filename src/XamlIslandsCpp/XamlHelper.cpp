@@ -1,6 +1,6 @@
 #include "pch.h"
-#include "XamlHelper.h"
 #include "Win32Helper.h"
+#include "XamlHelper.h"
 #include <winrt/Windows.UI.Xaml.Media.h>
 
 using namespace winrt;

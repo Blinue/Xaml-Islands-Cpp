@@ -30,10 +30,6 @@ public:
 		return _dispatcher;
 	}
 
-	const ::XamlIslandsCpp::MainWindow& MainWindow() const noexcept {
-		return *_mainWindow;
-	}
-
 	::XamlIslandsCpp::MainWindow& MainWindow() noexcept {
 		return *_mainWindow;
 	}

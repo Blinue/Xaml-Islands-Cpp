@@ -3,13 +3,13 @@
 #if __has_include("RootPage.g.cpp")
 #include "RootPage.g.cpp"
 #endif
-#include "Win32Helper.h"
-#include "CommonSharedConstants.h"
-#include "XamlHelper.h"
-#include "AppSettings.h"
 #include "App.h"
+#include "AppSettings.h"
+#include "CommonSharedConstants.h"
 #include "MainWindow.h"
 #include "TitleBarControl.h"
+#include "Win32Helper.h"
+#include "XamlHelper.h"
 
 using namespace ::XamlIslandsCpp;
 using namespace winrt;

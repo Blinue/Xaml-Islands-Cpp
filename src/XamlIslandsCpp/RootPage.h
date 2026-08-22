@@ -1,7 +1,7 @@
 #pragma once
 #include "pch.h"
-#include "RootPage.g.h"
 #include "Event.h"
+#include "RootPage.g.h"
 
 namespace winrt::XamlIslandsCpp::implementation {
 
