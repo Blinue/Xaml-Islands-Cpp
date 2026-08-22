@@ -2,15 +2,10 @@
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="..\Common.Pre.props" />
   <PropertyGroup Label="Configuration">
-    <BaseIntermediateOutputPath>$(SolutionDir)\obj\$(Platform)\$(Configuration)\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
-    <OutputPath>$(SolutionDir)\bin\$(Platform)\$(Configuration)\</OutputPath>
-  </PropertyGroup>
-  <PropertyGroup>
+    <BaseIntermediateOutputPath>$(IntDir)</BaseIntermediateOutputPath>
+    <OutputPath>$(OutBaseDir)</OutputPath>
     <WapProjPath Condition="'$(WapProjPath)'==''">$(MSBuildExtensionsPath)\Microsoft\DesktopBridge\</WapProjPath>
     <AddAdditionalExplicitAssemblyReferences>false</AddAdditionalExplicitAssemblyReferences>
-  </PropertyGroup>
-  <Import Project="$(WapProjPath)\Microsoft.DesktopBridge.props" />
-  <PropertyGroup>
     <ProjectGuid>e3aa150f-d6e7-44ab-b8d8-ef290c0889ef</ProjectGuid>
     <TargetPlatformVersion>10.0.26100.0</TargetPlatformVersion>
     <TargetPlatformMinVersion>10.0.18362.0</TargetPlatformMinVersion>
@@ -30,6 +25,7 @@
     <AppxPackageSigningEnabled>true</AppxPackageSigningEnabled>
     <PackageCertificateKeyFile>AppPackage_TemporaryKey.pfx</PackageCertificateKeyFile>
   </PropertyGroup>
+  <Import Project="$(WapProjPath)\Microsoft.DesktopBridge.props" />
   <Import Project="..\WinUI.targets" />
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest">

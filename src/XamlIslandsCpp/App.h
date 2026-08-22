@@ -20,7 +20,7 @@ public:
 	App(const App&) = delete;
 	App(App&&) = delete;
 
-	void Initialize();
+	bool Initialize();
 
 	int Run();
 
