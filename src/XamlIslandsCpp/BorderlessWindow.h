@@ -1,5 +1,5 @@
 #pragma once
-#include "WindowBaseT.h"
+#include "BaseWindow.h"
 #include "Win32Helper.h"
 #include <dwmapi.h>
 #include <shellapi.h>
@@ -7,14 +7,13 @@
 namespace XamlIslandsCpp {
 
 template <typename T>
-class BorderlessWindowT : public WindowBaseT<T> {
-	friend WindowBaseT<T>;
-
+class BorderlessWindow : public BaseWindow<T> {
+	using base_type = BaseWindow<T>;
+	friend base_type;
+	
 public:
-	using base_type = BorderlessWindowT<T>;
-
-	// 使得调用基类方法时不用加类名
-	using WindowBaseT<T>::Handle;
+	// 使得调用基类方法时不用限定
+	using base_type::Handle;
 
 protected:
 	// 支持在创建窗口前调用
@@ -25,7 +24,7 @@ protected:
 
 		if (Handle()) {
 			SetWindowPos(Handle(), NULL, 0, 0, 0, 0,
-				SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOCOPYBITS);
+				SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE);
 		}
 	}
 
@@ -33,8 +32,8 @@ protected:
 		return _isBorderless;
 	}
 
-	uint32_t _CurrentDpi() const noexcept {
-		return _currentDpi;
+	uint32_t _GetDpi() const noexcept {
+		return _dpi;
 	}
 
 	bool _IsMaximized() const noexcept {
@@ -46,7 +45,12 @@ protected:
 		return _isBorderless && !_isMaximized ? _nativeBorderThickness : 0;
 	}
 
-	// 子类应重载这个函数来绘制背景
+	// 派生类可重载这个函数来跳过绘制背景。Win10 中应总是绘制背景
+	bool _ShouldDrawBackground() const noexcept {
+		return true;
+	}
+
+	// 派生类可重载这个函数来绘制背景
 	void _DrawBackground(HDC /*hdc*/, const RECT& /*bkgRect*/) const noexcept {}
 
 	LRESULT _MessageHandler(UINT msg, WPARAM wParam, LPARAM lParam) noexcept {
@@ -117,17 +121,15 @@ protected:
 
 				// 如果有自动隐藏的任务栏，我们在它的方向稍微减小客户区，这样用户就可以用鼠标呼出任务栏
 				if (HMONITOR hMon = MonitorFromWindow(Handle(), MONITOR_DEFAULTTONEAREST)) {
-					MONITORINFO monInfo{};
-					monInfo.cbSize = sizeof(MONITORINFO);
+					MONITORINFO monInfo = { .cbSize = sizeof(MONITORINFO) };
 					GetMonitorInfo(hMon, &monInfo);
 
 					// 检查是否有自动隐藏的任务栏
-					APPBARDATA appBarData{};
-					appBarData.cbSize = sizeof(appBarData);
+					APPBARDATA appBarData = { .cbSize = sizeof(appBarData) };
 					if (SHAppBarMessage(ABM_GETSTATE, &appBarData) & ABS_AUTOHIDE) {
 						// 检查显示器的一条边
 						auto hasAutohideTaskbar = [&monInfo](UINT edge) -> bool {
-							APPBARDATA data{
+							APPBARDATA data = {
 								.cbSize = sizeof(data),
 								.uEdge = edge,
 								.rc = monInfo.rcMonitor
@@ -136,7 +138,7 @@ protected:
 							return hTaskbar != nullptr;
 						};
 
-						static constexpr int AUTO_HIDE_TASKBAR_HEIGHT = 2;
+						constexpr int AUTO_HIDE_TASKBAR_HEIGHT = 2;
 
 						if (hasAutohideTaskbar(ABE_TOP)) {
 							clientRect.top += AUTO_HIDE_TASKBAR_HEIGHT;
@@ -194,6 +196,10 @@ protected:
 		}
 		case WM_PAINT:
 		{
+			if (!((T*)this)->_ShouldDrawBackground()) {
+				return 0;
+			}
+
 			PAINTSTRUCT ps{};
 			HDC hdc = BeginPaint(Handle(), &ps);
 			if (!hdc) {
@@ -230,12 +236,12 @@ protected:
 		}
 		}
 
-		return WindowBaseT<T>::_MessageHandler(msg, wParam, lParam);
+		return base_type::_MessageHandler(msg, wParam, lParam);
 	}
 
 private:
 	void _UpdateDpi(uint32_t dpi) noexcept {
-		_currentDpi = dpi;
+		_dpi = dpi;
 
 		// Win10 中窗口边框始终只有一个像素宽，Win11 中的窗口边框宽度和 DPI 缩放有关
 		if (Win32Helper::GetOSVersion().IsWin11()) {
@@ -253,6 +259,9 @@ private:
 			return;
 		}
 
+		// Win10 中应总是绘制背景
+		assert(((T*)this)->_ShouldDrawBackground());
+
 		MARGINS margins{};
 		if (_GetTopBorderThickness() > 0) {
 			// 在 Win10 中，移除标题栏时上边框也被没了。我们的解决方案是：使用 DwmExtendFrameIntoClientArea
@@ -268,7 +277,7 @@ private:
 			// 户区？这大部分情况下可以工作，有一个小 bug：不显示边框颜色的设置下深色模式的边框会变为纯黑而不
 			// 是半透明。
 			RECT frame{};
-			AdjustWindowRectExForDpi(&frame, GetWindowStyle(Handle()), FALSE, 0, _currentDpi);
+			AdjustWindowRectExForDpi(&frame, GetWindowStyle(Handle()), FALSE, 0, _dpi);
 			margins.cyTopHeight = -frame.top;
 		}
 		DwmExtendFrameIntoClientArea(Handle(), &margins);
@@ -276,11 +285,11 @@ private:
 
 	int _GetResizeHandleHeight() const noexcept {
 		// 没有 SM_CYPADDEDBORDER
-		return GetSystemMetricsForDpi(SM_CXPADDEDBORDER, _currentDpi) +
-			GetSystemMetricsForDpi(SM_CYSIZEFRAME, _currentDpi);
+		return GetSystemMetricsForDpi(SM_CXPADDEDBORDER, _dpi) +
+			GetSystemMetricsForDpi(SM_CYSIZEFRAME, _dpi);
 	}
 
-	uint32_t _currentDpi = USER_DEFAULT_SCREEN_DPI;
+	uint32_t _dpi = USER_DEFAULT_SCREEN_DPI;
 	uint32_t _nativeBorderThickness = 1;
 
 	bool _isBorderless = true;

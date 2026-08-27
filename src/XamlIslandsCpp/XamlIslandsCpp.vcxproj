@@ -64,7 +64,7 @@
   <Import Project="..\UWPClangCL.props" Condition="$(UseClangCL)" />
   <ItemGroup>
     <ClInclude Include="AppSettings.h" />
-    <ClInclude Include="BorderlessWindowT.h" />
+    <ClInclude Include="BorderlessWindow.h" />
     <ClInclude Include="CaptionButtonsControl.h">
       <DependentUpon>CaptionButtonsControl.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -87,7 +87,7 @@
     </ClInclude>
     <ClInclude Include="Win32Helper.h" />
     <ClInclude Include="Event.h" />
-    <ClInclude Include="WindowBaseT.h" />
+    <ClInclude Include="BaseWindow.h" />
     <ClInclude Include="XamlHelper.h" />
   </ItemGroup>
   <ItemGroup>

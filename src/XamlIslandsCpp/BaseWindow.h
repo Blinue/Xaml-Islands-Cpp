@@ -1,16 +1,13 @@
 #pragma once
-#include <Windows.h>
 
 namespace XamlIslandsCpp {
 
 template <typename T>
-class WindowBaseT {
+class BaseWindow {
 public:
-	using base_type = WindowBaseT<T>;
-
-	WindowBaseT() noexcept = default;
-	WindowBaseT(const WindowBaseT&) = delete;
-	WindowBaseT(WindowBaseT&&) noexcept = default;
+	BaseWindow() noexcept = default;
+	BaseWindow(const BaseWindow&) = delete;
+	BaseWindow(BaseWindow&&) noexcept = default;
 
 	HWND Handle() const noexcept {
 		return _hWnd;
@@ -27,13 +24,13 @@ public:
 	}
 
 protected:
-	// 析构函数为 protected 使得无法通过基类指针删除。这里不调用 Destroy，因为父类的
-	// 析构函数在子类析构之后才会执行。
-	~WindowBaseT() noexcept {}
+	// 析构函数为 protected 使得无法通过基类指针删除。这里不调用 Destroy，因为基类的
+	// 析构函数在派生类析构之后才会执行。
+	~BaseWindow() noexcept {}
 
 	static LRESULT CALLBACK _WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept {
 		if (msg == WM_NCCREATE) {
-			WindowBaseT* that = (WindowBaseT*)(((CREATESTRUCT*)lParam)->lpCreateParams);
+			BaseWindow* that = (BaseWindow*)(((CREATESTRUCT*)lParam)->lpCreateParams);
 			assert(that && !that->_hWnd);
 			that->_hWnd = hWnd;
 			SetWindowLongPtr(hWnd, GWLP_USERDATA, (LONG_PTR)that);

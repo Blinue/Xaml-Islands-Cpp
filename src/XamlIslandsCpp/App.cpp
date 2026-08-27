@@ -62,7 +62,7 @@ bool App::Initialize() {
 
 	_themeChangedRevoker = AppSettings::Get().ThemeChanged(
 		auto_revoke, std::bind_front(&App::_AppSettings_ThemeChanged, this));
-	_AppSettings_ThemeChanged(AppSettings::Get().Theme());
+	_AppSettings_ThemeChanged(AppSettings::Get().GetTheme());
 
 	if (!_mainWindow->Create()) {
 		return false;
@@ -88,6 +88,7 @@ int App::Run() {
 
 void App::Quit() {
 	_mainWindow.reset();
+	PostQuitMessage(0);
 }
 
 void App::_AppSettings_ThemeChanged(AppTheme) {
@@ -96,7 +97,7 @@ void App::_AppSettings_ThemeChanged(AppTheme) {
 }
 
 void App::_UpdateColorValuesChangedRevoker() {
-	if (AppSettings::Get().Theme() == AppTheme::System) {
+	if (AppSettings::Get().GetTheme() == AppTheme::System) {
 		_colorValuesChangedRevoker = _uiSettings.ColorValuesChanged(
 			auto_revoke,
 			[this](const auto&, const auto&) {
@@ -114,7 +115,7 @@ static bool IsColorLight(const winrt::Windows::UI::Color& clr) noexcept {
 }
 
 void App::_UpdateTheme() {
-	AppTheme theme = AppSettings::Get().Theme();
+	AppTheme theme = AppSettings::Get().GetTheme();
 
 	bool isLightTheme = false;
 	if (theme == AppTheme::System) {

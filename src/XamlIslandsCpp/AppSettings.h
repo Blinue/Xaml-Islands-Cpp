@@ -30,18 +30,18 @@ public:
 		return _isCustomTitleBarEnabled;
 	}
 
-	void IsCustomTitleBarEnabled(bool value);
+	void SetCustomTitleBarEnabled(bool value);
 
-	AppTheme Theme() const noexcept {
+	AppTheme GetTheme() const noexcept {
 		return _theme;
 	}
-	void Theme(AppTheme value);
+	void SetTheme(AppTheme value);
 
-	WindowBackdrop Backdrop() const noexcept {
+	WindowBackdrop GetBackdrop() const noexcept {
 		return _backdrop;
 	}
 
-	void Backdrop(WindowBackdrop value);
+	void SetBackdrop(WindowBackdrop value);
 
 	Event<bool> IsCustomTitleBarEnabledChanged;
 	Event<AppTheme> ThemeChanged;

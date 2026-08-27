@@ -1,15 +1,16 @@
 #pragma once
 #include "AppSettings.h"
-#include "BorderlessWindowT.h"
+#include "BorderlessWindow.h"
 #include "RootPage.h"
 #include <windows.ui.xaml.hosting.desktopwindowxamlsource.h>
 #include <winrt/Windows.UI.Xaml.Hosting.h>
 
 namespace XamlIslandsCpp {
 
-class MainWindow : public BorderlessWindowT<MainWindow> {
-	friend WindowBaseT<MainWindow>;
-	friend BorderlessWindowT<MainWindow>;
+class MainWindow : public BorderlessWindow<MainWindow> {
+	using base_type = BorderlessWindow<MainWindow>;
+	friend base_type;
+	friend BaseWindow<MainWindow>;
 
 public:
 	~MainWindow() noexcept;
@@ -21,6 +22,8 @@ public:
 private:
 	LRESULT _MessageHandler(UINT msg, WPARAM wParam, LPARAM lParam) noexcept;
 
+	bool _ShouldDrawBackground() const noexcept;
+
 	void _DrawBackground(HDC hdc, const RECT& bkgRect) const noexcept;
 
 	static LRESULT CALLBACK _TitleBarWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept;
@@ -29,13 +32,12 @@ private:
 
 	void _ResizeTitleBarWindow() noexcept;
 
-	void _SetTheme(bool isLightTheme, bool force = false) noexcept;
+	void _UpdateTheme() noexcept;
 
-	// 需要重新创建窗口时返回 true
-	bool _SetBackdrop(WindowBackdrop value, bool force = false) noexcept;
+	void _UpdateBackdrop() noexcept;
 
 	// 支持在创建窗口前调用
-	void _SetCustomTitleBar(bool enabled) noexcept;
+	winrt::fire_and_forget _UpdateCustomTitleBar() noexcept;
 
 	winrt::com_ptr<winrt::XamlIslandsCpp::implementation::RootPage> _rootPage;
 
@@ -50,9 +52,8 @@ private:
 	Event<WindowBackdrop>::EventRevoker _backdropChangedRevoker;
 	Event<bool>::EventRevoker _isCustomTitleBarEnabledChangedRevoker;
 
-	WindowBackdrop _backdrop = WindowBackdrop::SolidColor;
+	HBRUSH _hbrBackground = NULL;
 
-	bool _isLightTheme = true;
 	bool _isTrackingMouse = false;
 	// 防止重新创建主窗口时退出
 	bool _isClosingForRecreate = false;

@@ -30,7 +30,6 @@
     <ClInclude Include="pch.h" />
     <ClInclude Include="CommonSharedConstants.h" />
     <ClInclude Include="MainWindow.h" />
-    <ClInclude Include="XamlWindow.h" />
     <ClInclude Include="ThemeHelper.h">
       <Filter>Helpers</Filter>
     </ClInclude>
@@ -45,6 +44,8 @@
     <ClInclude Include="SmoothResizeHelper.h">
       <Filter>Helpers</Filter>
     </ClInclude>
+    <ClInclude Include="BorderlessWindow.h" />
+    <ClInclude Include="BaseWindow.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

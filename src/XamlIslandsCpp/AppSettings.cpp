@@ -9,7 +9,7 @@ AppSettings::AppSettings() {
 		WindowBackdrop::Mica : WindowBackdrop::SolidColor;
 }
 
-void AppSettings::IsCustomTitleBarEnabled(bool value) {
+void AppSettings::SetCustomTitleBarEnabled(bool value) {
 	if (_isCustomTitleBarEnabled == value) {
 		return;
 	}
@@ -18,7 +18,7 @@ void AppSettings::IsCustomTitleBarEnabled(bool value) {
 	IsCustomTitleBarEnabledChanged.Invoke(value);
 }
 
-void AppSettings::Theme(AppTheme value) {
+void AppSettings::SetTheme(AppTheme value) {
 	if (_theme == value) {
 		return;
 	}
@@ -27,7 +27,7 @@ void AppSettings::Theme(AppTheme value) {
 	ThemeChanged.Invoke(value);
 }
 
-void AppSettings::Backdrop(WindowBackdrop value) {
+void AppSettings::SetBackdrop(WindowBackdrop value) {
 	if (_backdrop == value) {
 		return;
 	}

@@ -72,12 +72,12 @@ bool RootPage::IsCustomTitleBarEnabled() const noexcept {
 }
 
 void RootPage::IsCustomTitleBarEnabled(bool value) {
-	AppSettings::Get().IsCustomTitleBarEnabled(value);
+	AppSettings::Get().SetCustomTitleBarEnabled(value);
 	_propertyChangedEvent(*this, PropertyChangedEventArgs(L"IsCustomTitleBarEnabled"));
 }
 
 int RootPage::Theme() const noexcept {
-	return (int)AppSettings::Get().Theme();
+	return (int)AppSettings::Get().GetTheme();
 }
 
 void RootPage::Theme(int value) {
@@ -85,7 +85,7 @@ void RootPage::Theme(int value) {
 		return;
 	}
 
-	AppSettings::Get().Theme((AppTheme)value);
+	AppSettings::Get().SetTheme((AppTheme)value);
 	_propertyChangedEvent(*this, PropertyChangedEventArgs(L"Theme"));
 }
 
@@ -94,7 +94,7 @@ bool RootPage::IsMicaAvailable() noexcept {
 }
 
 int RootPage::Backdrop() const noexcept {
-	return (int)AppSettings::Get().Backdrop();
+	return (int)AppSettings::Get().GetBackdrop();
 }
 
 void RootPage::Backdrop(int value) {
@@ -102,7 +102,7 @@ void RootPage::Backdrop(int value) {
 		return;
 	}
 
-	AppSettings::Get().Backdrop((WindowBackdrop)value);
+	AppSettings::Get().SetBackdrop((WindowBackdrop)value);
 	_UpdateTheme();
 
 	_propertyChangedEvent(*this, PropertyChangedEventArgs(L"Backdrop"));
@@ -124,7 +124,7 @@ static Color Win32ColorToWinRTColor(COLORREF color) noexcept {
 
 void RootPage::_UpdateTheme() {
 	const bool isLightTheme = App::Get().IsLightTheme();
-	const WindowBackdrop backdrop = AppSettings::Get().Backdrop();
+	const WindowBackdrop backdrop = AppSettings::Get().GetBackdrop();
 
 	ElementTheme newTheme = isLightTheme ? ElementTheme::Light : ElementTheme::Dark;
 	RequestedTheme(newTheme);
