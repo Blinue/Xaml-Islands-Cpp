@@ -77,8 +77,12 @@
 			           HorizontalAlignment="Stretch"
 			           Fill="{ThemeResource DividerBackgroundColor}" />
 			<TextBlock x:Uid="LoadStringResTextBlock" />
-			<TextBlock x:Name="StringResTextBlock"
-			           HorizontalAlignment="Center" />
+			<TextBlock x:Name="StringResTextBlock1"
+			           HorizontalAlignment="Center"
+			           FontStyle="Italic" />
+			<TextBlock x:Name="StringResTextBlock2"
+			           HorizontalAlignment="Center"
+			           FontStyle="Italic" />
 			<TextBlock x:Uid="CustomControlTextBlock" />
 			<cl:UserControl HorizontalAlignment="Center" />
 		</StackPanel>

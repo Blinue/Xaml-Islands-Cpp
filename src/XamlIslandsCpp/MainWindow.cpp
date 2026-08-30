@@ -745,10 +745,10 @@ void MainWindow::_UpdateTheme() noexcept {
 
 	const bool isLightTheme = App::Get().IsLightTheme();
 
-	// 在 Win10 中如果自定义标题栏，那么即使在亮色主题下也应使用暗色边框，这也是 UWP 窗口的行为
 	ThemeHelper::SetWindowTheme(
 		Handle(),
-		Win32Helper::GetOSVersion().IsWin11() || !_IsBorderless() ? !isLightTheme : true,
+		// Win10 中启用自定义标题栏时始终使用暗色边框，这也是 UWP 窗口的行为
+		!isLightTheme || (Win32Helper::GetOSVersion().IsWin10() && _IsBorderless()),
 		!isLightTheme
 	);
 
