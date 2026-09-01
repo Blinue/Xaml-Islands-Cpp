@@ -12,7 +12,7 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Page Include="UserControl.xaml" />
+    <Page Include="Minesweeper.xaml" />
   </ItemGroup>
   <ItemGroup>
     <PRIResource Include="Resources.language-en-US.resw">

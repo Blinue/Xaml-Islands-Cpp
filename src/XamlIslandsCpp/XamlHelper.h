@@ -4,6 +4,9 @@
 namespace XamlIslandsCpp {
 
 struct XamlHelper {
+	// 使 XAML Islands 背景透明
+	static void SetWindowBackgroundTransparency(const winrt::Window& window, bool transparent) noexcept;
+
 	static void RepositionXamlPopups(winrt::XamlRoot const& root, bool closeFlyoutPresenter);
 
 	static void CloseComboBoxPopup(winrt::XamlRoot const& root);

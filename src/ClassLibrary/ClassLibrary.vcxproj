@@ -61,8 +61,8 @@
   <Import Project="..\UWPClangCL.props" Condition="$(UseClangCL)" />
   <ItemGroup>
     <ClInclude Include="pch.h" />
-    <ClInclude Include="UserControl.h">
-      <DependentUpon>UserControl.xaml</DependentUpon>
+    <ClInclude Include="Minesweeper.h">
+      <DependentUpon>Minesweeper.xaml</DependentUpon>
       <SubType>Code</SubType>
     </ClInclude>
   </ItemGroup>
@@ -71,14 +71,14 @@
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="$(GeneratedFilesDir)module.g.cpp" />
-    <ClCompile Include="UserControl.cpp">
-      <DependentUpon>UserControl.xaml</DependentUpon>
+    <ClCompile Include="Minesweeper.cpp">
+      <DependentUpon>Minesweeper.xaml</DependentUpon>
       <SubType>Code</SubType>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Midl Include="UserControl.idl">
-      <DependentUpon>UserControl.xaml</DependentUpon>
+    <Midl Include="Minesweeper.idl">
+      <DependentUpon>Minesweeper.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Midl>
   </ItemGroup>
@@ -87,7 +87,7 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Page Include="UserControl.xaml">
+    <Page Include="Minesweeper.xaml">
       <SubType>Designer</SubType>
     </Page>
   </ItemGroup>

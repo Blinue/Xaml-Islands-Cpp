@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -124,7 +124,7 @@
     <value>纯色</value>
   </data>
   <data name="CustomControlTextBlock.Text" xml:space="preserve">
-    <value>来自 ClassLibrary 的自定义控件</value>
+    <value>自定义控件</value>
   </data>
   <data name="CustomTitlebarTextBlock.Text" xml:space="preserve">
     <value>自定义标题栏</value>

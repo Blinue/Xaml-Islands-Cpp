@@ -16,12 +16,6 @@ namespace winrt {
 using namespace Windows::UI::Xaml::Hosting;
 }
 
-// 来自 https://learn.microsoft.com/en-us/windows/apps/api-reference/interface-members/ixamlsourcetransparency-isbackgroundtransparent
-DECLARE_INTERFACE_IID_(IXamlSourceTransparency, ::IInspectable, "06636C29-5A17-458D-8EA2-2422D997A922") {
-	STDMETHOD(get_IsBackgroundTransparent)(boolean* value) PURE;
-	STDMETHOD(put_IsBackgroundTransparent)(boolean value) PURE;
-};
-
 namespace XamlIslandsCpp {
 
 MainWindow::~MainWindow() noexcept {
@@ -96,11 +90,9 @@ bool MainWindow::Create(const WINDOWPLACEMENT* wp) noexcept {
 		sender.NavigateFocus(args.Request());
 	});
 
-	// XAML Islands 默认存在背景色，下面的调用使该背景透明，从而显露出 DWM 绘制的背景。
-	// Win11 22H2 前 DWM 不支持绘制 Mica 等背景，这一步不是必需的，但也没坏处。
-	if (auto xst = winrt::Window::Current().try_as<IXamlSourceTransparency>()) {
-		xst->put_IsBackgroundTransparent(true);
-	}
+	// 使 XAML Islands 背景透明，从而显露出 DWM 绘制的背景。Win11 22H2 前 DWM 不支持绘制
+	// Mica 等背景，这一步不是必需的，但也没坏处。
+	XamlHelper::SetWindowBackgroundTransparency(winrt::Window::Current(), true);
 
 	_isSmoothResizeEnabled = SmoothResizeHelper::EnableResizeSync(Handle(), App::Get());
 

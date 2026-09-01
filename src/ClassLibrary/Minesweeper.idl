@@ -1,0 +1,6 @@
+namespace ClassLibrary {
+	[default_interface]
+	runtimeclass Minesweeper : Windows.UI.Xaml.Controls.UserControl {
+		Minesweeper();
+	}
+}

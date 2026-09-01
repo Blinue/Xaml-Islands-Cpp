@@ -10,7 +10,7 @@
 #include <SDKDDKVer.h>
 
 // Windows 头文件
-#include <windows.h>
+#include <Windows.h>
 #include <windowsx.h>
 
 // C++ 运行时头文件

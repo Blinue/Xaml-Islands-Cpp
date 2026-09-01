@@ -26,7 +26,7 @@
 		<local:TitleBarControl x:Name="TitleBar"
 		                       Canvas.ZIndex="1"
 		                       Visibility="{x:Bind IsCustomTitleBarEnabled, Mode=OneWay}" />
-		<StackPanel Width="320"
+		<StackPanel Width="330"
 		            Padding="40,32"
 		            HorizontalAlignment="Center"
 		            VerticalAlignment="Center"
@@ -84,7 +84,7 @@
 			           HorizontalAlignment="Center"
 			           FontStyle="Italic" />
 			<TextBlock x:Uid="CustomControlTextBlock" />
-			<cl:UserControl HorizontalAlignment="Center" />
+			<cl:Minesweeper HorizontalAlignment="Left" />
 		</StackPanel>
 	</Grid>
 </Page>
