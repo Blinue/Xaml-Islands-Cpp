@@ -210,7 +210,7 @@ private:
 			}
 		}
 
-		static int _ = [this] {
+		[[maybe_unused]] static int _ = [this] {
 			std::random_device randomDevice;
 			_randomEngine.seed(randomDevice());
 			return 0;
@@ -309,12 +309,12 @@ void Minesweeper::InitializeComponent() {
 	_cellButtons.resize(CELL_COUNT);
 
 	const auto& buttonCollection = boardGrid.Children();
-	for (int i = 0; i < CELL_COUNT; ++i) {
+	for (uint32_t i = 0; i < CELL_COUNT; ++i) {
 		const Button& curCellButton = _cellButtons[i];
 		buttonCollection.Append(curCellButton);
 
-		Grid::SetColumn(curCellButton, i % COLUMN_COUNT);
-		Grid::SetRow(curCellButton, i / COLUMN_COUNT);
+		Grid::SetColumn(curCellButton, int(i % COLUMN_COUNT));
+		Grid::SetRow(curCellButton, int(i / COLUMN_COUNT));
 		
 		curCellButton.Click({ this, &Minesweeper::_CellButton_Click });
 		curCellButton.RightTapped({ this, &Minesweeper::_CellButton_RightTapped });
@@ -332,7 +332,7 @@ hstring Minesweeper::MinecountText() const noexcept {
 void Minesweeper::RestartButton_Click(IInspectable const&, RoutedEventArgs const&) {
 	GameState::Get().Restart();
 
-	for (int i = 0; i < CELL_COUNT; ++i) {
+	for (uint32_t i = 0; i < CELL_COUNT; ++i) {
 		_UpdateCellButtonState(i);
 	}
 
