@@ -83,6 +83,10 @@
 			<TextBlock x:Name="StringResTextBlock2"
 			           HorizontalAlignment="Center"
 			           FontStyle="Italic" />
+			<Rectangle Height="1"
+			           Margin="-8,4,-8,4"
+			           HorizontalAlignment="Stretch"
+			           Fill="{ThemeResource DividerBackgroundColor}" />
 			<TextBlock x:Uid="CustomControlTextBlock" />
 			<cl:Minesweeper HorizontalAlignment="Left" />
 		</StackPanel>

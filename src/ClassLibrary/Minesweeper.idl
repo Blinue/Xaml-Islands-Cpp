@@ -1,6 +1,7 @@
 namespace ClassLibrary {
-	[default_interface]
-	runtimeclass Minesweeper : Windows.UI.Xaml.Controls.UserControl {
+	runtimeclass Minesweeper : Windows.UI.Xaml.Controls.UserControl, Windows.UI.Xaml.Data.INotifyPropertyChanged {
 		Minesweeper();
+
+		String MinecountText { get; };
 	}
 }

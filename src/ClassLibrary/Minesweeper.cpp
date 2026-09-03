@@ -3,6 +3,7 @@
 #if __has_include("Minesweeper.g.cpp")
 #include "Minesweeper.g.cpp"
 #endif
+#include <format>
 #include <random>
 
 namespace winrt::ClassLibrary::implementation {
@@ -27,6 +28,7 @@ struct CellData {
 	// -1 表示雷
 	int number = 0;
 	bool isOpened = false;
+	bool isFlaged = false;
 };
 
 class GameState {
@@ -43,22 +45,31 @@ public:
 		return _isGameOver;
 	}
 
-	bool IsSucceed() const noexcept {
-		return _isSucceed;
+	bool IsGameWon() const noexcept {
+		return _isGameWon;
+	}
+
+	int GetRemainingMineCount() const noexcept {
+		return _remainingMineCount;
 	}
 
 	// 返回状态改变的单元编号
 	std::vector<uint32_t> OpenCell(uint32_t idx) noexcept {
-		assert(!_isGameOver && !_isSucceed);
+		assert(!_isGameOver && !_isGameWon);
 
 		// 第一次点击时生成地雷
 		if (!_isStarted) {
-			_InitializePlayground(idx);
+			_InitializeBoard(idx);
 			_isStarted = true;
 		}
 
 		CellData& curCellData = _cells[idx];
+		assert(!curCellData.isOpened);
 		curCellData.isOpened = true;
+
+		if (curCellData.isFlaged) {
+			++_remainingMineCount;
+		}
 
 		std::vector<uint32_t> outdatedCells;
 		outdatedCells.push_back(idx);
@@ -86,6 +97,10 @@ public:
 							continue;
 						}
 
+						if (curCellData.isFlaged) {
+							++_remainingMineCount;
+						}
+
 						outdatedCells.push_back(curIdx);
 
 						if (!_cells[curIdx].IsBlank()) {
@@ -96,7 +111,7 @@ public:
 					uint32_t col = curIdx % COLUMN_COUNT;
 					uint32_t row = curIdx / COLUMN_COUNT;
 
-					// 检查周围 8 格，否则角落的数字不会显示
+					// 检查周围 8 格，如果只检查 4 格那么角落的数字不会显示
 					bool hasTop = row > 0;
 					bool hasBottom = row < ROW_COUNT - 1;
 
@@ -135,14 +150,16 @@ public:
 			}
 
 			// 如果通关则显示所有地雷
-			_isSucceed = true;
+			_isGameWon = true;
 			for (uint32_t i = 0; i < CELL_COUNT; ++i) {
 				if (!_cells[i].isOpened && !_cells[i].IsMine()) {
-					_isSucceed = false;
+					_isGameWon = false;
 					break;
 				}
 			}
-			if (_isSucceed) {
+			if (_isGameWon) {
+				_remainingMineCount = 0;
+
 				for (uint32_t i = 0; i < CELL_COUNT; ++i) {
 					if (_cells[i].IsMine()) {
 						_cells[i].isOpened = true;
@@ -155,21 +172,35 @@ public:
 		return outdatedCells;
 	}
 
+	void FlagCell(uint32_t idx) noexcept {
+		assert(!_isGameOver && !_isGameWon);
+
+		CellData& curCellData = _cells[idx];
+		curCellData.isFlaged = !curCellData.isFlaged;
+
+		if (curCellData.isFlaged) {
+			--_remainingMineCount;
+		} else {
+			++_remainingMineCount;
+		}
+	}
+
 	const CellData& GetCellData(uint32_t idx) const noexcept {
 		return _cells[idx];
 	}
 
 	void Restart() noexcept {
+		_remainingMineCount = MINE_COUNT;
 		_isStarted = false;
 		_isGameOver = false;
-		_isSucceed = false;
+		_isGameWon = false;
 		std::fill(_cells.begin(), _cells.end(), CellData{});
 	}
 
 private:
 	GameState() = default;
 
-	void _InitializePlayground(uint32_t safeCell) noexcept {
+	void _InitializeBoard(uint32_t safeCell) noexcept {
 		// 随机生成地雷，不会在 safeCell 处生成
 		std::vector<uint32_t> list(CELL_COUNT - 1);
 		uint32_t listIdx = 0;
@@ -245,17 +276,39 @@ private:
 
 	std::array<CellData, CELL_COUNT> _cells;
 	std::default_random_engine _randomEngine;
+	// 可能是负数
+	int _remainingMineCount = MINE_COUNT;
 	bool _isStarted = false;
 	bool _isGameOver = false;
-	bool _isSucceed = false;
+	bool _isGameWon = false;
 };
 
 void Minesweeper::InitializeComponent() {
 	MinesweeperT::InitializeComponent();
 
+	// 演示读取字符串资源
+	_resourceLoader = ResourceLoader::GetForViewIndependentUse(RESOURCE_MAP_ID);
+
+	const Grid& boardGrid = BoardGrid();
+	const auto& colDefinitions = boardGrid.ColumnDefinitions();
+	const auto& rowDefinitions = boardGrid.RowDefinitions();
+
+	// 初始化网格
+	for (uint32_t i = 0; i < COLUMN_COUNT; ++i) {
+		ColumnDefinition colDefinition;
+		colDefinition.Width({ 1.0, GridUnitType::Star });
+		colDefinitions.Append(colDefinition);
+	}
+
+	for (uint32_t i = 0; i < ROW_COUNT; ++i) {
+		RowDefinition rowDefinition;
+		rowDefinition.Height({ 1.0, GridUnitType::Star });
+		rowDefinitions.Append(rowDefinition);
+	}
+	
 	_cellButtons.resize(CELL_COUNT);
 
-	const auto& buttonCollection = PlayAreaGrid().Children();
+	const auto& buttonCollection = boardGrid.Children();
 	for (int i = 0; i < CELL_COUNT; ++i) {
 		const Button& curCellButton = _cellButtons[i];
 		buttonCollection.Append(curCellButton);
@@ -270,13 +323,20 @@ void Minesweeper::InitializeComponent() {
 	}
 }
 
+hstring Minesweeper::MinecountText() const noexcept {
+	hstring templateStr = _resourceLoader.GetString(L"MinecountText");
+	int minecount = GameState::Get().GetRemainingMineCount();
+	return hstring(std::vformat(templateStr, std::make_wformat_args(minecount)));
+}
+
 void Minesweeper::RestartButton_Click(IInspectable const&, RoutedEventArgs const&) {
 	GameState::Get().Restart();
-	_flags.reset();
 
 	for (int i = 0; i < CELL_COUNT; ++i) {
 		_UpdateCellButtonState(i);
 	}
+
+	_propertyChangedEvent(*this, PropertyChangedEventArgs(L"MinecountText"));
 }
 
 void Minesweeper::_UpdateCellButtonState(uint32_t idx) noexcept {
@@ -287,14 +347,14 @@ void Minesweeper::_UpdateCellButtonState(uint32_t idx) noexcept {
 
 	if (cellData.isOpened) {
 		if (cellData.IsMine()) {
-			button.Content(box_value(GameState::Get().IsSucceed() ? L"🎉" : L"💥"));
+			button.Content(box_value(GameState::Get().IsGameWon() ? L"🎉" : L"💥"));
 		} else if (cellData.IsBlank()) {
 			button.Content(nullptr);
 		} else{
 			button.Content(box_value(to_hstring(cellData.number)));
 		}
 	} else {
-		button.Content(_flags[idx] ? box_value(L"🚩") : nullptr);
+		button.Content(cellData.isFlaged ? box_value(L"🚩") : nullptr);
 	}
 }
 
@@ -311,6 +371,8 @@ void Minesweeper::_CellButton_Click(IInspectable const& sender, RoutedEventArgs 
 	for (uint32_t idx : GameState::Get().OpenCell(row * COLUMN_COUNT + col)) {
 		_UpdateCellButtonState(idx);
 	}
+
+	_propertyChangedEvent(*this, PropertyChangedEventArgs(L"MinecountText"));
 }
 
 void Minesweeper::_CellButton_RightTapped(IInspectable const& sender, RightTappedRoutedEventArgs const&) {
@@ -324,10 +386,10 @@ void Minesweeper::_CellButton_RightTapped(IInspectable const& sender, RightTappe
 	int row = Grid::GetRow(btn);
 	uint32_t idx = row * COLUMN_COUNT + col;
 
-	if (!GameState::Get().GetCellData(idx).isOpened) {
-		_flags[idx].flip();
-		_UpdateCellButtonState(idx);
-	}
+	GameState::Get().FlagCell(idx);
+	_UpdateCellButtonState(idx);
+
+	_propertyChangedEvent(*this, PropertyChangedEventArgs(L"MinecountText"));
 }
 
 }

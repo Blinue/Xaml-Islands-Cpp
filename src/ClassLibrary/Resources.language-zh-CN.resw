@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -117,10 +117,10 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="ClickMeButton.Content" xml:space="preserve">
-    <value>我是一个按钮</value>
+  <data name="MinecountText" xml:space="preserve">
+    <value>剩余 {} 个地雷</value>
   </data>
-  <data name="ClickMeButton_ClickedContent" xml:space="preserve">
-    <value>我被点了 {} 次</value>
+  <data name="RestartTextBlock.Text" xml:space="preserve">
+    <value>重新开始</value>
   </data>
 </root>
