@@ -11,6 +11,12 @@
     <File Path="src/UWPClangCL.props" />
     <File Path="src/WinUI.targets" />
   </Folder>
+  <Folder Name="/Solution Items/Scripts/">
+    <File Path="scripts/publish.py" />
+  </Folder>
+  <Folder Name="/Solution Items/Workflows/">
+    <File Path=".github/workflows/build.yml" />
+  </Folder>
   <Project Path="src/AppPackage/AppPackage.wapproj" Type="c7167f0d-bc9f-4e6e-afe1-012c56b48db5">
     <Build Project="false" />
   </Project>

@@ -35,16 +35,29 @@
       <MultiProcessorCompilation>false</MultiProcessorCompilation>
     </ClCompile>
   </ItemDefinitionGroup>
-  
-  <!-- 使用 clang-cl 编译 cppwinrt 生成的源文件时关闭警告-->
-  <Target Name="FixClangCLCppWinRT" BeforeTargets="ClCompile">
+
+  <!-- 关闭 cppwinrt 生成的源文件中的警告 -->
+  <Target Name="TurnOffWarningsInGeneratedSources" BeforeTargets="ClCompile">
     <ItemGroup>
-      <_XamlTypeInfoCpp Include="@(ClCompile)" Condition="'%(Extension)' == '.cpp' And ('%(Filename)' == 'XamlTypeInfo.Impl.g' Or '%(Filename)' == 'XamlTypeInfo.g')" />
-      <ClCompile Remove="@(_XamlTypeInfoCpp)" />
-      <ClCompile Include="@(_XamlTypeInfoCpp)">
+      <ClCompile Condition="'%(Extension)' == '.cpp' And ('%(Filename)' == 'XamlTypeInfo.Impl.g' Or '%(Filename)' == 'XamlTypeInfo.g' Or '%(Filename)' == 'XamlMetaDataProvider')">
         <WarningLevel>TurnOffAllWarnings</WarningLevel>
       </ClCompile>
     </ItemGroup>
+  </Target>
+  <!-- 不在 cppwinrt 生成的源文件上运行 clang-tidy。FixClangTidy1 在 ClangTidy 前移除 -->
+  <!-- 这些文件，然后由 FixClangTidy2 恢复。 -->
+  <Target Name="FixClangTidy1" BeforeTargets="ClangTidy">
+  	<ItemGroup>
+  	  <_ClCompileBak Include="@(ClCompile)"/>
+  	  <ClCompile Remove="@(ClCompile)" Condition="'%(ClCompile.WarningLevel)' == 'TurnOffAllWarnings'"/>
+  	</ItemGroup>
+  </Target>
+  <Target Name="FixClangTidy2" AfterTargets="ClangTidy">
+  	<ItemGroup>
+  	  <ClCompile Remove="@(ClCompile)" />
+  	  <ClCompile Include="@(_ClCompileBak)" />
+  	  <_ClCompileBak Remove="@(_ClCompileBak)" />
+  	</ItemGroup>
   </Target>
   <!-- lld-link 不支持 /WINMD 和 /WINMDFILE -->
   <Target Name="FixClangCLLink" BeforeTargets="Link">
@@ -52,9 +65,7 @@
       <_GenerateWindowsMetadata />
     </PropertyGroup>
     <ItemGroup>
-      <_NoWinMD Include="@(Link)" />
-      <Link Remove="@(_NoWinMD)" />
-      <Link Include="@(_NoWinMD)">
+      <Link>
         <WindowsMetadataFile />
       </Link>
     </ItemGroup>

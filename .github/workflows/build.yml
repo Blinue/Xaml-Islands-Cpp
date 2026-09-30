@@ -1,42 +1,56 @@
 name: build
+permissions:
+  contents: read
 
 on:
   push:
-    paths: [ '.github/workflows/build.yml', 'XamlIslandsCpp.slnx', 'publish.py', 'src/**' ]
+    paths:
+      [
+        '.github/workflows/build.yml',
+        'XamlIslandsCpp.slnx',
+        'publish.py',
+        'src/**',
+      ]
   pull_request:
-    paths: [ '.github/workflows/build.yml', 'XamlIslandsCpp.slnx', 'publish.py', 'src/**' ]
+    paths:
+      [
+        '.github/workflows/build.yml',
+        'XamlIslandsCpp.slnx',
+        'publish.py',
+        'src/**',
+      ]
 
 jobs:
   build:
     runs-on: windows-2025-vs2026
     strategy:
       matrix:
-        compiler: ["MSVC", "ClangCL"]
-        platform: ["x64", "ARM64"]
-        packaged: ["unpackaged", "packaged"]
+        compiler: ['MSVC', 'clang-cl']
+        platform: ['x64', 'ARM64']
+        packaged: ['unpackaged', 'packaged']
 
     steps:
-    - uses: actions/checkout@v7
+      - uses: actions/checkout@v7
 
-    - uses: actions/setup-python@v7
-      with:
-        python-version: '3.13'
-    
-    - name: Build
-      run: |
-        $packagedOption = "${{ matrix.packaged }}" -eq "packaged" ? "--packaged" : $null
-        python scripts/publish.py --compiler=${{ matrix.compiler }} --platform=${{ matrix.platform }} $packagedOption
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.14'
 
-    - name: Store build
-      if: ${{ matrix.packaged == 'unpackaged' }}
-      uses: actions/upload-artifact@v7
-      with: 
+      - name: Build
+        run: |
+          $packagedOption = "${{ matrix.packaged }}" -eq "packaged" ? "--packaged" : $null
+          python scripts/publish.py --compiler=${{ matrix.compiler }} --platform=${{ matrix.platform }} $packagedOption
+
+      - name: Store build
+        if: ${{ matrix.packaged == 'unpackaged' }}
+        uses: actions/upload-artifact@v7
+        with:
           name: XamlIslandsCpp-${{ matrix.compiler }}-${{ matrix.platform }}
           path: ./publish/${{ matrix.platform }}
 
-    - name: Store build
-      if: ${{ matrix.packaged == 'packaged' }}
-      uses: actions/upload-artifact@v7
-      with: 
+      - name: Store build
+        if: ${{ matrix.packaged == 'packaged' }}
+        uses: actions/upload-artifact@v7
+        with:
           name: XamlIslandsCpp-${{ matrix.compiler }}-${{ matrix.platform }}-sideload
           path: ./publish/${{ matrix.platform }}-sideload

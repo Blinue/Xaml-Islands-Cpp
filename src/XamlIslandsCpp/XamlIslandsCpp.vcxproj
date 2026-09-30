@@ -185,9 +185,7 @@
   <!-- https://github.com/microsoft/terminal/blob/a2bb3136bb52c253060aa281396dbd12316b33a6/src/cascadia/TerminalApp/TerminalAppLib.vcxproj#L458 -->
   <Target Name="PlaceAppXbfAtRootOfResourceTree" AfterTargets="GetPackagingOutputs">
     <ItemGroup>
-      <_RelocatedAppXamlData Include="@(PackagingOutputs)" Condition="'%(Filename)' == 'App' and ('%(Extension)' == '.xaml' or '%(Extension)' == '.xbf')" />
-      <PackagingOutputs Remove="@(_RelocatedAppXamlData)" />
-      <PackagingOutputs Include="@(_RelocatedAppXamlData)">
+      <PackagingOutputs Condition="'%(Filename)' == 'App' and ('%(Extension)' == '.xaml' or '%(Extension)' == '.xbf')">
         <TargetPath>%(Filename)%(Extension)</TargetPath>
       </PackagingOutputs>
     </ItemGroup>
@@ -225,6 +223,8 @@
     <Exec Command="mt.exe -nologo -winmd:&quot;%(_UnpackagedWin32WinmdManifest.WinMDPath)&quot; -dll:%(_UnpackagedWin32WinmdManifest.Implementation) -out:&quot;%(_UnpackagedWin32WinmdManifest.Identity)&quot;" />
     <ItemGroup>
       <Manifest Include="@(_UnpackagedWin32WinmdManifest)" />
+      <_UnpackagedWin32WinmdManifest Remove="@(_UnpackagedWin32WinmdManifest)" />
+      <_UnpackagedWin32WinmdProjectReference Remove="@(_UnpackagedWin32WinmdProjectReference)" />
     </ItemGroup>
   </Target>
   <ImportGroup Label="ExtensionTargets">

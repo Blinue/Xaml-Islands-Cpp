@@ -4,12 +4,16 @@
   <PropertyGroup>
     <!-- 使用 clang-cl 编译 -->
     <UseClangCL>false</UseClangCL>
-    <!-- 针对当前硬件生成优化代码，只在使用 clang-cl 编译时有效 -->
-    <UseNativeMicroArch>false</UseNativeMicroArch>
+    <!-- 针对特定处理器架构生成优化代码，只在使用 clang-cl 编译时有效。常用值有 native 和 x86-64-v3 -->
+    <ClangTargetMicroArch></ClangTargetMicroArch>
+    <!-- 禁止生成 PDB -->
+    <DisablePDB>false</DisablePDB>
     <!-- 编译为打包应用 -->
     <IsPackaged>false</IsPackaged>
+    <!-- 执行静态代码分析 -->
+    <RunCodeAnalysis>false</RunCodeAnalysis>
   </PropertyGroup>
   
   <!-- 用户自定义编译选项 -->
-  <Import Project="$(MSBuildThisFileDirectory)\BuildOptions.props.user" Condition="Exists('$(MSBuildThisFileDirectory)\BuildOptions.props.user')" />
+  <Import Project="$(MSBuildThisFileDirectory)\BuildOptions.props.user" Condition="'$(DisableUserBuildOptions)' != 'true' And Exists('$(MSBuildThisFileDirectory)\BuildOptions.props.user')" />
 </Project>
